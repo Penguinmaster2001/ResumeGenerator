@@ -101,4 +101,8 @@ public class ResumeEntryBuilder
         _resumeEntry.BulletPointsText.Clear();
         return this;
     }
+
+
+
+    public ResumeEntry GetResumeEntry() => _resumeEntry;
 }
