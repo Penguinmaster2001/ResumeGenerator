@@ -9,7 +9,7 @@ public class ResumeEntryBuilder
 
 
 
-    public ResumeEntryBuilder(string entryTitle)
+    public ResumeEntryBuilder(string entryTitle = "")
     {
         _resumeEntry = new(entryTitle);
     }
