@@ -1,27 +1,20 @@
 
 using System.Text.Json;
 
+using ProjectLogging.Records;
+
 
 
 namespace ProjectLogging.Projects;
 
 
 
-public static class ProjectLoader
+public static class RecordLoader
 {
-    public static List<Project> LoadProjects(string filepath)
-    {
-        string jsonText = File.ReadAllText(filepath);
-
-        return JsonSerializer.Deserialize<List<Project>>(jsonText) ?? new();
-    }
+    public async static Task<List<T>> LoadRecordsAsync<T>(Stream stream) where T : IRecord
+        => await JsonSerializer.DeserializeAsync<List<T>>(stream) ?? new();
 
 
-
-    public static void WriteProjects(List<Project> projects, string filepath)
-    {
-        string jsonText = JsonSerializer.Serialize(projects);
-
-        File.WriteAllText(filepath, jsonText);
-    }
+    public async static Task<PersonalInfo> LoadPersonalInfoAsync(Stream stream)
+        => await JsonSerializer.DeserializeAsync<PersonalInfo>(stream) ?? new(string.Empty, string.Empty, string.Empty, string.Empty, new());
 }
