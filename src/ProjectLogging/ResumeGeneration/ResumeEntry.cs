@@ -13,15 +13,22 @@ namespace ProjectLogging.ResumeGeneration;
 
 public class ResumeEntry : IComponent
 {
-    public required string TitleText;
+    public string TitleText;
 
-    public string? LocationText;
+    public string? LocationText = null;
 
-    public DateOnly? StartDate;
-    public DateOnly? EndDate;
+    public DateOnly? StartDate = null;
+    public DateOnly? EndDate = null;
 
-    public string? DescriptionText;
+    public string? DescriptionText = null;
     public List<string> BulletPointsText = new();
+
+
+
+    public ResumeEntry(string title)
+    {
+        TitleText = title;
+    }
 
 
 
