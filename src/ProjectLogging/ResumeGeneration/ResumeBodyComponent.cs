@@ -12,30 +12,41 @@ public class ResumeBodyComponent : IComponent
 {
     public string Title;
 
-    public List<ResumeEntry> Entries = new();
+    private List<ResumeEntry> _entries;
 
-    public ResumeBodyComponent(string title)
+
+
+    public ResumeBodyComponent(string title, params ResumeEntry[] entries)
     {
         Title = title;
+        _entries = entries.ToList();
     }
 
 
 
-    public void Compose(IContainer container)
+    public ResumeBodyComponent(string title, IEnumerable<ResumeEntry> entries)
     {
-        container.MultiColumn(multiColumn =>
-            {
-                multiColumn.Columns(2);
-
-                multiColumn.Spacing(10.0f);
-
-                multiColumn.Content().Column(column =>
-                    {
-                        foreach (ResumeEntry entry in Entries)
-                        {
-                            column.Item().Element(entry.Compose);
-                        }
-                    });
-            });
+        Title = title;
+        _entries = new(entries);
     }
+
+
+
+    public void AddEntries(params ResumeEntry[] entries) => _entries.AddRange(entries);
+
+    public void AddEntries(IEnumerable<ResumeEntry> entries) => _entries.AddRange(entries);
+
+
+
+    public void ClearEntries() => _entries.Clear();
+
+
+
+    public void Compose(IContainer container) => container.Column(column =>
+        {
+            foreach (ResumeEntry entry in _entries)
+            {
+                column.Item().Element(entry.Compose);
+            }
+        });
 }
