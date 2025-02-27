@@ -11,4 +11,4 @@ namespace ProjectLogging.Records;
 
 [JsonSerializable(typeof(Project))]
 public record Project(string Title, string ShortDescription, List<string> Points, List<Skill> Skills,
-    string Location, DateOnly StartDate, DateOnly? EndDate);
+    string Location, DateOnly StartDate, DateOnly? EndDate) : IRecord;
