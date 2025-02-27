@@ -103,11 +103,14 @@ public class ResumeEntry : IComponent
 
     private void BulletPoints(IContainer container) => container.Column(column =>
         {
-            column.Item().Row(row =>
+            foreach (string bulletPoint in BulletPointsText)
             {
-                row.ConstantItem(10.0f).Image(Placeholders.Image(128, 128));
-                row.ConstantItem(5);
-                row.RelativeItem().Text(Placeholders.Label());
-            });
+                column.Item().Row(row =>
+                {
+                    row.ConstantItem(10.0f).Image(Placeholders.Image(128, 128));
+                    row.ConstantItem(5);
+                    row.RelativeItem().Text(bulletPoint);
+                });
+            }
         });
 }
