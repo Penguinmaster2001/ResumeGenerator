@@ -52,6 +52,7 @@ public class ResumeHeaderComponent : IComponent
                 column.Item().Element(Name);
                 column.Item().Element(ContactRow);
                 column.Item().Element(URLRow);
+                column.Item().PaddingVertical(2.0f).LineHorizontal(2.0f);
             });
     }
 
@@ -61,28 +62,28 @@ public class ResumeHeaderComponent : IComponent
 
 
 
-    private void ContactRow(IContainer container) => container.Text(text =>
+    private void ContactRow(IContainer container) => container.Row(row =>
         {
-            text.Span(PhoneNumberText);
-            text.Span("|");
-            text.Hyperlink(EmailText, $"mailto:{EmailText}").Underline().FontColor(Colors.Blue.Darken2);
-            text.Span("|");
-            text.Span(LocationText);
+            row.AutoItem().Text(PhoneNumberText);
+            row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
+            row.AutoItem().Text(text => text.Hyperlink(EmailText, $"mailto:{EmailText}").Underline().FontColor(Colors.Blue.Darken2));
+            row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
+            row.AutoItem().Text(LocationText);
         });
 
 
 
 
-    private void URLRow(IContainer container) => container.Text(text =>
+    private void URLRow(IContainer container) => container.Row(row =>
         {
             for (int urlIndex = 0; urlIndex < URLs.Count; urlIndex++)
             {
                 string url = URLs[urlIndex];
-                text.Hyperlink(url, url).Underline().FontColor(Colors.Blue.Darken2);
+                row.AutoItem().Text(text => text.Hyperlink(url, $"https://{url}").Underline().FontColor(Colors.Blue.Darken2));
 
                 if (urlIndex < URLs.Count)
                 {
-                    text.Span("|");
+                    row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
                 }
             }
         });
