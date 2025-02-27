@@ -1,5 +1,10 @@
 
-using ProjectLogging.Skills;
+using System;
+
+using QuestPDF.Fluent;
+
+using ProjectLogging.Records;
+using ProjectLogging.ResumeGeneration;
 using ProjectLogging.Projects;
 
 
@@ -10,28 +15,26 @@ namespace ProjectLogging;
 
 public static class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
-        List<Project> testProjects = new() {
-            new("Test Project",
-                "This is a test project",
-                new List<string> { "Point 1", "Point 2" },
-                new List<Skill> { new("Category", "Skill") },
-                "Location",
-                new DateOnly(2021, 1, 1),
-                new DateOnly(2021, 1, 2)),
-
-            new("Current project",
-                    "This project doesn't have an end date",
-                    new List<string> { "I create a project with null end date", "This is interpreted as a current project" },
-                    new List<Skill> { new("another category", "another skill") },
-                    "Location",
-                    new DateOnly(2021, 1, 1),
-                    null)
-        };
+        string[] args = Environment.GetCommandLineArgs();
+        if (args.Length < 5)
+        {
+            Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json>");
+            return;
+        }
 
 
+        var personalInfo = RecordLoader.LoadPersonalInfoAsync(File.OpenRead(args[1]));
 
-        ProjectLoader.WriteProjects(testProjects, "../testing/projects.json");
+        var jobs = RecordLoader.LoadRecordsAsync<Job>(File.OpenRead(args[2]));
+        var projects = RecordLoader.LoadRecordsAsync<Project>(File.OpenRead(args[3]));
+        var volunteers = RecordLoader.LoadRecordsAsync<Volunteer>(File.OpenRead(args[4]));
+
+        await Task.WhenAll(personalInfo, jobs, projects, volunteers);
+
+        ResumeGenerator rGen = new();
+        rGen.GenerateResume(personalInfo.Result, jobs.Result, projects.Result, volunteers.Result)
+            .GeneratePdf("test.pdf");
     }
 }
