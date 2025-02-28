@@ -39,5 +39,5 @@ public class ResumeDocument : IDocument
 
 
 
-    void ComposeBody(IContainer container) => container.Dynamic(ResumeModel.ResumeBody);
+    void ComposeBody(IContainer container) => container.Element(ResumeModel.ResumeBody.Compose);
 }
