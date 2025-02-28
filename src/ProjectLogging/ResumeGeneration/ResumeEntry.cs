@@ -57,39 +57,57 @@ public class ResumeEntry : IComponent
 
 
 
-    private void Title(IContainer container) => container.AlignCenter().Text(TitleText);
+    private void Title(IContainer container) => container.Text(TitleText).Bold();
 
 
 
     private void LocationAndDate(IContainer container) => container.Row(row =>
         {
             row.RelativeItem().Text(LocationText ?? "");
-            row.RelativeItem().Text(FormatDate());
+            row.RelativeItem().AlignRight().Text(FormatDate());
         });
 
 
 
     private string FormatDate()
     {
-        if (!StartDate.HasValue) return "";
+        if (!StartDate.HasValue) return string.Empty;
 
         StringBuilder sb = new();
 
-        sb.Append(StartDate?.ToString("MMM yyyy"));
-        sb.Append(" - ");
+        sb.Append(StartDate.Value.ToString("MMM"))
+          .Append(" ");
 
         if (EndDate.HasValue)
         {
+            if (StartDate.Value.Year == EndDate.Value.Year)
+            {
+                if (StartDate.Value.Month == EndDate.Value.Month)
+                {
+                    return sb.Append(StartDate.Value.ToString("yyyy"))
+                             .ToString();
+                }
+
+                return sb.Append("- ")
+                         .Append(EndDate.Value.ToString("MMM"))
+                         .Append(" ")
+                         .Append(StartDate.Value.ToString("yyyy"))
+                         .ToString();
+            }
+
+            sb.Append(StartDate.Value.ToString("yyyy"))
+              .Append(" - ");
+
             if (EndDate > DateOnly.FromDateTime(DateTime.Now))
             {
                 sb.Append("exp. ");
             }
 
-            sb.Append(EndDate?.ToString("MMM yyyy"));
+            sb.Append(EndDate.Value.ToString("MMM yyyy"));
         }
         else
         {
-            sb.Append("Present");
+            sb.Append("- Present");
         }
 
         return sb.ToString();
