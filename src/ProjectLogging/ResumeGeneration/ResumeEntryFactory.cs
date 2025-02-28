@@ -46,6 +46,6 @@ public static class ResumeEntryFactory
 
 
     public static ResumeEntry CreateEntry(string title, IEnumerable<string> items)
-        => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items))
+        => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items.Order()))
                                         .GetResumeEntry();
 }

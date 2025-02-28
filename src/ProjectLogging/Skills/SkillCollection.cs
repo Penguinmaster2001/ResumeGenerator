@@ -1,5 +1,7 @@
 
-using System.Text.Json;
+using ProjectLogging.Records;
+
+
 
 namespace ProjectLogging.Skills;
 
@@ -7,34 +9,22 @@ namespace ProjectLogging.Skills;
 
 public class SkillCollection
 {
-    private Dictionary<int, Skill> _skills;
-
-    private Dictionary<string, List<string>> _categorySkills;
+    public Dictionary<string, HashSet<string>> CategorySkills = new();
 
 
 
-    public SkillCollection()
+    public void AddSkills<T>(List<T> records) where T : IRecord
     {
-        _skills = new();
-
-        _categorySkills = new();
-    }
-
-
-
-    public void LoadSkills(string filePath)
-    {
-        string jsonText = File.ReadAllText(filePath);
-
-        _categorySkills = JsonSerializer.Deserialize<Dictionary<string, List<string>>>(jsonText) ?? new();
-
-        foreach (string category in _categorySkills.Keys)
+        foreach (IRecord record in records)
         {
-            foreach (string name in _categorySkills[category])
+            foreach (Skill skill in record.Skills)
             {
-                Skill skill = new(category, name);
+                if (!CategorySkills.ContainsKey(skill.Category))
+                {
+                    CategorySkills.Add(skill.Category, new());
+                }
 
-                _skills.Add(skill.ID, skill);
+                CategorySkills[skill.Category].Add(skill.Name);
             }
         }
     }

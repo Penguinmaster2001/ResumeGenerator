@@ -3,6 +3,7 @@ using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 using ProjectLogging.Records;
+using ProjectLogging.Skills;
 
 
 
@@ -20,9 +21,15 @@ public class ResumeGenerator
 
 
     public ResumeDocument GenerateResume(PersonalInfo personalInfo,
-        List<Job> jobs, List<Project> projects, List<Volunteer> volunteers)
+                                         List<Job> jobs, List<Project> projects, List<Volunteer> volunteers)
     {
-        ResumeModel model = new ResumeModelCreator(personalInfo, jobs, projects, volunteers).CreateModel();
+        SkillCollection skillCollection = new();
+        skillCollection.AddSkills(jobs);
+        skillCollection.AddSkills(projects);
+        skillCollection.AddSkills(volunteers);
+
+        ResumeModel model = new ResumeModelCreator(personalInfo, skillCollection.CategorySkills,
+            skillCollection.CategorySkills, jobs, projects, volunteers).CreateModel();
 
         return new(model);
     }

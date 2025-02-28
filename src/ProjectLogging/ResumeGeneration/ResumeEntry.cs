@@ -63,8 +63,8 @@ public class ResumeEntry : IComponent
 
     private void LocationAndDate(IContainer container) => container.Row(row =>
         {
-            row.RelativeItem().Text(LocationText ?? "");
-            row.RelativeItem().AlignRight().Text(FormatDate());
+            row.RelativeItem().Text(LocationText ?? String.Empty).Bold();
+            row.RelativeItem().AlignRight().Text(FormatDate()).Bold();
         });
 
 
