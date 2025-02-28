@@ -9,7 +9,7 @@ namespace ProjectLogging.ResumeGeneration;
 
 
 
-public class ResumeBodyComponent : IComponent
+public class ResumeSegmentComponent : IComponent
 {
     public string TitleText;
 
@@ -17,7 +17,7 @@ public class ResumeBodyComponent : IComponent
 
 
 
-    public ResumeBodyComponent(string title, params ResumeEntry[] entries)
+    public ResumeSegmentComponent(string title, params ResumeEntry[] entries)
     {
         TitleText = title;
         _entries = entries.ToList();
@@ -25,7 +25,7 @@ public class ResumeBodyComponent : IComponent
 
 
 
-    public ResumeBodyComponent(string title, IEnumerable<ResumeEntry> entries)
+    public ResumeSegmentComponent(string title, IEnumerable<ResumeEntry> entries)
     {
         TitleText = title;
         _entries = new(entries);

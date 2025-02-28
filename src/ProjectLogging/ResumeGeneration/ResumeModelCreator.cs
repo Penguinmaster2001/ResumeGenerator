@@ -44,7 +44,7 @@ public class ResumeModelCreator
     {
         ResumeHeaderComponent resumeHeader = new(PersonalInfo);
 
-        List<ResumeBodyComponent> resumeBody = new()
+        List<ResumeSegmentComponent> resumeBody = new()
         {
             new("tech skills", Skills.Keys.Select(category
                                             => ResumeEntryFactory.CreateEntry(category, Skills[category]))),

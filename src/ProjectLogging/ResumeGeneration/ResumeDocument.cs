@@ -49,7 +49,7 @@ public class ResumeDocument : IDocument
                 {
                     for (int i = 0; i < ResumeModel.ResumeBodyComponents.Count; i++)
                     {
-                        ResumeBodyComponent bodyComponent = ResumeModel.ResumeBodyComponents[i];
+                        ResumeSegmentComponent bodyComponent = ResumeModel.ResumeBodyComponents[i];
 
                         if (i > 0)
                         {
