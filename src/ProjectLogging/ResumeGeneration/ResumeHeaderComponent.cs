@@ -37,9 +37,11 @@ public class ResumeHeaderComponent : IComponent
     public ResumeHeaderComponent(PersonalInfo personalInfo)
     {
         NameText = personalInfo.Name;
+
         PhoneNumberText = personalInfo.PhoneNumber;
         EmailText = personalInfo.Email;
         LocationText = personalInfo.Location;
+
         URLs = personalInfo.URLs;
     }
 
@@ -47,27 +49,30 @@ public class ResumeHeaderComponent : IComponent
 
     public void Compose(IContainer container)
     {
-        container.Column(column =>
+        container.DefaultTextStyle(style => style.Bold()
+                                                 .FontColor(Colors.Blue.Accent2)
+                                                 .FontSize(14.0f))
+                 .Column(column =>
             {
                 column.Item().Element(Name);
                 column.Item().Element(ContactRow);
                 column.Item().Element(URLRow);
-                column.Item().PaddingVertical(2.0f).LineHorizontal(2.0f);
+                column.Item().PaddingVertical(2.0f).LineHorizontal(1.0f);
             });
     }
 
 
 
-    private void Name(IContainer container) => container.Text(NameText).FontSize(20.0f).FontColor(Colors.Blue.Accent1);
+    private void Name(IContainer container) => container.Text(NameText).FontSize(20.0f);
 
 
 
     private void ContactRow(IContainer container) => container.Row(row =>
         {
             row.AutoItem().Text(PhoneNumberText);
-            row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
-            row.AutoItem().Text(text => text.Hyperlink(EmailText, $"mailto:{EmailText}").Underline().FontColor(Colors.Blue.Darken2));
-            row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
+            row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
+            row.AutoItem().Text(text => text.Hyperlink(EmailText, $"mailto:{EmailText}").Underline().FontColor(Colors.Blue.Darken4));
+            row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
             row.AutoItem().Text(LocationText);
         });
 
@@ -79,11 +84,11 @@ public class ResumeHeaderComponent : IComponent
             for (int urlIndex = 0; urlIndex < URLs.Count; urlIndex++)
             {
                 string url = URLs[urlIndex];
-                row.AutoItem().Text(text => text.Hyperlink(url, $"https://{url}").Underline().FontColor(Colors.Blue.Darken2));
+                row.AutoItem().Text(text => text.Hyperlink(url, $"https://{url}").Underline().FontColor(Colors.Blue.Darken4));
 
-                if (urlIndex < URLs.Count)
+                if (urlIndex < URLs.Count - 1)
                 {
-                    row.AutoItem().PaddingHorizontal(2.0f).LineVertical(1.0f);
+                    row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
                 }
             }
         });

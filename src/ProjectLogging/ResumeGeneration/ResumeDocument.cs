@@ -24,7 +24,7 @@ public class ResumeDocument : IDocument
 
     public void Compose(IDocumentContainer container) => container.Page(page =>
         {
-            page.Size(PageSizes.A4);
+            page.Size(PageSizes.Letter);
             page.Margin(0.25f, Unit.Inch);
             page.PageColor(Colors.White);
             page.DefaultTextStyle(textStyle => textStyle.FontSize(9.5f).FontFamily("Roboto Condensed"));
@@ -47,9 +47,15 @@ public class ResumeDocument : IDocument
 
             multiColumn.Content().Column(column =>
                 {
-                    foreach (ResumeBodyComponent bodyComponent in ResumeModel.ResumeBodyComponents)
+                    for (int i = 0; i < ResumeModel.ResumeBodyComponents.Count; i++)
                     {
-                        column.Item().PaddingVertical(2.0f).LineHorizontal(1.0f);
+                        ResumeBodyComponent bodyComponent = ResumeModel.ResumeBodyComponents[i];
+
+                        if (i > 0)
+                        {
+                            column.Item().PaddingVertical(2.0f).LineHorizontal(0.5f);
+                        }
+
                         column.Item().Element(bodyComponent.Compose);
                     }
                 });

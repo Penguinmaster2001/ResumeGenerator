@@ -2,7 +2,6 @@
 using System.Text;
 
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -107,7 +106,8 @@ public class ResumeEntry : IComponent
         }
         else
         {
-            sb.Append("- Present");
+            sb.Append(StartDate.Value.ToString("yyyy"))
+              .Append(" - Present");
         }
 
         return sb.ToString();
@@ -125,8 +125,9 @@ public class ResumeEntry : IComponent
             {
                 column.Item().Row(row =>
                 {
-                    row.ConstantItem(10.0f).Image(Placeholders.Image(128, 128));
-                    row.ConstantItem(5);
+                    row.ConstantItem(5.0f);
+                    row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Image("Resources/bullet.png");
+                    row.ConstantItem(5.0f);
                     row.RelativeItem().Text(bulletPoint);
                 });
             }

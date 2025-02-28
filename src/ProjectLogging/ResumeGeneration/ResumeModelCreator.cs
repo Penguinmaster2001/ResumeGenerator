@@ -43,9 +43,9 @@ public class ResumeModelCreator
         {
             new("tech skills", Skills.Keys.Select(category => ResumeEntryFactory.CreateEntry(category, Skills[category]))),
             new("volunteer / extracurricular", Volunteers.Select(v => ResumeEntryFactory.CreateEntry(v))),
+            new("hobbies", Hobbies.Keys.Select(category => ResumeEntryFactory.CreateEntry(category, Hobbies[category]))),
             new("work experience", Jobs.Select(j => ResumeEntryFactory.CreateEntry(j))),
             new("projects", Projects.Select(p => ResumeEntryFactory.CreateEntry(p))),
-            new("hobbies", Hobbies.Keys.Select(category => ResumeEntryFactory.CreateEntry(category, Hobbies[category]))),
         };
 
         return new(resumeHeader, resumeBody);

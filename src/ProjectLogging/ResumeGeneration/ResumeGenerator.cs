@@ -1,5 +1,4 @@
 
-using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
 using ProjectLogging.Records;
@@ -16,6 +15,8 @@ public class ResumeGenerator
     static ResumeGenerator()
     {
         QuestPDF.Settings.License = LicenseType.Community;
+        QuestPDF.Settings.UseEnvironmentFonts = false;
+        QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
     }
 
 

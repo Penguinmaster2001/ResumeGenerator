@@ -46,6 +46,7 @@ public class ResumeBodyComponent : IComponent
     public void Compose(IContainer container) => container.Column(column =>
         {
             column.Item()
+                  .PaddingTop(1.0f)
                   .Text(TitleText.ToUpper())
                   .AlignCenter()
                   .FontSize(11.0f)
@@ -54,7 +55,9 @@ public class ResumeBodyComponent : IComponent
 
             foreach (ResumeEntry entry in _entries)
             {
-                column.Item().Element(entry.Compose);
+                column.Item()
+                      .PaddingVertical(3.0f)
+                      .Element(entry.Compose);
             }
         });
 }

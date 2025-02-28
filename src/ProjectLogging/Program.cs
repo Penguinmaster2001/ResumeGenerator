@@ -1,6 +1,4 @@
 
-using System;
-
 using QuestPDF.Fluent;
 
 using ProjectLogging.Records;
