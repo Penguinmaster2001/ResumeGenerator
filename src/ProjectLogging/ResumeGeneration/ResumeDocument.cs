@@ -30,7 +30,7 @@ public class ResumeDocument : IDocument
             page.DefaultTextStyle(textStyle => textStyle.FontSize(9.5f).FontFamily("Roboto Condensed"));
 
             page.Header().Element(ComposeHeader);
-            page.Content().Element(ComposeContent);
+            page.Content().Element(ComposeBody);
         });
 
 
@@ -39,25 +39,5 @@ public class ResumeDocument : IDocument
 
 
 
-    void ComposeContent(IContainer container) => container.MultiColumn(multiColumn =>
-        {
-            multiColumn.Columns(2);
-
-            multiColumn.Spacing(10.0f);
-
-            multiColumn.Content().Column(column =>
-                {
-                    for (int i = 0; i < ResumeModel.ResumeBodyComponents.Count; i++)
-                    {
-                        ResumeSegmentComponent bodyComponent = ResumeModel.ResumeBodyComponents[i];
-
-                        if (i > 0)
-                        {
-                            column.Item().PaddingVertical(2.0f).LineHorizontal(0.5f);
-                        }
-
-                        column.Item().Element(bodyComponent.Compose);
-                    }
-                });
-        });
+    void ComposeBody(IContainer container) => container.Dynamic(ResumeModel.ResumeBody);
 }

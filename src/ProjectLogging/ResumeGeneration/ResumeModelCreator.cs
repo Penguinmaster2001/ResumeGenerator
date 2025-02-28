@@ -44,22 +44,26 @@ public class ResumeModelCreator
     {
         ResumeHeaderComponent resumeHeader = new(PersonalInfo);
 
-        List<ResumeSegmentComponent> resumeBody = new()
+        List<ResumeSegmentComponent> segmentList = new()
         {
             new("tech skills", Skills.Keys.Select(category
                                             => ResumeEntryFactory.CreateEntry(category, Skills[category]))),
-            new("volunteer / extracurricular", Volunteers.Select(v
-                                                            => ResumeEntryFactory.CreateEntry(v))),
+
+            new("volunteer / extracurricular", Volunteers.Select(v => ResumeEntryFactory.CreateEntry(v))),
+
             new("hobbies", Hobbies.Keys.Select(category
-                                        => ResumeEntryFactory.CreateEntry(category, Hobbies[category]))),
+                                            => ResumeEntryFactory.CreateEntry(category, Hobbies[category]))),
 
             new("education", Educations.Select(e => ResumeEntryFactory.CreateEntry(e))
                                        .Concat(Courses.Keys.Select(category
                                            => ResumeEntryFactory.CreateEntry(category, Courses[category])))),
 
             new("work experience", Jobs.Select(j => ResumeEntryFactory.CreateEntry(j))),
+
             new("projects", Projects.Select(p => ResumeEntryFactory.CreateEntry(p))),
         };
+
+        ResumeBodyComponent resumeBody = new(segmentList);
 
         return new(resumeHeader, resumeBody);
     }

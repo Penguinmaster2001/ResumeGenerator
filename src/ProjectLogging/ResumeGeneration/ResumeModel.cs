@@ -6,13 +6,13 @@ namespace ProjectLogging.ResumeGeneration;
 public class ResumeModel
 {
     public ResumeHeaderComponent ResumeHeader;
-    public List<ResumeSegmentComponent> ResumeBodyComponents;
+    public ResumeBodyComponent ResumeBody;
 
 
 
-    public ResumeModel(ResumeHeaderComponent resumeHeader, List<ResumeSegmentComponent> resumeBodyComponents)
+    public ResumeModel(ResumeHeaderComponent resumeHeader, ResumeBodyComponent resumeBody)
     {
         ResumeHeader = resumeHeader;
-        ResumeBodyComponents = resumeBodyComponents;
+        ResumeBody = resumeBody;
     }
 }
