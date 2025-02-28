@@ -23,14 +23,13 @@ public class ResumeGenerator
 
     public ResumeDocument GenerateResume(PersonalInfo personalInfo,
                                          List<Job> jobs, List<Project> projects, List<Volunteer> volunteers,
-                                         SkillCollection hobbies)
+                                         SkillCollection skills, SkillCollection hobbies)
     {
-        SkillCollection skillCollection = new();
-        skillCollection.AddSkills(jobs);
-        skillCollection.AddSkills(projects);
-        skillCollection.AddSkills(volunteers);
+        skills.AddSkills(jobs);
+        skills.AddSkills(projects);
+        skills.AddSkills(volunteers);
 
-        ResumeModel model = new ResumeModelCreator(personalInfo, skillCollection.CategorySkills,
+        ResumeModel model = new ResumeModelCreator(personalInfo, skills.CategorySkills,
             hobbies.CategorySkills, jobs, projects, volunteers).CreateModel();
 
         return new(model);

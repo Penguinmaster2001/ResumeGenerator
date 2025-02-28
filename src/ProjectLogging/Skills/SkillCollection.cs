@@ -19,7 +19,7 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
 
 
-    public void AddSkills<T>(List<T> records) where T : IRecord
+    public void AddSkills<T>(List<T> records, bool addNewCategories = false) where T : IRecord
     {
         foreach (IRecord record in records)
         {
@@ -27,6 +27,8 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
             {
                 if (!CategorySkills.ContainsKey(skill.Category))
                 {
+                    if (!addNewCategories) break;
+
                     CategorySkills.Add(skill.Category, new());
                 }
 
