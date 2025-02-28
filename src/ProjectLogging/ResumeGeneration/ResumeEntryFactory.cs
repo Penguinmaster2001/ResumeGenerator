@@ -39,6 +39,10 @@ public static class ResumeEntryFactory
         {
             entryBuilder.ChangeTitle(projectEntry.Title);
         }
+        else if (entryRecord is Education educationEntry)
+        {
+            entryBuilder.ChangeTitle($"{educationEntry.Degree} @ {educationEntry.School}");
+        }
 
         return entryBuilder.GetResumeEntry();
     }

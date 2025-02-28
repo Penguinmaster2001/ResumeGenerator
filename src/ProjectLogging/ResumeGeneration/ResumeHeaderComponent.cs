@@ -70,9 +70,9 @@ public class ResumeHeaderComponent : IComponent
     private void ContactRow(IContainer container) => container.Row(row =>
         {
             row.AutoItem().Text(PhoneNumberText);
-            row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
+            row.AutoItem().AlignMiddle().PaddingHorizontal(5.0f).Height(12.0f).LineVertical(0.8f);
             row.AutoItem().Text(text => text.Hyperlink(EmailText, $"mailto:{EmailText}").Underline().FontColor(Colors.Blue.Darken4));
-            row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
+            row.AutoItem().AlignMiddle().PaddingHorizontal(5.0f).Height(12.0f).LineVertical(0.8f);
             row.AutoItem().Text(LocationText);
         });
 
@@ -88,7 +88,7 @@ public class ResumeHeaderComponent : IComponent
 
                 if (urlIndex < URLs.Count - 1)
                 {
-                    row.AutoItem().AlignBottom().PaddingHorizontal(2.0f).Height(8.0f).LineVertical(0.5f);
+                    row.AutoItem().AlignMiddle().PaddingHorizontal(5.0f).Height(12.0f).LineVertical(0.8f);
                 }
             }
         });

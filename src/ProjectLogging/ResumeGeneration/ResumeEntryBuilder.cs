@@ -72,7 +72,7 @@ public class ResumeEntryBuilder
 
 
 
-    public ResumeEntryBuilder SetDescription(string description)
+    public ResumeEntryBuilder SetDescription(string? description)
     {
         _resumeEntry.DescriptionText = description;
         return this;

@@ -9,7 +9,7 @@ namespace ProjectLogging.Records;
 
 public interface IRecord
 {
-    string ShortDescription { get; }
+    string? ShortDescription { get; }
     List<string> Points { get; }
     List<Skill> Skills { get; }
     string Location { get; }

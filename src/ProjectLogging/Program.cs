@@ -17,10 +17,10 @@ public static class Program
     public static async Task Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        if (args.Length < 7)
+        if (args.Length < 9)
         {
-            Console.WriteLine($@"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json>
-                <hobbies json> <skills json>");
+            Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
+                + "<education json> <courses json> <hobbies json> <skills json>");
             return;
         }
 
@@ -31,13 +31,17 @@ public static class Program
         var projects = RecordLoader.LoadRecordsAsync<Project>(args[3]);
         var volunteers = RecordLoader.LoadRecordsAsync<Volunteer>(args[4]);
 
-        var hobbies = SkillCollection.LoadSkillsAsync(args[5]);
-        var skills = SkillCollection.LoadSkillsAsync(args[6]);
+        var education = RecordLoader.LoadRecordsAsync<Education>(args[5]);
+        var courses = SkillCollection.LoadSkillsAsync(args[6]);
 
-        await Task.WhenAll(personalInfo, jobs, projects, volunteers, skills, hobbies);
+        var hobbies = SkillCollection.LoadSkillsAsync(args[7]);
+        var skills = SkillCollection.LoadSkillsAsync(args[8]);
+
+        await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
         ResumeGenerator rGen = new();
-        rGen.GenerateResume(personalInfo.Result, jobs.Result, projects.Result, volunteers.Result, skills.Result, hobbies.Result)
+        rGen.GenerateResume(personalInfo.Result, jobs.Result, projects.Result, volunteers.Result,
+            education.Result, courses.Result, skills.Result, hobbies.Result)
             .GeneratePdf("test.pdf");
     }
 }
