@@ -1,5 +1,6 @@
 
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -44,6 +45,13 @@ public class ResumeBodyComponent : IComponent
 
     public void Compose(IContainer container) => container.Column(column =>
         {
+            column.Item()
+                  .Text(Title)
+                  .AlignCenter()
+                  .FontSize(11.0f)
+                  .Bold()
+                  .FontColor(Colors.Green.Darken3);
+
             foreach (ResumeEntry entry in _entries)
             {
                 column.Item().Element(entry.Compose);
