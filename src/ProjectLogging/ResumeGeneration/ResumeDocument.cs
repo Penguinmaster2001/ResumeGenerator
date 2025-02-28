@@ -49,6 +49,7 @@ public class ResumeDocument : IDocument
                 {
                     foreach (ResumeBodyComponent bodyComponent in ResumeModel.ResumeBodyComponents)
                     {
+                        column.Item().PaddingVertical(2.0f).LineHorizontal(1.0f);
                         column.Item().Element(bodyComponent.Compose);
                     }
                 });
