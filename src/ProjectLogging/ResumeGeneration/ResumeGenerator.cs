@@ -21,7 +21,8 @@ public class ResumeGenerator
 
 
     public ResumeDocument GenerateResume(PersonalInfo personalInfo,
-                                         List<Job> jobs, List<Project> projects, List<Volunteer> volunteers)
+                                         List<Job> jobs, List<Project> projects, List<Volunteer> volunteers,
+                                         SkillCollection hobbies)
     {
         SkillCollection skillCollection = new();
         skillCollection.AddSkills(jobs);
@@ -29,7 +30,7 @@ public class ResumeGenerator
         skillCollection.AddSkills(volunteers);
 
         ResumeModel model = new ResumeModelCreator(personalInfo, skillCollection.CategorySkills,
-            skillCollection.CategorySkills, jobs, projects, volunteers).CreateModel();
+            hobbies.CategorySkills, jobs, projects, volunteers).CreateModel();
 
         return new(model);
     }

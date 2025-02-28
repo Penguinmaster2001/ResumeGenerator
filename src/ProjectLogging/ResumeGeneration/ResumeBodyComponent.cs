@@ -11,7 +11,7 @@ namespace ProjectLogging.ResumeGeneration;
 
 public class ResumeBodyComponent : IComponent
 {
-    public string Title;
+    public string TitleText;
 
     private List<ResumeEntry> _entries;
 
@@ -19,7 +19,7 @@ public class ResumeBodyComponent : IComponent
 
     public ResumeBodyComponent(string title, params ResumeEntry[] entries)
     {
-        Title = title;
+        TitleText = title;
         _entries = entries.ToList();
     }
 
@@ -27,7 +27,7 @@ public class ResumeBodyComponent : IComponent
 
     public ResumeBodyComponent(string title, IEnumerable<ResumeEntry> entries)
     {
-        Title = title;
+        TitleText = title;
         _entries = new(entries);
     }
 
@@ -46,7 +46,7 @@ public class ResumeBodyComponent : IComponent
     public void Compose(IContainer container) => container.Column(column =>
         {
             column.Item()
-                  .Text(Title)
+                  .Text(TitleText.ToUpper())
                   .AlignCenter()
                   .FontSize(11.0f)
                   .Bold()
