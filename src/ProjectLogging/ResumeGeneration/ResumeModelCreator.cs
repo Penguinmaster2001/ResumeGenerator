@@ -1,5 +1,6 @@
 
 using ProjectLogging.Records;
+using ProjectLogging.ResumeGeneration.Segments;
 
 
 
@@ -19,6 +20,7 @@ public class ResumeModelCreator
     public List<Project> Projects;
     public List<Volunteer> Volunteers;
     public List<Education> Educations;
+
 
 
     public ResumeModelCreator(PersonalInfo personalInfo, Dictionary<string, HashSet<string>> skills,

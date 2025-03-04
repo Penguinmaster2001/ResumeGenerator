@@ -5,7 +5,7 @@ using QuestPDF.Infrastructure;
 
 
 
-namespace ProjectLogging.ResumeGeneration;
+namespace ProjectLogging.ResumeGeneration.Segments;
 
 
 

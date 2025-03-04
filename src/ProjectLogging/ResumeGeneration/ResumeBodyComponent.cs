@@ -1,7 +1,9 @@
 
 using QuestPDF.Fluent;
-using QuestPDF.Infrastructure;
 using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
+using ProjectLogging.ResumeGeneration.Segments;
 
 
 
