@@ -11,31 +11,15 @@ public class ResumeModelCreator
 {
     public PersonalInfo PersonalInfo;
 
-    Dictionary<string, HashSet<string>> Skills;
-    Dictionary<string, HashSet<string>> Hobbies;
-    Dictionary<string, HashSet<string>> Courses;
-
-    public List<Job> Jobs;
-    public List<Project> Projects;
-    public List<Volunteer> Volunteers;
-    public List<Education> Educations;
+    public List<(string Name, IEnumerable<IResumeEntryable> Info)> Segments;
 
 
-    public ResumeModelCreator(PersonalInfo personalInfo, Dictionary<string, HashSet<string>> skills,
-                              Dictionary<string, HashSet<string>> hobbies, Dictionary<string, HashSet<string>> courses,
-                              List<Job> jobs, List<Project> projects, List<Volunteer> volunteers,
-                              List<Education> educations)
+
+    public ResumeModelCreator(PersonalInfo personalInfo,
+        IEnumerable<(string Name, IEnumerable<IResumeEntryable> info)> segments)
     {
         PersonalInfo = personalInfo;
-
-        Skills = skills;
-        Hobbies = hobbies;
-        Courses = courses;
-
-        Jobs = jobs;
-        Projects = projects;
-        Volunteers = volunteers;
-        Educations = educations;
+        Segments = segments.ToList();
     }
 
 
@@ -44,26 +28,11 @@ public class ResumeModelCreator
     {
         ResumeHeaderComponent resumeHeader = new(PersonalInfo);
 
-        List<ResumeSegmentComponent> segmentList = new()
-        {
-            new("tech skills", Skills.Keys.Select(category
-                                            => ResumeEntryFactory.CreateEntry(category, Skills[category]))),
+        var resumeSegments = Segments.Select(
+                                        s => new ResumeSegmentComponent(s.Name, s.Info.Select(i => i.ToResumeEntry())))
+                                     .ToList();
 
-            new("volunteer / extracurricular", Volunteers.Select(v => ResumeEntryFactory.CreateEntry(v))),
-
-            new("hobbies", Hobbies.Keys.Select(category
-                                            => ResumeEntryFactory.CreateEntry(category, Hobbies[category]))),
-
-            new("education", Educations.Select(e => ResumeEntryFactory.CreateEntry(e))
-                                       .Concat(Courses.Keys.Select(category
-                                           => ResumeEntryFactory.CreateEntry(category, Courses[category])))),
-
-            new("work experience", Jobs.Select(j => ResumeEntryFactory.CreateEntry(j))),
-
-            new("projects", Projects.Select(p => ResumeEntryFactory.CreateEntry(p))),
-        };
-
-        ResumeBodyComponent resumeBody = new(segmentList);
+        ResumeBodyComponent resumeBody = new(resumeSegments);
 
         return new(resumeHeader, resumeBody);
     }
