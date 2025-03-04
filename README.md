@@ -138,4 +138,4 @@ Note: The skills from education, jobs, projects, etc. will also be added to the 
 
 ## License
 
-TODO
+This project is licensed under the [MIT License](LICENSE).
