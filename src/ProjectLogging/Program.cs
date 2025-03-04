@@ -17,10 +17,10 @@ public static class Program
     public static async Task Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        if (args.Length < 9)
+        if (args.Length < 10)
         {
             Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
-                + "<education json> <courses json> <hobbies json> <skills json>");
+                + "<education json> <courses json> <hobbies json> <skills json> <resume output>");
             return;
         }
 
@@ -42,6 +42,6 @@ public static class Program
         ResumeGenerator rGen = new();
         rGen.GenerateResume(personalInfo.Result, jobs.Result, projects.Result, volunteers.Result,
             education.Result, courses.Result, skills.Result, hobbies.Result)
-            .GeneratePdf("test.pdf");
+            .GeneratePdf(args[9]);
     }
 }
