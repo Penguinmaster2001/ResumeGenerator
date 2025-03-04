@@ -1,10 +1,10 @@
 
 using QuestPDF.Fluent;
 
-using ProjectLogging.Records;
-using ProjectLogging.ResumeGeneration;
-using ProjectLogging.Projects;
 using ProjectLogging.Skills;
+using ProjectLogging.Records;
+using ProjectLogging.Projects;
+using ProjectLogging.ResumeGeneration;
 
 
 
@@ -40,8 +40,14 @@ public static class Program
         await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
         ResumeGenerator rGen = new();
-        rGen.GenerateResume(personalInfo.Result, jobs.Result, projects.Result, volunteers.Result,
-            education.Result, courses.Result, skills.Result, hobbies.Result)
+
+        rGen.GenerateResume(personalInfo.Result,
+                            ("tech skills", skills.Result),
+                            ("hobbies", hobbies.Result),
+                            ("education", education.Result.Concat(courses.Result as IEnumerable<IResumeEntryable>)),
+                            ("work experiance", jobs.Result),
+                            ("projects", projects.Result),
+                            ("volunteer / extracurricular", volunteers.Result))
             .GeneratePdf(args[9]);
     }
 }
