@@ -27,7 +27,7 @@ public class ResumeDocument : IDocument
             page.Size(PageSizes.Letter);
             page.Margin(0.25f, Unit.Inch);
             page.PageColor(Colors.White);
-            page.DefaultTextStyle(textStyle => textStyle.FontSize(9.5f).FontFamily("Roboto Condensed"));
+            page.DefaultTextStyle(textStyle => textStyle.FontSize(9.5f).FontFamily("Roboto Condensed").LineHeight(1.1f));
 
             page.Header().Element(ComposeHeader);
             page.Content().Element(ComposeBody);
