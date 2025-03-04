@@ -1,5 +1,6 @@
 
 using System.Text.Json;
+using System.Collections;
 
 using ProjectLogging.Records;
 
@@ -9,9 +10,9 @@ namespace ProjectLogging.Skills;
 
 
 
-public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
+public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable<Category>
 {
-    public Dictionary<string, HashSet<string>> CategorySkills = categorySkills;
+    public Dictionary<string, HashSet<string>> CategoryNames { get; set; } = categorySkills;
 
 
 
@@ -25,14 +26,14 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
         {
             foreach (Skill skill in record.Skills)
             {
-                if (!CategorySkills.ContainsKey(skill.Category))
+                if (!CategoryNames.ContainsKey(skill.Category))
                 {
                     if (!addNewCategories) break;
 
-                    CategorySkills.Add(skill.Category, new());
+                    CategoryNames.Add(skill.Category, new());
                 }
 
-                CategorySkills[skill.Category].Add(skill.Name);
+                CategoryNames[skill.Category].Add(skill.Name);
             }
         }
     }
@@ -48,4 +49,18 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
         return new(categorySkills ?? new());
     }
+
+
+
+    public IEnumerator<Category> GetEnumerator()
+    {
+        foreach (string category in CategoryNames.Keys)
+        {
+            yield return new Category(category, CategoryNames[category]);
+        }
+    }
+
+
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
