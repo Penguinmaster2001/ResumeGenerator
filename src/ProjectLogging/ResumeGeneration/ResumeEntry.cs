@@ -62,7 +62,7 @@ public class ResumeEntry : IComponent
 
     private void LocationAndDate(IContainer container) => container.Row(row =>
         {
-            row.RelativeItem().Text(LocationText ?? String.Empty).Bold();
+            row.RelativeItem().Text(LocationText ?? string.Empty).Bold();
             row.RelativeItem().AlignRight().Text(FormatDate()).Bold();
         });
 
@@ -75,11 +75,13 @@ public class ResumeEntry : IComponent
         StringBuilder sb = new();
 
         sb.Append(StartDate.Value.ToString("MMM"))
-          .Append(" ");
+          .Append(' ');
 
         if (EndDate.HasValue)
         {
-            if (StartDate.Value.Year == EndDate.Value.Year)
+            bool ongoing = EndDate > DateOnly.FromDateTime(DateTime.Now);
+
+            if (StartDate.Value.Year == EndDate.Value.Year && !ongoing)
             {
                 if (StartDate.Value.Month == EndDate.Value.Month)
                 {
@@ -89,7 +91,7 @@ public class ResumeEntry : IComponent
 
                 return sb.Append("- ")
                          .Append(EndDate.Value.ToString("MMM"))
-                         .Append(" ")
+                         .Append(' ')
                          .Append(StartDate.Value.ToString("yyyy"))
                          .ToString();
             }
@@ -97,7 +99,7 @@ public class ResumeEntry : IComponent
             sb.Append(StartDate.Value.ToString("yyyy"))
               .Append(" - ");
 
-            if (EndDate > DateOnly.FromDateTime(DateTime.Now))
+            if (ongoing)
             {
                 sb.Append("exp. ");
             }

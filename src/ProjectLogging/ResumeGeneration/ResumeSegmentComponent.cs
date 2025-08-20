@@ -46,17 +46,17 @@ public class ResumeSegmentComponent : IComponent
     public void Compose(IContainer container) => container.Column(column =>
         {
             column.Item()
-                  .PaddingTop(1.0f)
+                  .PaddingTop(2.0f)
                   .Text(TitleText.ToUpper())
                   .AlignCenter()
-                  .FontSize(11.0f)
+                  .FontSize(12.0f)
                   .Bold()
                   .FontColor(Colors.Green.Darken3);
 
             foreach (ResumeEntry entry in _entries)
             {
                 column.Item()
-                      .PaddingVertical(3.0f)
+                      .PaddingVertical(5.0f)
                       .Element(entry.Compose);
             }
         });

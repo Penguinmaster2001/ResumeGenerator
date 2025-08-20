@@ -43,11 +43,11 @@ public static class Program
 
         rGen.GenerateResume(personalInfo.Result,
                             ("tech skills", skills.Result),
+                            ("volunteer / extracurricular", volunteers.Result),
                             ("hobbies", hobbies.Result),
                             ("education", education.Result.Concat(courses.Result as IEnumerable<IResumeEntryable>)),
-                            ("work experiance", jobs.Result),
-                            ("projects", projects.Result),
-                            ("volunteer / extracurricular", volunteers.Result))
+                            ("work experience", jobs.Result),
+                            ("projects", projects.Result))
             .GeneratePdf(args[9]);
     }
 }
