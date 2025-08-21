@@ -3,7 +3,7 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class HtmlTree
+public interface IHtmlNodeContent
 {
-    
+    string GenerateHtml();
 }
