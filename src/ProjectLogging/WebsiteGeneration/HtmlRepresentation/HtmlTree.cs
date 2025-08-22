@@ -1,9 +1,0 @@
-
-namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
-
-
-
-public class HtmlTree
-{
-    
-}

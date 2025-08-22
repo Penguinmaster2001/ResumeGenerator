@@ -1,14 +1,16 @@
 
 using System.Text;
 
+
+
 namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class HtmlSection(HtmlTag tag, List<HtmlNode>? content = null) : IHtmlNodeContent
+public class HtmlSection(HtmlTag tag, params List<IHtmlItem> content) : IHtmlItem
 {
     public HtmlTag Tag { get; set; } = tag;
-    public List<HtmlNode> Content { get; set; } = content ?? [];
+    public List<IHtmlItem> Content { get; set; } = content;
 
 
 

@@ -3,11 +3,11 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class RawHtml(string html) : IHtmlNodeContent
+public class RawHtml(string html = "") : IHtmlItem
 {
     public string Html { get; set; } = html;
 
 
 
-    public string GenerateHtml() => Html;
+    public virtual string GenerateHtml() => Html;
 }
