@@ -3,7 +3,7 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public class RawTagElement : HtmlElementAttributeBase
+public class RawTagElement : HtmlElementWithAttributeBase<RawTagElement>
 {
     private HtmlTag.HtmlTags _tagType;
     public HtmlTag.HtmlTags TagType

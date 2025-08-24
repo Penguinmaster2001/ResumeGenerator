@@ -7,26 +7,36 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public class ListElement(bool ordered = false, params List<IHtmlElement> listItems) : IHtmlElement
+public class ListElement(bool ordered = false, params List<IHtmlItem> listItems) : IHtmlElement
 {
     public bool Ordered { get; set; } = ordered;
-    public List<IHtmlElement> ListItems { get; set; } = listItems;
+    public List<IHtmlItem> ListItems { get; set; } = listItems;
 
     private readonly List<HtmlTag.Attribute> _attributes = [];
 
 
 
-    public IHtmlElement AddAttribute(string name, string value)
+    public ListElement AddAttribute(string name, string value)
     {
         _attributes.Add(new HtmlTag.Attribute(name, value));
         return this;
     }
+    IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
 
 
 
-    public IHtmlElement AddAttribute(HtmlTag.Attribute attribute)
+    public ListElement AddAttribute(HtmlTag.Attribute attribute)
     {
         _attributes.Add(attribute);
+        return this;
+    }
+    IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
+
+
+
+    public ListElement AddItem(IHtmlItem item)
+    {
+        ListItems.Add(item);
         return this;
     }
 
@@ -51,4 +61,5 @@ public class ListElement(bool ordered = false, params List<IHtmlElement> listIte
 
         return sb.ToString();
     }
+
 }

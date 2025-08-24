@@ -1,10 +1,10 @@
 
-using QuestPDF.Fluent;
-
-using ProjectLogging.Skills;
-using ProjectLogging.Records;
 using ProjectLogging.Projects;
+using ProjectLogging.Records;
 using ProjectLogging.ResumeGeneration;
+using ProjectLogging.Skills;
+using ProjectLogging.WebsiteGeneration;
+using QuestPDF.Fluent;
 
 
 
@@ -15,6 +15,13 @@ namespace ProjectLogging;
 public static class Program
 {
     public static async Task Main()
+    {
+        await GenerateWebsite();
+    }
+
+
+
+    private static async Task GenerateResume()
     {
         string[] args = Environment.GetCommandLineArgs();
         if (args.Length < 10)
@@ -49,5 +56,22 @@ public static class Program
                             ("work experience", jobs.Result),
                             ("projects", projects.Result))
             .GeneratePdf(args[9]);
+    }
+
+
+
+    public static async Task GenerateWebsite()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        if (args.Length < 2)
+        {
+            Console.WriteLine($"Usage: {args[0]} <website directory>");
+            return;
+        }
+
+        await Task.Run(() =>
+        {
+            WebsiteGenerator.GenerateWebsite().CreateFiles(args[1]);
+        });
     }
 }

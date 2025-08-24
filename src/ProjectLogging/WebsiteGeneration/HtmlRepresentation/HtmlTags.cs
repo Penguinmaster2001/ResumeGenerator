@@ -1,6 +1,4 @@
 
-using System.ComponentModel;
-
 namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
@@ -28,12 +26,26 @@ public class HtmlTag
         Header6,
         Paragraph,
         Code,
+        Bold,
+        Emphasis,
         Head,
         Header,
         Body,
         Footer,
         Html,
     }
+
+
+
+    public static HtmlTags Header(int header) => header switch
+    {
+        6 => HtmlTags.Header6,
+        5 => HtmlTags.Header5,
+        4 => HtmlTags.Header4,
+        3 => HtmlTags.Header3,
+        2 => HtmlTags.Header2,
+        _ => HtmlTags.Header1,
+    };
 
 
 
@@ -63,7 +75,9 @@ public class HtmlTag
         { HtmlTags.Header5,         "h5" },
         { HtmlTags.Header6,         "h6" },
         { HtmlTags.Paragraph,       "p" },
-        { HtmlTags.Code,            "c" },
+        { HtmlTags.Code,            "code" },
+        { HtmlTags.Bold,            "b" },
+        { HtmlTags.Emphasis,        "em" },
         { HtmlTags.Head,            "head" },
         { HtmlTags.Header,          "header" },
         { HtmlTags.Body,            "body" },
@@ -73,21 +87,13 @@ public class HtmlTag
 
 
 
-    public HtmlTags Tag { set => TagString = TagStrings[value]; }
+    public HtmlTags Tag { get; set; }
     public List<Attribute> Attributes { get; set; } = [];
-    public string TagString { get; set; } = string.Empty;
+    public string TagString => TagStrings[Tag];
+    public string AttributeString => string.Join(' ', Attributes);
     public string Opener => $"<{TagString} {AttributeString}>";
     public string Closer => $"</{TagString}>";
     public string SelfCloser => $"</{TagString} {AttributeString}>";
-    public string AttributeString => string.Join(' ', Attributes);
-
-
-
-    public HtmlTag(string tagString, params List<Attribute> attrs)
-    {
-        TagString = tagString;
-        Attributes = attrs;
-    }
 
 
 

@@ -1,9 +1,10 @@
 
+using ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
+namespace ProjectLogging.WebsiteGeneration;
 
 
 
@@ -25,9 +26,9 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
 
 
 
-    public HtmlPageBuilder Style(string title)
+    public HtmlPageBuilder Style(string style)
     {
-        _style = title;
+        _style = style;
         return this;
     }
 

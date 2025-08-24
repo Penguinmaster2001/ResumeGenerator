@@ -3,7 +3,7 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public class NavHeaderElement : HtmlElementAttributeBase
+public class NavHeaderElement : HtmlElementWithAttributeBase<NavHeaderElement>
 {
     public List<HtmlPage> Pages { get; set; } = [];
 

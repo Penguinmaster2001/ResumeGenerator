@@ -7,9 +7,9 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class HtmlSection(HtmlTag tag, params List<IHtmlItem> content) : IHtmlItem
+public class HtmlSection(HtmlTag? tag = null, params List<IHtmlItem> content) : IHtmlItem
 {
-    public HtmlTag Tag { get; set; } = tag;
+    public HtmlTag? Tag { get; set; } = tag;
     public List<IHtmlItem> Content { get; set; } = content;
 
 
@@ -17,14 +17,18 @@ public class HtmlSection(HtmlTag tag, params List<IHtmlItem> content) : IHtmlIte
     public string GenerateHtml()
     {
         var sb = new StringBuilder();
-        sb.Append(Tag.Opener);
 
         foreach (var item in Content)
         {
             sb.Append(item.GenerateHtml());
         }
 
-        sb.Append(Tag.Closer);
+        if (Tag is not null)
+        {
+            sb.Insert(0, Tag.Opener);
+            sb.Append(Tag.Closer);
+        }
+
 
         return sb.ToString();
     }

@@ -20,18 +20,26 @@ public class WebsiteFileOrganizer : IFileOrganizer
 
 
 
-    public static string ResourceType(ResourceTypes resourceType) => nameof(resourceType).ToLower();
+    public static string ResourceType(ResourceTypes resourceType) => resourceType.ToString().ToLower();
 
 
 
     public string GetPathForResource(string resourceName, string resourceType, string rootDir)
     {
-        if (_filePaths.TryGetValue(resourceName, out var path)) return path;
+        var name = Sanitize(resourceName);
+        if (_filePaths.TryGetValue(name, out var path)) return path;
 
-        var newPath = Path.Combine(rootDir, Path.ChangeExtension(resourceName, resourceType));
+        var newPath = Path.Combine(rootDir, Path.ChangeExtension(name, resourceType));
 
-        _filePaths.Add(resourceName, newPath);
+        _filePaths.Add(name, newPath);
 
         return newPath;
+    }
+
+
+
+    private static string Sanitize(string path)
+    {
+        return path.Replace(' ', '_');
     }
 }
