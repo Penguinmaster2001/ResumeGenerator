@@ -1,10 +1,12 @@
 
 using ProjectLogging.Projects;
-using ProjectLogging.Records;
+using ProjectLogging.Models;
 using ProjectLogging.ResumeGeneration;
 using ProjectLogging.Skills;
 using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
+using ProjectLogging.Views.Resume;
+using System.Linq;
 
 
 
@@ -16,7 +18,8 @@ public static class Program
 {
     public static async Task Main()
     {
-        await GenerateWebsite();
+        await GenerateResume();
+        // await GenerateWebsite();
     }
 
 
@@ -52,7 +55,7 @@ public static class Program
                             ("tech skills", skills.Result),
                             ("volunteer / extracurricular", volunteers.Result),
                             ("hobbies", hobbies.Result),
-                            ("education", education.Result.Concat(courses.Result as IEnumerable<IResumeEntryable>)),
+                            ("education", education.Result.Select(e => e as IModel).Concat(courses.Result)),
                             ("work experience", jobs.Result),
                             ("projects", projects.Result))
             .GeneratePdf(args[9]);
@@ -71,7 +74,7 @@ public static class Program
 
         await Task.Run(() =>
         {
-            WebsiteGenerator.GenerateWebsite().CreateFiles(args[1]);
+            // WebsiteGenerator.GenerateWebsite().CreateFiles(args[1]);
         });
     }
 }

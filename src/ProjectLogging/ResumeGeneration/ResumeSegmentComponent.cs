@@ -1,4 +1,5 @@
 
+using ProjectLogging.Views.Resume;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -13,29 +14,29 @@ public class ResumeSegmentComponent : IComponent
 {
     public string TitleText;
 
-    private List<ResumeEntry> _entries;
+    private List<IResumeView> _entries;
 
 
 
-    public ResumeSegmentComponent(string title, params ResumeEntry[] entries)
+    public ResumeSegmentComponent(string title, params IResumeView[] entries)
     {
         TitleText = title;
-        _entries = entries.ToList();
+        _entries = [.. entries];
     }
 
 
 
-    public ResumeSegmentComponent(string title, IEnumerable<ResumeEntry> entries)
+    public ResumeSegmentComponent(string title, IEnumerable<IResumeView> entries)
     {
         TitleText = title;
-        _entries = new(entries);
+        _entries = [.. entries];
     }
 
 
 
-    public void AddEntries(params ResumeEntry[] entries) => _entries.AddRange(entries);
+    public void AddEntries(params IResumeView[] entries) => _entries.AddRange(entries);
 
-    public void AddEntries(IEnumerable<ResumeEntry> entries) => _entries.AddRange(entries);
+    public void AddEntries(IEnumerable<IResumeView> entries) => _entries.AddRange(entries);
 
 
 
@@ -53,7 +54,7 @@ public class ResumeSegmentComponent : IComponent
                   .Bold()
                   .FontColor(Colors.Green.Darken3);
 
-            foreach (ResumeEntry entry in _entries)
+            foreach (IResumeView entry in _entries)
             {
                 column.Item()
                       .PaddingVertical(5.0f)

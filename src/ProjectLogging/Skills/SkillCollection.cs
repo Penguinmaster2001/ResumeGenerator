@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Collections;
 
-using ProjectLogging.Records;
+using ProjectLogging.Models;
 
 
 
@@ -10,7 +10,7 @@ namespace ProjectLogging.Skills;
 
 
 
-public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable<Category>
+public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable, IEnumerable<Category>, IModel
 {
     public Dictionary<string, HashSet<string>> CategoryNames { get; set; } = categorySkills;
 
@@ -20,9 +20,9 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
 
 
-    public void AddSkills<T>(List<T> records, bool addNewCategories = false) where T : IRecord
+    public void AddSkills<T>(List<T> records, bool addNewCategories = false) where T : BaseModel
     {
-        foreach (IRecord record in records)
+        foreach (BaseModel record in records)
         {
             foreach (Skill skill in record.Skills)
             {

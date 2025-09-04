@@ -1,6 +1,6 @@
 
 using System.Text;
-
+using ProjectLogging.Views.Resume;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
@@ -10,7 +10,7 @@ namespace ProjectLogging.ResumeGeneration;
 
 
 
-public class ResumeEntry : IComponent
+public class ResumeEntry : IResumeView
 {
     public string TitleText;
 

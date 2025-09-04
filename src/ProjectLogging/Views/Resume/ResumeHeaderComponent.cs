@@ -2,12 +2,11 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-
-using ProjectLogging.Records;
-
+using ProjectLogging.Models;
 
 
-namespace ProjectLogging.ResumeGeneration;
+
+namespace ProjectLogging.Views.Resume;
 
 
 

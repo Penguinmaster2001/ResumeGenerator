@@ -1,8 +1,7 @@
 
-using QuestPDF.Infrastructure;
-
+using ProjectLogging.Models;
 using ProjectLogging.Skills;
-using ProjectLogging.Records;
+using QuestPDF.Infrastructure;
 
 
 
@@ -22,10 +21,10 @@ public class ResumeGenerator
 
 
     public ResumeDocument GenerateResume(PersonalInfo personalInfo,
-        (string SkillsSegmentName, SkillCollection Skills) skillsSegment,
-        params IEnumerable<(string Name, IEnumerable<IResumeEntryable> info)> segments)
+        (string Name, SkillCollection Skills) skillsSegment,
+        params IEnumerable<(string Name, IEnumerable<IModel> Model)> segments)
     {
-        foreach (IEnumerable<IRecord> info in segments.Select(s => s.info).OfType<IEnumerable<IRecord>>())
+        foreach (IEnumerable<BaseModel> info in segments.Select(s => s.Model).OfType<IEnumerable<BaseModel>>())
         {
             skillsSegment.Skills.AddSkills(info.ToList());
         }

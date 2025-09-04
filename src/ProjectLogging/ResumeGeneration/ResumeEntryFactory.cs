@@ -1,5 +1,6 @@
 
-using ProjectLogging.Records;
+using ProjectLogging.Models;
+using ProjectLogging.Skills;
 
 
 
@@ -9,7 +10,16 @@ namespace ProjectLogging.ResumeGeneration;
 
 public static class ResumeEntryFactory
 {
-    public static ResumeEntry CreateEntry(IRecord entryRecord)
+    public static ResumeEntry CreateEntry(object model) => model switch
+    {
+        BaseModel baseModel => CreateEntry(baseModel),
+        Category category   => CreateEntry(category),
+        _ => throw new NotImplementedException($"ResumeEntry factory method not implemented for {model.GetType()}"),
+    };
+
+
+
+    public static ResumeEntry CreateEntry(BaseModel entryRecord)
     {
         ResumeEntryBuilder entryBuilder = new();
 
@@ -17,9 +27,9 @@ public static class ResumeEntryFactory
                     .SetLocation(entryRecord.Location)
                     .SetStartDate(entryRecord.StartDate);
 
-        foreach (string bulletpoint in entryRecord.Points)
+        foreach (string bulletPoint in entryRecord.Points)
         {
-            entryBuilder.AddBulletPoint(bulletpoint);
+            entryBuilder.AddBulletPoint(bulletPoint);
         }
 
         if (entryRecord.EndDate.HasValue)
@@ -27,21 +37,20 @@ public static class ResumeEntryFactory
             entryBuilder.SetEndDate(entryRecord.EndDate.Value);
         }
 
-        if (entryRecord is Job jobEntry)
+        switch (entryRecord)
         {
-            entryBuilder.ChangeTitle($"{jobEntry.Position} @ {jobEntry.Company}");
-        }
-        else if (entryRecord is Volunteer volunteerEntry)
-        {
-            entryBuilder.ChangeTitle($"{volunteerEntry.Position} @ {volunteerEntry.Organization}");
-        }
-        else if (entryRecord is Project projectEntry)
-        {
-            entryBuilder.ChangeTitle(projectEntry.Title);
-        }
-        else if (entryRecord is Education educationEntry)
-        {
-            entryBuilder.ChangeTitle($"{educationEntry.Degree} @ {educationEntry.School}");
+            case Job jobEntry:
+                entryBuilder.ChangeTitle($"{jobEntry.Position} @ {jobEntry.Company}");
+                break;
+            case Volunteer volunteerEntry:
+                entryBuilder.ChangeTitle($"{volunteerEntry.Position} @ {volunteerEntry.Organization}");
+                break;
+            case Project projectEntry:
+                entryBuilder.ChangeTitle(projectEntry.Title);
+                break;
+            case Education educationEntry:
+                entryBuilder.ChangeTitle($"{educationEntry.Degree} @ {educationEntry.School}");
+                break;
         }
 
         return entryBuilder.GetResumeEntry();
@@ -52,4 +61,8 @@ public static class ResumeEntryFactory
     public static ResumeEntry CreateEntry(string title, IEnumerable<string> items)
         => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items.Order()))
                                         .GetResumeEntry();
+
+
+
+    public static ResumeEntry CreateEntry(Category category) => CreateEntry(category.Name, category.Items);
 }

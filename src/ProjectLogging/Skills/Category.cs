@@ -1,5 +1,5 @@
 
-using ProjectLogging.ResumeGeneration;
+using ProjectLogging.Models;
 
 
 
@@ -7,7 +7,7 @@ namespace ProjectLogging.Skills;
 
 
 
-public class Category : IResumeEntryable
+public class Category : IModel
 {
     public string Name;
 
@@ -21,8 +21,4 @@ public class Category : IResumeEntryable
 
         Items = items.ToList();
     }
-
-
-
-    public ResumeEntry ToResumeEntry() => ResumeEntryFactory.CreateEntry(Name, Items);
 }

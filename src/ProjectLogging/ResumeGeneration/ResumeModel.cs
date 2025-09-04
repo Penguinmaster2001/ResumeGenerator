@@ -1,4 +1,6 @@
 
+using ProjectLogging.Views.Resume;
+
 namespace ProjectLogging.ResumeGeneration;
 
 

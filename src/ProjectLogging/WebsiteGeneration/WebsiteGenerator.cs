@@ -1,4 +1,7 @@
 
+using ProjectLogging.Models;
+using ProjectLogging.Skills;
+using ProjectLogging.Views.Resume;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
@@ -10,7 +13,9 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public class WebsiteGenerator
 {
-    public static Website GenerateWebsite()
+    public static Website GenerateWebsite(PersonalInfo personalInfo,
+        (string SkillsSegmentName, SkillCollection Skills) skillsSegment,
+        params IEnumerable<(string Name, IEnumerable<IResumeView> info)> segments)
     {
         var website = new Website(new WebsiteFileOrganizer());
 
