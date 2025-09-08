@@ -3,7 +3,7 @@ namespace ProjectLogging.Views.Website;
 
 
 
-public interface IWebsiteView
+public static class WebsiteViewFactory
 {
     
 }

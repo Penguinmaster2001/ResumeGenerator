@@ -1,5 +1,6 @@
 
 using System.Text;
+using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
@@ -7,14 +8,14 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class HtmlSection(HtmlTag? tag = null, params List<IHtmlItem> content) : IHtmlItem
+public abstract class HtmlSection<T>(HtmlTag tag, IEnumerable<IHtmlItem> content) : HtmlElementWithAttributeBase<T>(tag)
+    where T : HtmlSection<T>
 {
-    public HtmlTag? Tag { get; set; } = tag;
-    public List<IHtmlItem> Content { get; set; } = content;
+    public List<IHtmlItem> Content { get; set; } = [.. content];
 
 
 
-    public string GenerateHtml()
+    public override string GenerateHtml()
     {
         var sb = new StringBuilder();
 
@@ -29,7 +30,17 @@ public class HtmlSection(HtmlTag? tag = null, params List<IHtmlItem> content) : 
             sb.Append(Tag.Closer);
         }
 
-
         return sb.ToString();
     }
+}
+
+
+
+public class HtmlSection : HtmlSection<HtmlSection>
+{
+    public HtmlSection(HtmlTag tag, params IEnumerable<IHtmlItem> content) : base(tag, content) { }
+
+    public HtmlSection(HtmlTag.HtmlTags tag, params IEnumerable<IHtmlItem> content) : base(new HtmlTag(tag), content) { }
+
+    public HtmlSection(params IEnumerable<IHtmlItem> content) : base(HtmlTag.Section, content) { }
 }

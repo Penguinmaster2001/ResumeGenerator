@@ -14,20 +14,8 @@ public class Website(IFileOrganizer fileOrganizer)
 
 
 
-    private void LinkPages()
-    {
-        foreach (var page in Pages)
-        {
-            page.HeaderRoot.Pages = Pages;
-        }
-    }
-
-
-
     public void CreateFiles(string outputDir)
     {
-        LinkPages();
-
         foreach (var page in Pages)
         {
             Directory.CreateDirectory(outputDir);

@@ -7,6 +7,7 @@ using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
 using ProjectLogging.Views.Resume;
 using System.Linq;
+using ProjectLogging.Models.Website;
 
 
 
@@ -18,8 +19,8 @@ public static class Program
 {
     public static async Task Main()
     {
-        await GenerateResume();
-        // await GenerateWebsite();
+        // await GenerateResume();
+        await GenerateWebsite();
     }
 
 
@@ -72,9 +73,6 @@ public static class Program
             return;
         }
 
-        await Task.Run(() =>
-        {
-            // WebsiteGenerator.GenerateWebsite().CreateFiles(args[1]);
-        });
+        await Task.Run(() => WebsiteGenerator.GenerateWebsite().CreateFiles(args[1]));
     }
 }

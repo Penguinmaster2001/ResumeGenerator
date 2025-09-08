@@ -46,6 +46,8 @@ public class HtmlText : IHtmlElement
     private readonly Stack<HtmlTag> _workingTags = [];
     private bool _inNestedTag = false;
 
+    public List<HtmlTag.Attribute> Attributes { get => throw new NotImplementedException(); }
+
 
 
 
@@ -67,7 +69,7 @@ public class HtmlText : IHtmlElement
 
     public HtmlText StartHeader(int header, string text = "")
     {
-        AddNonNested(HtmlTag.Header(header), text);
+        AddNonNested(HtmlTag.TextHeader(header), text);
 
         return this;
     }

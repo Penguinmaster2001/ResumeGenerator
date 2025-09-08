@@ -11,14 +11,13 @@ public class ListElement(bool ordered = false, params List<IHtmlItem> listItems)
 {
     public bool Ordered { get; set; } = ordered;
     public List<IHtmlItem> ListItems { get; set; } = listItems;
-
-    private readonly List<HtmlTag.Attribute> _attributes = [];
+    public List<HtmlTag.Attribute> Attributes { get; } = [];
 
 
 
     public ListElement AddAttribute(string name, string value)
     {
-        _attributes.Add(new HtmlTag.Attribute(name, value));
+        Attributes.Add(new HtmlTag.Attribute(name, value));
         return this;
     }
     IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
@@ -27,7 +26,7 @@ public class ListElement(bool ordered = false, params List<IHtmlItem> listItems)
 
     public ListElement AddAttribute(HtmlTag.Attribute attribute)
     {
-        _attributes.Add(attribute);
+        Attributes.Add(attribute);
         return this;
     }
     IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
