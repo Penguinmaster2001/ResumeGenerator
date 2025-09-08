@@ -1,11 +1,10 @@
 
 using System.Text.Json.Serialization;
-
 using ProjectLogging.Skills;
 
 
 
-namespace ProjectLogging.Models;
+namespace ProjectLogging.Data;
 
 
 

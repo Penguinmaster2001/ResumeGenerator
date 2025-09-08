@@ -12,7 +12,6 @@ public class HeaderView
 
 
 
-
     public HeaderView(HeaderModel model)
     {
         Model = model;

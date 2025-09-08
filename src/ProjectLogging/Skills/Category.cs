@@ -1,7 +1,5 @@
 
-using ProjectLogging.Models;
-
-
+using ProjectLogging.Data;
 
 namespace ProjectLogging.Skills;
 

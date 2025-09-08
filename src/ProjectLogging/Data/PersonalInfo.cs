@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 
 
-namespace ProjectLogging.Models;
+namespace ProjectLogging.Data;
 
 
 

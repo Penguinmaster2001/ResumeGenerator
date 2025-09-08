@@ -4,7 +4,7 @@ using ProjectLogging.Skills;
 
 
 
-namespace ProjectLogging.Models;
+namespace ProjectLogging.Data;
 
 
 
