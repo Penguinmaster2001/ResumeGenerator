@@ -13,4 +13,8 @@ public record BaseModel(string? ShortDescription,
                         string Location,
                         DateOnly StartDate,
                         DateOnly? EndDate)
-                    : IModel;
+                    : IModel, ISkillData
+{
+    IEnumerable<Skill> ISkillData.Skills { get => Skills; }
+}
+

@@ -1,6 +1,6 @@
 
 using ProjectLogging.Data;
-using ProjectLogging.Views.Resume;
+using ProjectLogging.Models.Resume;
 
 
 
@@ -27,13 +27,13 @@ public class ResumeModelCreator
 
     public ResumeModel CreateModel()
     {
-        ResumeHeaderComponent resumeHeader = new(PersonalInfo);
+        ResumeHeaderModel resumeHeader = new(PersonalInfo);
 
         var resumeSegments = Segments.Select(
-                                        s => new ResumeSegmentComponent(s.Name, s.Categories.Select(c => ResumeEntryFactory.CreateEntry(c))))
+                                        s => new ResumeSegmentModel(s.Name, s.Categories.Select(c => ResumeEntryFactory.CreateEntry(c))))
                                      .ToList();
 
-        ResumeBodyComponent resumeBody = new(resumeSegments);
+        ResumeBodyModel resumeBody = new(resumeSegments);
 
         return new(resumeHeader, resumeBody);
     }

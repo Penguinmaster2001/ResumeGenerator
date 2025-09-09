@@ -19,8 +19,8 @@ public static class Program
 {
     public static async Task Main()
     {
-        // await GenerateResume();
-        await GenerateWebsite();
+        await GenerateResume();
+        // await GenerateWebsite();
     }
 
 
@@ -50,9 +50,7 @@ public static class Program
 
         await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
-        ResumeGenerator rGen = new();
-
-        rGen.GenerateResume(personalInfo.Result,
+        ResumeGenerator.GenerateResume(personalInfo.Result,
                             ("tech skills", skills.Result),
                             ("volunteer / extracurricular", volunteers.Result),
                             ("hobbies", hobbies.Result),

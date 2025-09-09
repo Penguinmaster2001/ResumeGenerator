@@ -15,24 +15,24 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
 
 
-    public SkillCollection() : this(new()) { }
+    public SkillCollection() : this([]) { }
 
 
 
-    public void AddSkills<T>(List<T> records, bool addNewCategories = false) where T : BaseModel
+    public void AddSkills(List<ISkillData> records, bool addNewCategories = false)
     {
-        foreach (BaseModel record in records)
+        foreach (var record in records)
         {
             foreach (Skill skill in record.Skills)
             {
-                if (!CategoryNames.ContainsKey(skill.Category))
+                if (!CategoryNames.TryGetValue(skill.Category, out HashSet<string>? value))
                 {
                     if (!addNewCategories) break;
-
-                    CategoryNames.Add(skill.Category, new());
+                    value = [];
+                    CategoryNames.Add(skill.Category, value);
                 }
 
-                CategoryNames[skill.Category].Add(skill.Name);
+                value.Add(skill.Name);
             }
         }
     }
@@ -46,11 +46,12 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
     {
         var categorySkills = await JsonSerializer.DeserializeAsync<Dictionary<string, HashSet<string>>>(stream);
 
-        return new(categorySkills ?? new());
+        return new(categorySkills ?? []);
     }
 
 
 
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public IEnumerator<Category> GetEnumerator()
     {
         foreach (string category in CategoryNames.Keys)
@@ -58,8 +59,4 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
             yield return new Category(category, CategoryNames[category]);
         }
     }
-
-
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
