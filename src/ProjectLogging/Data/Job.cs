@@ -17,7 +17,7 @@ public record Job(string Company,
                   string Location,
                   DateOnly StartDate,
                   DateOnly? EndDate)
-            : BaseModel(ShortDescription,
+            : BaseData(ShortDescription,
                         Points,
                         Skills,
                         Location,

@@ -1,7 +1,6 @@
 
-using System.Text.Json;
 using System.Collections;
-using ProjectLogging.Data;
+using System.Text.Json;
 
 
 
@@ -9,7 +8,7 @@ namespace ProjectLogging.Skills;
 
 
 
-public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable, IEnumerable<Category>, IModel
+public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable, IEnumerable<Category>
 {
     public Dictionary<string, HashSet<string>> CategoryNames { get; set; } = categorySkills;
 
@@ -19,13 +18,13 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
 
 
-    public void AddSkills(List<ISkillData> records, bool addNewCategories = false)
+    public void AddSkills(List<ISkillData> skillData, bool addNewCategories = false)
     {
-        foreach (var record in records)
+        foreach (var data in skillData)
         {
-            foreach (Skill skill in record.Skills)
+            foreach (var skill in data.Skills)
             {
-                if (!CategoryNames.TryGetValue(skill.Category, out HashSet<string>? value))
+                if (!CategoryNames.TryGetValue(skill.Category, out var value))
                 {
                     if (!addNewCategories) break;
                     value = [];

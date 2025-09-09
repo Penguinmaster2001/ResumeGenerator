@@ -17,7 +17,7 @@ public record Volunteer(string Organization,
                         string Location,
                         DateOnly StartDate,
                         DateOnly? EndDate)
-                : BaseModel(ShortDescription,
+                : BaseData(ShortDescription,
                     Points,
                     Skills,
                     Location,

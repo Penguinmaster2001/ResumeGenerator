@@ -1,6 +1,5 @@
 
 using ProjectLogging.Models.Resume;
-using ProjectLogging.Views.Resume;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -24,11 +23,11 @@ public class ResumeSegmentViewStrategy : PdfViewStrategy<ResumeSegmentModel>
                     .Bold()
                     .FontColor(Colors.Green.Darken3);
 
-                foreach (IResumeView entry in model.Entries)
+                foreach (ResumeEntryModel entry in model.Entries)
                 {
                     column.Item()
                         .PaddingVertical(5.0f)
-                        .Element(entry.Compose);
+                        .Element(factory.BuildView(entry));
                 }
             });
 }

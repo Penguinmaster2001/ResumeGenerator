@@ -1,5 +1,6 @@
 
 using ProjectLogging.Data;
+using ProjectLogging.Models.Resume;
 using ProjectLogging.Skills;
 
 
@@ -10,16 +11,16 @@ namespace ProjectLogging.ResumeGeneration;
 
 public static class ResumeEntryFactory
 {
-    public static ResumeEntry CreateEntry(object model) => model switch
+    public static ResumeEntryModel CreateEntry(object model) => model switch
     {
-        BaseModel baseModel => CreateEntry(baseModel),
+        BaseData baseModel => CreateEntry(baseModel),
         Category category   => CreateEntry(category),
         _ => throw new NotImplementedException($"ResumeEntry factory method not implemented for {model.GetType()}"),
     };
 
 
 
-    public static ResumeEntry CreateEntry(BaseModel entryRecord)
+    public static ResumeEntryModel CreateEntry(BaseData entryRecord)
     {
         ResumeEntryBuilder entryBuilder = new();
 
@@ -53,16 +54,15 @@ public static class ResumeEntryFactory
                 break;
         }
 
-        return entryBuilder.GetResumeEntry();
+        return entryBuilder.Build();
     }
+    
+
+
+    public static ResumeEntryModel CreateEntry(string title, IEnumerable<string> items)
+        => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items.Order())).Build();
 
 
 
-    public static ResumeEntry CreateEntry(string title, IEnumerable<string> items)
-        => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items.Order()))
-                                        .GetResumeEntry();
-
-
-
-    public static ResumeEntry CreateEntry(Category category) => CreateEntry(category.Name, category.Items);
+    public static ResumeEntryModel CreateEntry(Category category) => CreateEntry(category.Name, category.Items);
 }

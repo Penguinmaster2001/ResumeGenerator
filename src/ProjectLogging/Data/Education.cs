@@ -18,7 +18,7 @@ public record Education(string School,
                         string Location,
                         DateOnly StartDate,
                         DateOnly? EndDate)
-                : BaseModel(ShortDescription,
+                : BaseData(ShortDescription,
                     Points,
                     Skills,
                     Location,

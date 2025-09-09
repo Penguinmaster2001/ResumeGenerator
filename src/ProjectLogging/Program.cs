@@ -4,9 +4,6 @@ using ProjectLogging.ResumeGeneration;
 using ProjectLogging.Skills;
 using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
-using ProjectLogging.Views.Resume;
-using System.Linq;
-using ProjectLogging.Models.Website;
 using ProjectLogging.Data;
 
 
@@ -54,7 +51,7 @@ public static class Program
                             ("tech skills", skills.Result),
                             ("volunteer / extracurricular", volunteers.Result),
                             ("hobbies", hobbies.Result),
-                            ("education", education.Result.Select(e => e as IModel).Concat(courses.Result)),
+                            ("education", education.Result.Select(e => e as object).Concat(courses.Result)),
                             ("work experience", jobs.Result),
                             ("projects", projects.Result))
             .GeneratePdf(args[9]);

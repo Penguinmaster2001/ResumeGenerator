@@ -10,10 +10,10 @@ namespace ProjectLogging.Projects;
 
 public static class RecordLoader
 {
-    public async static Task<List<T>> LoadRecordsAsync<T>(string filePath) where T : BaseModel
+    public async static Task<List<T>> LoadRecordsAsync<T>(string filePath) where T : BaseData
         => await LoadRecordsAsync<T>(File.OpenRead(filePath));
 
-    public async static Task<List<T>> LoadRecordsAsync<T>(Stream stream) where T : BaseModel
+    public async static Task<List<T>> LoadRecordsAsync<T>(Stream stream) where T : BaseData
         => await JsonSerializer.DeserializeAsync<List<T>>(stream) ?? new();
 
 

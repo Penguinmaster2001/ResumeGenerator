@@ -1,11 +1,15 @@
 
+using ProjectLogging.Models.Resume;
+
+
+
 namespace ProjectLogging.ResumeGeneration;
 
 
 
 public class ResumeEntryBuilder
 {
-    private ResumeEntry _resumeEntry;
+    private ResumeEntryModel _resumeEntry;
 
 
 
@@ -104,5 +108,5 @@ public class ResumeEntryBuilder
 
 
 
-    public ResumeEntry GetResumeEntry() => _resumeEntry;
+    public ResumeEntryModel Build() => _resumeEntry;
 }

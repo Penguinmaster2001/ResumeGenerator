@@ -23,20 +23,39 @@ public static class ResumeGenerator
 
 
     public static ResumeDocument GenerateResume(PersonalInfo personalInfo,
-        (string Name, SkillCollection Skills) skillsSegment,
-        params IEnumerable<(string Name, IEnumerable<IModel> Model)> segments)
+        (string Name, SkillCollection Skills) skillInfo,
+        params IEnumerable<(string Name, IEnumerable<object> Data)> segmentInfo)
     {
-        foreach (var skillData in segments.Select(s => s.Model).OfType<IEnumerable<ISkillData>>())
+        foreach (var skillData in segmentInfo.Select(s => s.Data).OfType<IEnumerable<ISkillData>>())
         {
-            skillsSegment.Skills.AddSkills([.. skillData]);
+            skillInfo.Skills.AddSkills([.. skillData]);
         }
 
-        ResumeModel model = new ResumeModelCreator(personalInfo, segments.Prepend(skillsSegment)).CreateModel();
+        ResumeHeaderModel resumeHeader = new(personalInfo);
+
+        var resumeSegments = new List<ResumeSegmentModel>();
+
+        var skillSegment = new ResumeSegmentModel(skillInfo.Name);
+        foreach (var category in skillInfo.Skills.CategoryNames)
+        {
+            skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
+        }
+
+        resumeSegments.Add(skillSegment);
+
+        foreach (var segment in segmentInfo)
+        {
+            resumeSegments.Add(new ResumeSegmentModel(segment.Name, segment.Data.Select(ResumeEntryFactory.CreateEntry)));
+        }
+    
+        ResumeBodyModel resumeBody = new(resumeSegments);
+        ResumeModel model = new(resumeHeader, resumeBody);
 
         var viewFactory = new PdfViewFactory();
         viewFactory.AddStrategy(new ResumeHeaderViewStrategy());
         viewFactory.AddStrategy(new ResumeBodyViewStrategy());
         viewFactory.AddStrategy(new ResumeSegmentViewStrategy());
+        viewFactory.AddStrategy(new ResumeEntryViewStrategy());
 
         return new(model, viewFactory);
     }

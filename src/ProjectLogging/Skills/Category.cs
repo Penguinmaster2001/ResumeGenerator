@@ -1,11 +1,9 @@
 
-using ProjectLogging.Data;
-
 namespace ProjectLogging.Skills;
 
 
 
-public class Category : IModel
+public class Category
 {
     public string Name;
 
@@ -17,6 +15,6 @@ public class Category : IModel
     {
         Name = name;
 
-        Items = items.ToList();
+        Items = [.. items];
     }
 }

@@ -10,7 +10,7 @@ namespace ProjectLogging.Data;
 
 [JsonSerializable(typeof(Project))]
 public record Project(string Title, string ShortDescription, List<string> Points, List<Skill> Skills,
-    string Location, DateOnly StartDate, DateOnly? EndDate) : BaseModel(ShortDescription,
+    string Location, DateOnly StartDate, DateOnly? EndDate) : BaseData(ShortDescription,
                         Points,
                         Skills,
                         Location,
