@@ -1,5 +1,6 @@
 
 using ProjectLogging.Models.Resume;
+using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -12,12 +13,12 @@ namespace ProjectLogging.ResumeGeneration;
 
 public class ResumeDocument : IDocument
 {
-    private readonly IPdfViewFactory _viewFactory;
+    private readonly IViewFactory<Action<IContainer>> _viewFactory;
     public ResumeModel ResumeModel { get; set; }
 
 
 
-    public ResumeDocument(ResumeModel resumeModel, IPdfViewFactory viewFactory)
+    public ResumeDocument(ResumeModel resumeModel, IViewFactory<Action<IContainer>> viewFactory)
     {
         _viewFactory = viewFactory;
         ResumeModel = resumeModel;

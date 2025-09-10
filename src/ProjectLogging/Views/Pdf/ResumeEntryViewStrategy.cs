@@ -1,6 +1,6 @@
 
 using ProjectLogging.Models.Resume;
-using ProjectLogging.ResumeGeneration;
+using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
 
@@ -10,10 +10,10 @@ namespace ProjectLogging.Views.Pdf;
 
 
 
-public class ResumeEntryViewStrategy : PdfViewStrategy<ResumeEntryModel>
+public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEntryModel>
 {
 
-    public override Action<IContainer> BuildView(ResumeEntryModel model, IPdfViewFactory factory)
+    public override Action<IContainer> BuildView(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
         => (container) => container.Column(column =>
             {
                 column.Item().Element(Title(model));

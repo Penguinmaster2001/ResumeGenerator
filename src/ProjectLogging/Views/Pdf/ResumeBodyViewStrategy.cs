@@ -1,6 +1,6 @@
 
 using ProjectLogging.Models.Resume;
-using ProjectLogging.ResumeGeneration;
+using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -11,9 +11,9 @@ namespace ProjectLogging.Views.Pdf;
 
 
 
-public class ResumeBodyViewStrategy : PdfViewStrategy<ResumeBodyModel>
+public class ResumeBodyViewStrategy : ViewStrategy<Action<IContainer>, ResumeBodyModel>
 {
-    public override Action<IContainer> BuildView(ResumeBodyModel model, IPdfViewFactory factory)
+    public override Action<IContainer> BuildView(ResumeBodyModel model, IViewFactory<Action<IContainer>> factory)
         => (container) => container.Row(row =>
             {
                 float margin = 2.0f * 0.25f * 72.0f;

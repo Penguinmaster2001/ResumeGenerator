@@ -7,6 +7,7 @@ using QuestPDF.Fluent;
 using ProjectLogging.Data;
 using ProjectLogging.Views.Pdf;
 using QuestPDF.Infrastructure;
+using ProjectLogging.Views.ViewCreation;
 
 
 
@@ -56,7 +57,7 @@ public static class Program
                             ("work experience", jobs.Result),
                             ("projects", projects.Result));
 
-        var viewFactory = new PdfViewFactory();
+        var viewFactory = new ViewFactory<Action<IContainer>>();
         viewFactory.AddStrategy(new ResumeHeaderViewStrategy());
         viewFactory.AddStrategy(new ResumeBodyViewStrategy());
         viewFactory.AddStrategy(new ResumeSegmentViewStrategy());
