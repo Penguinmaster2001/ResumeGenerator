@@ -5,6 +5,8 @@ using ProjectLogging.Skills;
 using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
 using ProjectLogging.Data;
+using ProjectLogging.Views.Pdf;
+using QuestPDF.Infrastructure;
 
 
 
@@ -32,7 +34,6 @@ public static class Program
             return;
         }
 
-
         var personalInfo = RecordLoader.LoadPersonalInfoAsync(args[1]);
 
         var jobs = RecordLoader.LoadRecordsAsync<Job>(args[2]);
@@ -47,14 +48,25 @@ public static class Program
 
         await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
-        ResumeGenerator.GenerateResume(personalInfo.Result,
+        var resumeModel = ResumeModelFactory.GenerateResume(personalInfo.Result,
                             ("tech skills", skills.Result),
                             ("volunteer / extracurricular", volunteers.Result),
                             ("hobbies", hobbies.Result),
                             ("education", education.Result.Select(e => e as object).Concat(courses.Result)),
                             ("work experience", jobs.Result),
-                            ("projects", projects.Result))
-            .GeneratePdf(args[9]);
+                            ("projects", projects.Result));
+
+        var viewFactory = new PdfViewFactory();
+        viewFactory.AddStrategy(new ResumeHeaderViewStrategy());
+        viewFactory.AddStrategy(new ResumeBodyViewStrategy());
+        viewFactory.AddStrategy(new ResumeSegmentViewStrategy());
+        viewFactory.AddStrategy(new ResumeEntryViewStrategy());
+
+        QuestPDF.Settings.License = LicenseType.Community;
+        QuestPDF.Settings.UseEnvironmentFonts = false;
+        QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
+
+        new ResumeDocument(resumeModel, viewFactory).GeneratePdf(args[9]);
     }
 
 

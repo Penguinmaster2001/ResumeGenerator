@@ -2,8 +2,6 @@
 using ProjectLogging.Data;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Skills;
-using ProjectLogging.Views.Pdf;
-using QuestPDF.Infrastructure;
 
 
 
@@ -11,18 +9,9 @@ namespace ProjectLogging.ResumeGeneration;
 
 
 
-public static class ResumeGenerator
+public static class ResumeModelFactory
 {
-    static ResumeGenerator()
-    {
-        QuestPDF.Settings.License = LicenseType.Community;
-        QuestPDF.Settings.UseEnvironmentFonts = false;
-        QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
-    }
-
-
-
-    public static ResumeDocument GenerateResume(PersonalInfo personalInfo,
+    public static ResumeModel GenerateResume(PersonalInfo personalInfo,
         (string Name, SkillCollection Skills) skillInfo,
         params IEnumerable<(string Name, IEnumerable<object> Data)> segmentInfo)
     {
@@ -49,14 +38,7 @@ public static class ResumeGenerator
         }
     
         ResumeBodyModel resumeBody = new(resumeSegments);
-        ResumeModel model = new(resumeHeader, resumeBody);
-
-        var viewFactory = new PdfViewFactory();
-        viewFactory.AddStrategy(new ResumeHeaderViewStrategy());
-        viewFactory.AddStrategy(new ResumeBodyViewStrategy());
-        viewFactory.AddStrategy(new ResumeSegmentViewStrategy());
-        viewFactory.AddStrategy(new ResumeEntryViewStrategy());
-
-        return new(model, viewFactory);
+        
+        return new(resumeHeader, resumeBody);
     }
 }
