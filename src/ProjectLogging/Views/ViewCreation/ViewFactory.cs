@@ -20,7 +20,7 @@ public class ViewFactory<V> : IViewFactory<V>
     {
         ArgumentNullException.ThrowIfNull(model, nameof(model));
 
-        if (!_strategies.TryGetValue(typeof(T), out var strategy) || strategy is not ViewStrategy<V, T> typedStrategy)
+        if (!_strategies.TryGetValue(model.GetType(), out var strategy) || strategy is not ViewStrategy<V, T> typedStrategy)
         {
             throw new ArgumentException($"Strategy for model of type {model.GetType()} not added.", nameof(model));
         }

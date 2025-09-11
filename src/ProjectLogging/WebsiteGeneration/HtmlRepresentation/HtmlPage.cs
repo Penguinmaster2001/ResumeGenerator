@@ -8,10 +8,10 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 
 
 
-public class HtmlPage(HeadElement head, NavHeaderElement headerRoot, IHtmlItem bodyRoot, IHtmlItem footerRoot) : IHtmlItem
+public class HtmlPage(HeadElement head, IHtmlItem headerRoot, IHtmlItem bodyRoot, IHtmlItem footerRoot) : IHtmlItem
 {
     public HeadElement Head { get; set; } = head;
-    public NavHeaderElement HeaderRoot { get; set; } = headerRoot;
+    public IHtmlItem HeaderRoot { get; set; } = headerRoot;
     public IHtmlItem BodyRoot { get; set; } = bodyRoot;
     public IHtmlItem FooterRoot { get; set; } = footerRoot;
 

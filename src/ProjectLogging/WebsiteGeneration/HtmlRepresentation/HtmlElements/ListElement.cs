@@ -7,29 +7,29 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public class ListElement(bool ordered = false, params List<IHtmlItem> listItems) : IHtmlElement
+public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> listItems) : IHtmlElement
 {
     public bool Ordered { get; set; } = ordered;
-    public List<IHtmlItem> ListItems { get; set; } = listItems;
+    public List<IHtmlItem> ListItems { get; set; } = [.. listItems];
     public List<HtmlTag.Attribute> Attributes { get; } = [];
 
 
 
+    IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
     public ListElement AddAttribute(string name, string value)
     {
         Attributes.Add(new HtmlTag.Attribute(name, value));
         return this;
     }
-    IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
 
 
 
+    IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
     public ListElement AddAttribute(HtmlTag.Attribute attribute)
     {
         Attributes.Add(attribute);
         return this;
     }
-    IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
 
 
 

@@ -13,6 +13,7 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
     private string _title = title;
     private string _style = style;
     private string _favicon = favicon;
+    private IHtmlItem? _header;
     private IHtmlItem? _body;
     private IHtmlItem? _footer;
 
@@ -41,11 +42,21 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
     }
 
 
+
+    public HtmlPageBuilder AddHeader(IHtmlItem header)
+    {
+        _header = header;
+        return this;
+    }
+
+
+
     public HtmlPageBuilder AddBody(IHtmlItem body)
     {
         _body = body;
         return this;
     }
+
 
 
     public HtmlPageBuilder AddFooter(IHtmlItem footer)
@@ -59,10 +70,9 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
     public HtmlPage Build()
     {
         var head = new HeadElement(_title, _style, _favicon);
-        var header = new NavHeaderElement();
 
         return new HtmlPage(head,
-                            header,
+                            _header ?? new RawHtml(),
                             _body ?? new RawHtml(),
                             _footer ?? new RawHtml());
     }
