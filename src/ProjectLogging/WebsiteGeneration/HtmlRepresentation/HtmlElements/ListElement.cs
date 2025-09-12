@@ -11,21 +11,21 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
 {
     public bool Ordered { get; set; } = ordered;
     public List<IHtmlItem> ListItems { get; set; } = [.. listItems];
-    public List<HtmlTag.Attribute> Attributes { get; } = [];
+    public List<ITagAttribute> Attributes { get; } = [];
 
 
 
     IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
     public ListElement AddAttribute(string name, string value)
     {
-        Attributes.Add(new HtmlTag.Attribute(name, value));
+        Attributes.Add(new TagAttribute(name, value));
         return this;
     }
 
 
 
-    IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
-    public ListElement AddAttribute(HtmlTag.Attribute attribute)
+    IHtmlElement IHtmlElement.AddAttribute(ITagAttribute attribute) => AddAttribute(attribute);
+    public ListElement AddAttribute(ITagAttribute attribute)
     {
         Attributes.Add(attribute);
         return this;

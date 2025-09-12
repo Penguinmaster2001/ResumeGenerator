@@ -1,4 +1,3 @@
-
 namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 

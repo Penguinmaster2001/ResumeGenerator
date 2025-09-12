@@ -7,17 +7,17 @@ public abstract class HtmlElementWithAttributeBase<T>(HtmlTag tag) : IHtmlElemen
     where T : HtmlElementWithAttributeBase<T>
 {
     protected HtmlTag Tag { get; set; } = tag;
-    public List<HtmlTag.Attribute> Attributes { get => Tag.Attributes; }
+    public List<ITagAttribute> Attributes { get => Tag.Attributes; }
 
 
 
     IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
-    public T AddAttribute(string name, string value) => AddAttribute(new HtmlTag.Attribute(name, value));
+    public T AddAttribute(string name, string value) => AddAttribute(new TagAttribute(name, value));
 
 
 
-    IHtmlElement IHtmlElement.AddAttribute(HtmlTag.Attribute attribute) => AddAttribute(attribute);
-    public T AddAttribute(HtmlTag.Attribute attribute)
+    IHtmlElement IHtmlElement.AddAttribute(ITagAttribute attribute) => AddAttribute(attribute);
+    public T AddAttribute(ITagAttribute attribute)
     {
         Tag.Attributes.Add(attribute);
         return (T)this;

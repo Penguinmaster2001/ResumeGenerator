@@ -1,5 +1,5 @@
 
-namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation;
+namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 

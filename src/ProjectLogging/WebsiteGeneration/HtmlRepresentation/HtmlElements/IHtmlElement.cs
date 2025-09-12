@@ -1,11 +1,10 @@
-
 namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
 public interface IHtmlElement : IHtmlItem
 {
-    List<HtmlTag.Attribute> Attributes { get; }
+    List<ITagAttribute> Attributes { get; }
     IHtmlElement AddAttribute(string name, string value);
-    IHtmlElement AddAttribute(HtmlTag.Attribute attribute);
+    IHtmlElement AddAttribute(ITagAttribute attribute);
 }

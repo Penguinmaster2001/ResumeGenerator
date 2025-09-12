@@ -2,6 +2,7 @@
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.ViewCreation;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation;
+using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 

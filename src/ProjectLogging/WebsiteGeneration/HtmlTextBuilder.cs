@@ -46,7 +46,7 @@ public class HtmlText : IHtmlElement
     private readonly Stack<HtmlTag> _workingTags = [];
     private bool _inNestedTag = false;
 
-    public List<HtmlTag.Attribute> Attributes { get => throw new NotImplementedException(); }
+    public List<ITagAttribute> Attributes { get => throw new NotImplementedException(); }
 
 
 
@@ -235,7 +235,7 @@ public class HtmlText : IHtmlElement
         throw new NotImplementedException();
     }
 
-    public IHtmlElement AddAttribute(HtmlTag.Attribute attribute)
+    public IHtmlElement AddAttribute(ITagAttribute attribute)
     {
         throw new NotImplementedException();
     }
