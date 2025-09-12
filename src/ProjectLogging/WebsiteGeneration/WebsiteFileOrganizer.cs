@@ -1,5 +1,7 @@
 
-using System.ComponentModel;
+using System.Text;
+
+
 
 namespace ProjectLogging.WebsiteGeneration;
 
@@ -7,39 +9,62 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public class WebsiteFileOrganizer : IFileOrganizer
 {
-    private readonly Dictionary<string, string> _filePaths = [];
+    private readonly Dictionary<string, Dictionary<string, PathInfo>> _filePaths = [];
 
 
 
-    public enum ResourceTypes
+    public string RootDirectory { get; set; } = Environment.CurrentDirectory;
+
+
+
+    public IEnumerable<PathInfo> QueryName(string resourceName)
     {
-        Html,
-        Css,
-        JS,
+        if (!_filePaths.TryGetValue(resourceName, out var namePaths)) return [];
+
+        return namePaths.Values;
     }
 
 
 
-    public static string ResourceType(ResourceTypes resourceType) => resourceType.ToString().ToLower();
+    public string GetFullPath(string resourceName, string resourceType)
+        => Path.Join(RootDirectory, GetRelativePath(resourceName, resourceType));
 
 
 
-    public string GetPathForResource(string resourceName, string resourceType, string rootDir)
+    public string GetRelativePath(string resourceName, string resourceType)
+        => Path.ChangeExtension(GetPath(resourceName, resourceType), resourceType);
+
+
+
+    public string GetPath(string resourceName, string resourceType)
+        => GetPathInfo(resourceName, resourceType).Path;
+
+
+
+    public PathInfo GetPathInfo(string resourceName, string resourceType)
     {
-        var name = Sanitize(resourceName);
-        if (_filePaths.TryGetValue(name, out var path)) return path;
+        if (!_filePaths.TryGetValue(resourceName, out var namePaths))
+        {
+            namePaths = [];
+            _filePaths[resourceName] = namePaths;
+        }
 
-        var newPath = Path.Combine(rootDir, Path.ChangeExtension(name, resourceType));
+        if (!namePaths.TryGetValue(resourceType, out var pathInfo))
+        {
+            pathInfo = CreatePathInfo(resourceName, resourceType);
+            namePaths[resourceType] = pathInfo;
+        }
 
-        _filePaths.Add(name, newPath);
-
-        return newPath;
+        return pathInfo;
     }
 
 
 
-    private static string Sanitize(string path)
-    {
-        return path.Replace(' ', '_');
-    }
+    private static string CreatePath(string resourceName, string resourceType)
+        => Path.Join(Constants.Resources.Directory(resourceType), resourceName);
+
+
+
+    private static PathInfo CreatePathInfo(string resourceName, string resourceType)
+        => new(CreatePath(resourceName, resourceType), resourceName, resourceType, false);
 }

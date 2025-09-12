@@ -75,6 +75,6 @@ public static class Program
 
     public static void GenerateWebsite(ResumeModel resumeModel, string outDir)
     {
-        WebsiteGenerator.GenerateWebsite(resumeModel).CreateFiles(outDir);
+        WebsiteGenerator.GenerateWebsite(resumeModel, outDir).CreateFiles();
     }
 }

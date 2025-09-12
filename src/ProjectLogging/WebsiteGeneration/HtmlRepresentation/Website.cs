@@ -14,15 +14,13 @@ public class Website(IFileOrganizer fileOrganizer)
 
 
 
-    public void CreateFiles(string outputDir)
+    public void CreateFiles()
     {
         foreach (var page in Pages)
         {
-            Directory.CreateDirectory(outputDir);
-            File.WriteAllText(_fileOrganizer.GetPathForResource(page.Head.Title,
-                WebsiteFileOrganizer.ResourceType(WebsiteFileOrganizer.ResourceTypes.Html),
-                    outputDir),
-                    page.GenerateHtml());
+            Directory.CreateDirectory(_fileOrganizer.RootDirectory);
+            File.WriteAllText(_fileOrganizer.GetFullPath(page.Head.Title, Constants.Resources.Html),
+                page.GenerateHtml());
         }
     }
 }

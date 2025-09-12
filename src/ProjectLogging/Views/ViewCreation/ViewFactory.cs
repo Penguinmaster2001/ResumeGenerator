@@ -14,7 +14,7 @@ public class ViewFactory<V> : IViewFactory<V>
     {
         ArgumentNullException.ThrowIfNull(helper, nameof(helper));
 
-        _helpers[helper.GetType()] = helper;
+        _helpers[typeof(T)] = helper;
     }
 
 

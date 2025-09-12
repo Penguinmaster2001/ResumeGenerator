@@ -8,6 +8,7 @@ public interface IViewFactory<V>
     void AddHelper<T, U>(U helper) where U : T;
 
 
+
     T GetHelper<T>();
 
 
