@@ -16,16 +16,16 @@ public class WebsiteGenerator
     public static Website GenerateWebsite(ResumeModel resumeModel)
     {
         var viewFactory = new ViewFactory<IHtmlItem>();
-        viewFactory.AddStrategy(new ResumeHtmlStrategy());
-        viewFactory.AddStrategy(new ResumeHeaderHtmlStrategy());
-        viewFactory.AddStrategy(new ResumeBodyHtmlStrategy());
-        viewFactory.AddStrategy(new ResumeSegmentHtmlStrategy());
-        viewFactory.AddStrategy(new ResumeEntryHtmlStrategy());
+        viewFactory.AddStrategy<ResumeHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
 
         var website = new Website(new WebsiteFileOrganizer());
 
         website.Pages.Add(new HtmlPageBuilder("test page", "styles/styles.css")
-            .AddBody(viewFactory.BuildView(resumeModel))
+            .AddBody(resumeModel.CreateView(viewFactory))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
             .Build());
 

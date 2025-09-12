@@ -39,9 +39,9 @@ public class ResumeDocument : IDocument
 
 
 
-    void ComposeHeader(IContainer container) => container.Element(_viewFactory.BuildView(ResumeModel.ResumeHeader));
+    void ComposeHeader(IContainer container) => container.Element(_viewFactory.CreateView(ResumeModel.ResumeHeader));
 
 
 
-    void ComposeBody(IContainer container) => container.Element(_viewFactory.BuildView(ResumeModel.ResumeBody));
+    void ComposeBody(IContainer container) => container.Element(_viewFactory.CreateView(ResumeModel.ResumeBody));
 }

@@ -6,6 +6,28 @@ namespace ProjectLogging.Views.ViewCreation;
 public class ViewFactory<V> : IViewFactory<V>
 {
     private readonly Dictionary<Type, IViewStrategy<V>> _strategies = [];
+    private readonly Dictionary<Type, object> _helpers = [];
+
+
+
+    public void AddHelper<T, U>(U helper) where U : T
+    {
+        ArgumentNullException.ThrowIfNull(helper, nameof(helper));
+
+        _helpers[helper.GetType()] = helper;
+    }
+
+
+
+    public T GetHelper<T>()
+    {
+        if (!_helpers.TryGetValue(typeof(T), out var helper))
+        {
+            throw new ArgumentException($"No helper of type {typeof(T)} found");
+        }
+
+        return (T)helper;
+    }
 
 
 
@@ -16,13 +38,23 @@ public class ViewFactory<V> : IViewFactory<V>
 
 
 
-    public V BuildView<T>(T model)
+    public void AddStrategy<S>() where S : IViewStrategy<V>, new()
+    {
+        var strategy = new S();
+        _strategies.Add(strategy.ModelType, strategy);
+    }
+
+
+
+    public V CreateView<T>(T model)
     {
         ArgumentNullException.ThrowIfNull(model, nameof(model));
 
-        if (!_strategies.TryGetValue(model.GetType(), out var strategy) || strategy is not ViewStrategy<V, T> typedStrategy)
+        if (!_strategies.TryGetValue(model.GetType(), out var strategy)
+            || strategy is not ViewStrategy<V, T> typedStrategy)
         {
-            throw new ArgumentException($"Strategy for model of type {model.GetType()} not added.", nameof(model));
+            throw new ArgumentException($"Valid strategy for model of type {model.GetType()} not added.",
+                nameof(model));
         }
 
         return typedStrategy.BuildView(model, this);

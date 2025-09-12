@@ -18,7 +18,7 @@ public class ResumeSegmentHtmlStrategy : ViewStrategy<IHtmlItem, ResumeSegmentMo
 
         foreach (ResumeEntryModel entry in model.Entries)
         {
-            section.Content.Add(factory.BuildView(entry));
+            section.Content.Add(entry.CreateView(factory));
         }
 
         return section;

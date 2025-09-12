@@ -28,7 +28,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
                 {
                     column.Item()
                         .PaddingVertical(5.0f)
-                        .Element(factory.BuildView(entry));
+                        .Element(entry.CreateView(factory));
                 }
             });
 }

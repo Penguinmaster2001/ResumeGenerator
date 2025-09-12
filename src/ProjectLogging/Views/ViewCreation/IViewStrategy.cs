@@ -3,7 +3,7 @@ namespace ProjectLogging.Views.ViewCreation;
 
 
 
-internal interface IViewStrategy<V>
+public interface IViewStrategy<V>
 {
     Type ModelType { get; }
 }

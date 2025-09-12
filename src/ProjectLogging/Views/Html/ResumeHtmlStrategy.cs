@@ -15,8 +15,8 @@ public class ResumeHtmlStrategy : ViewStrategy<IHtmlItem, ResumeModel>
     {
         var section = new HtmlSection(HtmlTag.Section);
 
-        section.Content.Add(factory.BuildView(model.ResumeHeader));
-        section.Content.Add(factory.BuildView(model.ResumeBody));
+        section.Content.Add(model.ResumeHeader.CreateView(factory));
+        section.Content.Add(model.ResumeBody.CreateView(factory));
 
         return section;
     }

@@ -31,11 +31,11 @@ public class ResumeBodyViewStrategy : ViewStrategy<Action<IContainer>, ResumeBod
                         {
                             int start = rowItemNum * segmentPivot;
 
-                            column.Item().Element(factory.BuildView(model.ResumeSegments[start]));
+                            column.Item().Element(model.ResumeSegments[start].CreateView(factory));
                             model.ResumeSegments[(start + 1)..end].ForEach(segment =>
                                 {
                                     column.Item().LineHorizontal(0.5f);
-                                    column.Item().Element(factory.BuildView(segment));
+                                    column.Item().Element(segment.CreateView(factory));
                                 });
                         });
 

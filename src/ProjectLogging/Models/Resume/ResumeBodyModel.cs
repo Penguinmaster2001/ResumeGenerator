@@ -1,9 +1,13 @@
 
+using ProjectLogging.Views.ViewCreation;
+
+
+
 namespace ProjectLogging.Models.Resume;
 
 
 
-public class ResumeBodyModel
+public class ResumeBodyModel : IModel
 {
     public List<ResumeSegmentModel> ResumeSegments;
 
@@ -13,4 +17,8 @@ public class ResumeBodyModel
     {
         ResumeSegments = resumeSegments;
     }
+
+
+
+    public V CreateView<V>(IViewFactory<V> viewFactory) => viewFactory.CreateView(this);
 }

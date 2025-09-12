@@ -1,5 +1,6 @@
 
 using ProjectLogging.Data;
+using ProjectLogging.Views.ViewCreation;
 
 
 
@@ -7,7 +8,7 @@ namespace ProjectLogging.Models.Resume;
 
 
 
-public class ResumeHeaderModel
+public class ResumeHeaderModel : IModel
 {
     public string NameText;
     public string PhoneNumberText;
@@ -38,4 +39,8 @@ public class ResumeHeaderModel
 
         URLs = personalInfo.URLs;
     }
+
+
+
+    public V CreateView<V>(IViewFactory<V> viewFactory) => viewFactory.CreateView(this);
 }
