@@ -42,13 +42,18 @@ public static class Program
 
         await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
-        var resumeModel = ResumeModelFactory.GenerateResume(personalInfo.Result,
-                            ("tech skills", skills.Result),
-                            ("volunteer / extracurricular", volunteers.Result),
-                            ("hobbies", hobbies.Result),
-                            ("education", education.Result.Select(e => e as object).Concat(courses.Result)),
-                            ("work experience", jobs.Result),
-                            ("projects", projects.Result));
+        var dataCollection = new DataCollection();
+
+        dataCollection.AddData("personal info", personalInfo.Result);
+        dataCollection.AddData("tech skills", skills.Result);
+        dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
+        dataCollection.AddData("hobbies", hobbies.Result);
+        dataCollection.AddData("education", education.Result);
+        dataCollection.AddData("courses", courses.Result);
+        dataCollection.AddData("work experience", jobs.Result);
+        dataCollection.AddData("projects", projects.Result);
+
+        var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
         GeneratePdf(resumeModel, args[9]);
         GenerateWebsite(resumeModel, args[10]);
@@ -59,10 +64,10 @@ public static class Program
     private static void GeneratePdf(ResumeModel resumeModel, string outDir)
     {
         var viewFactory = new ViewFactory<Action<IContainer>>();
-        viewFactory.AddStrategy(new ResumeHeaderViewStrategy());
-        viewFactory.AddStrategy(new ResumeBodyViewStrategy());
-        viewFactory.AddStrategy(new ResumeSegmentViewStrategy());
-        viewFactory.AddStrategy(new ResumeEntryViewStrategy());
+        viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
+        viewFactory.AddStrategy<ResumeBodyViewStrategy>();
+        viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
+        viewFactory.AddStrategy<ResumeEntryViewStrategy>();
 
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;

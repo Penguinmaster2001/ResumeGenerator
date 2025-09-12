@@ -11,34 +11,55 @@ namespace ProjectLogging.ResumeGeneration;
 
 public static class ResumeModelFactory
 {
-    public static ResumeModel GenerateResume(PersonalInfo personalInfo,
-        (string Name, SkillCollection Skills) skillInfo,
-        params IEnumerable<(string Name, IEnumerable<object> Data)> segmentInfo)
+    public static ResumeModel GenerateResume(IDataCollection data)
     {
-        foreach (var skillData in segmentInfo.Select(s => s.Data).OfType<IEnumerable<ISkillData>>())
+        var skills = data.GetData<SkillCollection>("tech skills");
+
+        foreach (var skillData in data.GetDataOfType<IEnumerable<ISkillData>>().Select(s => s.data))
         {
-            skillInfo.Skills.AddSkills([.. skillData]);
+            skills.AddSkills([.. skillData]);
         }
 
-        ResumeHeaderModel resumeHeader = new(personalInfo);
+        ResumeHeaderModel resumeHeader = new(data.GetData<PersonalInfo>("personal info"));
 
         var resumeSegments = new List<ResumeSegmentModel>();
 
-        var skillSegment = new ResumeSegmentModel(skillInfo.Name);
-        foreach (var category in skillInfo.Skills.CategoryNames)
+        var skillSegment = new ResumeSegmentModel("tech skills");
+        foreach (var category in skills.CategoryNames)
         {
             skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
         }
 
         resumeSegments.Add(skillSegment);
 
-        foreach (var segment in segmentInfo)
+        resumeSegments.Add(CreateModel<List<Volunteer>>("volunteer / extracurricular", data));
+
+        var hobbySegment = new ResumeSegmentModel("hobbies");
+        foreach (var category in data.GetData<SkillCollection>("hobbies").CategoryNames)
         {
-            resumeSegments.Add(new ResumeSegmentModel(segment.Name, segment.Data.Select(ResumeEntryFactory.CreateEntry)));
+            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
         }
-    
+        resumeSegments.Add(hobbySegment);
+
+        var educationSegment = CreateModel<List<Education>>("education", data);
+        foreach (var category in data.GetData<SkillCollection>("courses").CategoryNames)
+        {
+            educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
+        }
+        resumeSegments.Add(educationSegment);
+
+        resumeSegments.Add(CreateModel<List<Job>>("work experience", data));
+        resumeSegments.Add(CreateModel<List<Project>>("projects", data));
+
         ResumeBodyModel resumeBody = new(resumeSegments);
-        
+
         return new(resumeHeader, resumeBody);
+    }
+
+
+
+    private static ResumeSegmentModel CreateModel<T>(string label, IDataCollection data) where T : IEnumerable<object>
+    {
+        return new ResumeSegmentModel(label, data.GetData<T>(label).Select(ResumeEntryFactory.CreateEntry));
     }
 }
