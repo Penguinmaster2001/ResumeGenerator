@@ -64,10 +64,10 @@ public static class Program
     private static void GeneratePdf(ResumeModel resumeModel, string outDir)
     {
         var viewFactory = new ViewFactory<Action<IContainer>>();
-        viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
-        viewFactory.AddStrategy<ResumeBodyViewStrategy>();
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
+        viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
         viewFactory.AddStrategy<ResumeEntryViewStrategy>();
+        viewFactory.AddStrategy<ResumeBodyViewStrategy>();
 
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;

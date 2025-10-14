@@ -19,7 +19,7 @@ public class WebsiteGenerator
     {
         var fileOrganizer = new WebsiteFileOrganizer
         {
-            RootDirectory = outDir
+            RootDirectory = outDir,
         };
 
         var viewFactory = new ViewFactory<IHtmlItem>();
@@ -31,6 +31,15 @@ public class WebsiteGenerator
         viewFactory.AddStrategy<NavLinksStrategy>();
 
         viewFactory.AddHelper<IPageLinker, PageLinker>(new PageLinker(fileOrganizer));
+        viewFactory.AddHelper<IStyleManager, StyleManager>();
+
+        viewFactory.AddPostAction((htmlItem, factory) =>
+            {
+                if (htmlItem is IHtmlElement htmlElement)
+                {
+                    factory.GetHelper<IStyleManager>().ApplyStyle(htmlElement);
+                }
+            });
 
         var website = new Website(fileOrganizer);
 

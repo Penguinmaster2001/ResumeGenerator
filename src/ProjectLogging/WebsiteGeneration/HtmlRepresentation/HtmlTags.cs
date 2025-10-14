@@ -35,6 +35,8 @@ public class HtmlTag
         Html,
     }
 
+
+
     public static HtmlTag Article => new(HtmlTags.Article);
     public static HtmlTag Aside => new(HtmlTags.Aside);
     public static HtmlTag Div => new(HtmlTags.Div);

@@ -1,6 +1,8 @@
+
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.ViewCreation;
 using ProjectLogging.WebsiteGeneration;
+using ProjectLogging.WebsiteGeneration.GenerationContext;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
@@ -14,7 +16,9 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 {
     public override IHtmlItem BuildView(ResumeEntryModel model, IViewFactory<IHtmlItem> factory)
     {
-        var section = new HtmlSection(HtmlTag.Section, Title(model)).AddAttribute("class", "grid-item");
+        var styleManager = factory.GetHelper<IStyleManager>();
+
+        var section = new HtmlSection(HtmlTag.Section, Title(model));
 
         if (model.LocationText is not null || model.StartDate.HasValue)
         {
@@ -28,7 +32,10 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 
         if (model.BulletPointsText.Count > 0)
         {
-            section.Content.Add(BulletPoints(model));
+            var bulletPoints = BulletPoints(model);
+            styleManager.ApplyStyle(bulletPoints);
+
+            section.Content.Add(bulletPoints);
         }
 
         return section;
@@ -50,6 +57,6 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 
 
 
-    private IHtmlItem BulletPoints(ResumeEntryModel model)
+    private IHtmlElement BulletPoints(ResumeEntryModel model)
         => new ListElement(false, model.BulletPointsText.Select(HtmlText.BeginParagraph));
 }

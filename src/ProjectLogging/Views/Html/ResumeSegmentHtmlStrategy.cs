@@ -15,7 +15,8 @@ public class ResumeSegmentHtmlStrategy : ViewStrategy<IHtmlItem, ResumeSegmentMo
 {
     public override IHtmlItem BuildView(ResumeSegmentModel model, IViewFactory<IHtmlItem> factory)
     {
-        var section = new HtmlSection(HtmlTag.Section, HtmlText.BeginHeader(2).Bold(model.TitleText.ToUpper()));
+        var section = new HtmlSection(HtmlTag.Section, HtmlText.BeginHeader(2).Bold(model.TitleText.ToUpper()))
+            .AddAttribute("class", "grid-item");
 
         foreach (ResumeEntryModel entry in model.Entries)
         {

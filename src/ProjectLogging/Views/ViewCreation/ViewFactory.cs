@@ -7,6 +7,14 @@ public class ViewFactory<V> : IViewFactory<V>
 {
     private readonly Dictionary<Type, IViewStrategy<V>> _strategies = [];
     private readonly Dictionary<Type, object> _helpers = [];
+    private readonly List<Action<V, IViewFactory<V>>> _postActions = [];
+
+
+
+    public void AddHelper<T, U>() where U : T, new()
+    {
+        _helpers[typeof(T)] = new U();
+    }
 
 
 
@@ -28,6 +36,10 @@ public class ViewFactory<V> : IViewFactory<V>
 
         return (T)helper;
     }
+
+
+
+    public void AddPostAction(Action<V, IViewFactory<V>> action) => _postActions.Add(action);
 
 
 
@@ -56,7 +68,14 @@ public class ViewFactory<V> : IViewFactory<V>
             throw new ArgumentException($"Valid strategy for model of type {model.GetType()} not added.",
                 nameof(model));
         }
+        
+        var view = typedStrategy.BuildView(model, this);
 
-        return typedStrategy.BuildView(model, this);
+        foreach (var action in _postActions)
+        {
+            action.Invoke(view, this);
+        }
+
+        return view;
     }
 }

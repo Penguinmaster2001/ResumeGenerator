@@ -45,6 +45,11 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
     {
         var listTag = new HtmlTag(Ordered ? HtmlTag.HtmlTags.OrderedList : HtmlTag.HtmlTags.UnorderedList);
         var itemTag = new HtmlTag(HtmlTag.HtmlTags.ListItem);
+        
+        foreach (var attribute in Attributes)
+        {
+            listTag.Attributes.Add(attribute);
+        }
 
         var sb = new StringBuilder();
         sb.Append(listTag.Opener);
@@ -60,5 +65,4 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
 
         return sb.ToString();
     }
-
 }

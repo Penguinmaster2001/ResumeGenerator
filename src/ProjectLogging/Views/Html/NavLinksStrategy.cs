@@ -23,7 +23,9 @@ public class NavLinksStrategy : ViewStrategy<IHtmlItem, NavLinksModel>
 
         for (int page = 0; page < pagePaths.Count; page++)
         {
-            section.Content.Add(new AnchorElement(pagePaths[page], HtmlText.BeginParagraph(model.PagesToLink[page])));
+            var anchor = new AnchorElement(pagePaths[page], HtmlText.BeginParagraph(model.PagesToLink[page]));
+
+            section.Content.Add(anchor);
         }
 
         return section;
