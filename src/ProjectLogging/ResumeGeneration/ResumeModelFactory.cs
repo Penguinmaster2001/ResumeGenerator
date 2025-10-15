@@ -22,34 +22,37 @@ public static class ResumeModelFactory
 
         ResumeHeaderModel resumeHeader = new(data.GetData<PersonalInfo>("personal info"));
 
-        var resumeSegments = new List<ResumeSegmentModel>();
-
         var skillSegment = new ResumeSegmentModel("tech skills");
         foreach (var category in skills.CategoryNames)
         {
             skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
         }
 
-        resumeSegments.Add(skillSegment);
-
-        resumeSegments.Add(CreateModel<List<Volunteer>>("volunteer / extracurricular", data));
-
         var hobbySegment = new ResumeSegmentModel("hobbies");
         foreach (var category in data.GetData<SkillCollection>("hobbies").CategoryNames)
         {
             hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
         }
-        resumeSegments.Add(hobbySegment);
 
         var educationSegment = CreateModel<List<Education>>("education", data);
         foreach (var category in data.GetData<SkillCollection>("courses").CategoryNames)
         {
             educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
         }
-        resumeSegments.Add(educationSegment);
 
-        resumeSegments.Add(CreateModel<List<Job>>("work experience", data));
-        resumeSegments.Add(CreateModel<List<Project>>("projects", data));
+        var volunteerSegment = CreateModel<List<Volunteer>>("volunteer / extracurricular", data);
+        var careerSegment = CreateModel<List<Job>>("work experience", data);
+        var projectSegment = CreateModel<List<Project>>("projects", data);
+
+        var resumeSegments = new List<ResumeSegmentModel>
+            {
+                skillSegment,
+                educationSegment,
+                careerSegment,
+                projectSegment,
+                volunteerSegment,
+                hobbySegment,
+            };
 
         ResumeBodyModel resumeBody = new(resumeSegments);
 

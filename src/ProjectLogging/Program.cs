@@ -46,12 +46,12 @@ public static class Program
 
         dataCollection.AddData("personal info", personalInfo.Result);
         dataCollection.AddData("tech skills", skills.Result);
-        dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
-        dataCollection.AddData("hobbies", hobbies.Result);
         dataCollection.AddData("education", education.Result);
         dataCollection.AddData("courses", courses.Result);
         dataCollection.AddData("work experience", jobs.Result);
         dataCollection.AddData("projects", projects.Result);
+        dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
+        dataCollection.AddData("hobbies", hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
@@ -67,7 +67,7 @@ public static class Program
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
         viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
         viewFactory.AddStrategy<ResumeEntryViewStrategy>();
-        viewFactory.AddStrategy<ResumeBodyViewStrategy>();
+        viewFactory.AddStrategy<ResumeBodyOneColumnViewStrategy>();
 
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;
