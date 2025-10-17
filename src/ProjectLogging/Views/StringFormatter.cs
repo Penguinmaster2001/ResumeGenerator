@@ -1,5 +1,6 @@
 
 using System.Text;
+using ProjectLogging.Models.General;
 
 
 
@@ -51,6 +52,45 @@ public static class StringFormatter
         {
             sb.Append(startDate.Value.ToString("yyyy"))
               .Append(" - Present");
+        }
+
+        return sb.ToString();
+    }
+
+
+
+    public static string FormatLocationText(LocationText location, bool includeCity = true, bool includeRegion = true, bool includeCountry = false)
+    {
+        if (location.IsEmpty) return string.Empty;
+
+        StringBuilder sb = new();
+        bool empty = true;
+
+        if (includeCity && !string.IsNullOrWhiteSpace(location.City))
+        {
+            sb.Append(location.City);
+            empty = false;
+        }
+
+        if (includeRegion && !string.IsNullOrWhiteSpace(location.Region))
+        {
+            if (!empty)
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append(location.Region);
+            empty = false;
+        }
+
+        if (includeCountry && !string.IsNullOrWhiteSpace(location.Country))
+        {
+            if (!empty)
+            {
+                sb.Append(", ");
+            }
+
+            sb.Append(location.Country);
         }
 
         return sb.ToString();

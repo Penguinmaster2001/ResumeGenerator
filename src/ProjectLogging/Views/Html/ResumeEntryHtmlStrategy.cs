@@ -20,7 +20,7 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 
         var section = new HtmlSection(HtmlTag.Section, Title(model));
 
-        if (model.LocationText is not null || model.StartDate.HasValue)
+        if (!model.LocationText.IsEmpty || model.StartDate.HasValue)
         {
             section.Content.Add(LocationAndDate(model));
         }
@@ -48,7 +48,7 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 
 
     private IHtmlItem LocationAndDate(ResumeEntryModel model) => HtmlText.BeginHeader(4)
-        .Bold($"{model.LocationText ?? string.Empty}\t{StringFormatter.FormatDate(model.StartDate, model.EndDate)}");
+        .Bold($"{StringFormatter.FormatLocationText(model.LocationText)}\t{StringFormatter.FormatDate(model.StartDate, model.EndDate)}");
 
 
 

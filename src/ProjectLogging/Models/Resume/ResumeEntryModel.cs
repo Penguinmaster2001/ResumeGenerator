@@ -1,4 +1,5 @@
 
+using ProjectLogging.Models.General;
 using ProjectLogging.Views.ViewCreation;
 
 
@@ -11,7 +12,7 @@ public class ResumeEntryModel : IModel
 {
     public string TitleText;
 
-    public string? LocationText = null;
+    public LocationText LocationText = LocationText.Empty;
 
     public DateOnly? StartDate = null;
     public DateOnly? EndDate = null;

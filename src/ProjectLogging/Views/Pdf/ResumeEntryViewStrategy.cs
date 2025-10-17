@@ -14,37 +14,58 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 {
 
     public override Action<IContainer> BuildView(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
-        => (container) => container.Column(column =>
-            {
-                column.Item().Element(Title(model));
+        => (container) =>
+        {
+            bool description = model.DescriptionText is not null;
+            bool locationAndDate = !model.LocationText.IsEmpty || model.StartDate is not null;
+            bool bulletPoints = model.BulletPointsText.Count > 0;
+            bool oneLine = description && !locationAndDate && !bulletPoints;
 
-                if (model.LocationText is not null || model.StartDate.HasValue)
+            if (oneLine)
+            {
+                container.Row(row =>
+                {
+                    row.AutoItem().Element(Title($"{model.TitleText}:"));
+                    row.ConstantItem(3.0f);
+                    row.RelativeItem().Element(Description(model));
+                });
+
+                return;
+            }
+
+            container.Column(column =>
+            {
+
+                column.Item().Element(Title(model.TitleText));
+
+                if (locationAndDate)
                 {
                     column.Item().Element(LocationAndDate(model));
                 }
 
-                if (model.DescriptionText is not null)
+                if (description)
                 {
                     column.Item().Element(Description(model));
                 }
 
-                if (model.BulletPointsText.Count > 0)
+                if (bulletPoints)
                 {
                     column.Item().Element(BulletPoints(model));
                 }
             });
+        };
 
 
 
-    private Action<IContainer> Title(ResumeEntryModel model)
-        => (container) => container.Text(model.TitleText).Bold();
+    private Action<IContainer> Title(string title)
+        => (container) => container.Text(title).Bold();
 
 
 
     private Action<IContainer> LocationAndDate(ResumeEntryModel model)
         => (container) => container.Row(row =>
             {
-                row.RelativeItem().Text(model.LocationText ?? string.Empty).Bold();
+                row.RelativeItem().Text(StringFormatter.FormatLocationText(model.LocationText)).Bold();
                 row.RelativeItem().AlignRight().Text(StringFormatter.FormatDate(model.StartDate, model.EndDate)).Bold();
             });
 

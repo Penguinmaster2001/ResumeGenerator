@@ -1,5 +1,4 @@
 
-
 namespace ProjectLogging.Data;
 
 

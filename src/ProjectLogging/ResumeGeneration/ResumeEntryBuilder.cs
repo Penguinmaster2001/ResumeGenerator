@@ -30,7 +30,7 @@ public class ResumeEntryBuilder
 
     public ResumeEntryBuilder SetLocation(string location)
     {
-        _resumeEntry.LocationText = location;
+        _resumeEntry.LocationText = new(location);
         return this;
     }
 
@@ -38,7 +38,7 @@ public class ResumeEntryBuilder
 
     public ResumeEntryBuilder ClearLocation()
     {
-        _resumeEntry.LocationText = null;
+        _resumeEntry.LocationText = new();
         return this;
     }
 
