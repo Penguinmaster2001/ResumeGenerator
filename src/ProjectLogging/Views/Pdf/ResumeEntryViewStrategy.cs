@@ -36,12 +36,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
             container.Column(column =>
             {
 
-                column.Item().Element(Title(model.TitleText));
-
-                if (locationAndDate)
-                {
-                    column.Item().Element(LocationAndDate(model));
-                }
+                column.Item().Element(HeaderRow(model));
 
                 if (description)
                 {
@@ -57,22 +52,26 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
 
 
-    private Action<IContainer> Title(string title)
-        => (container) => container.Text(title).Bold();
-
-
-
-    private Action<IContainer> LocationAndDate(ResumeEntryModel model)
+    private Action<IContainer> HeaderRow(ResumeEntryModel model)
         => (container) => container.Row(row =>
             {
-                row.RelativeItem().Text(StringFormatter.FormatLocationText(model.LocationText)).Bold();
+                row.AutoItem().Element(Title(model.TitleText));
+                row.ConstantItem(5.0f);
+                row.ConstantItem(5.0f).AlignMiddle().AlignCenter().Svg("Resources/star.svg");
+                row.ConstantItem(5.0f);
+                row.AutoItem().Text(StringFormatter.FormatLocationText(model.LocationText)).Bold();
                 row.RelativeItem().AlignRight().Text(StringFormatter.FormatDate(model.StartDate, model.EndDate)).Bold();
             });
 
 
 
+    private Action<IContainer> Title(string title)
+        => (container) => container.Text(title).Bold();
+
+
+
     private Action<IContainer> Description(ResumeEntryModel model)
-        => (container) => container.Text(model.DescriptionText);
+        => (container) => container.Text(model.DescriptionText).FontSize(11.0f);
 
 
 
@@ -84,7 +83,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                     column.Item().Row(row =>
                     {
                         row.ConstantItem(5.0f);
-                        row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Image("Resources/bullet.png");
+                        row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
                         row.ConstantItem(5.0f);
                         row.RelativeItem().Text(bulletPoint);
                     });

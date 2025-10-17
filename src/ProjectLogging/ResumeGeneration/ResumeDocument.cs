@@ -29,9 +29,9 @@ public class ResumeDocument : IDocument
     public void Compose(IDocumentContainer container) => container.Page(page =>
         {
             page.Size(PageSizes.Letter);
-            page.Margin(0.25f, Unit.Inch);
+            page.Margin(0.3f, Unit.Inch);
             page.PageColor(Colors.White);
-            page.DefaultTextStyle(textStyle => textStyle.FontSize(9.5f).FontFamily("Roboto Condensed").LineHeight(1.1f));
+            page.DefaultTextStyle(textStyle => textStyle.FontSize(10.5f).FontFamily("Ubuntu").LineHeight(1.15f));
 
             page.Header().Element(ComposeHeader);
             page.Content().Element(ComposeBody);

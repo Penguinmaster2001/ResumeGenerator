@@ -8,9 +8,9 @@ namespace ProjectLogging.Skills;
 
 
 
-public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills) : IEnumerable, IEnumerable<Category>
+public class SkillCollection(Dictionary<string, List<string>> categorySkills) : IEnumerable, IEnumerable<Category>
 {
-    public Dictionary<string, HashSet<string>> CategoryNames { get; set; } = categorySkills;
+    public Dictionary<string, List<string>> CategoryNames { get; set; } = categorySkills;
 
 
 
@@ -24,14 +24,18 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
         {
             foreach (var skill in data.Skills)
             {
-                if (!CategoryNames.TryGetValue(skill.Category, out var value))
+                if (!CategoryNames.TryGetValue(skill.Category, out var categorySkills))
                 {
                     if (!addNewCategories) break;
-                    value = [];
-                    CategoryNames.Add(skill.Category, value);
+                    categorySkills = [];
+                    CategoryNames.Add(skill.Category, categorySkills);
                 }
 
-                value.Add(skill.Name);
+                // Can't use a set, need to preserve order
+                if (!categorySkills.Contains(skill.Name))
+                {
+                    categorySkills.Add(skill.Name);
+                }
             }
         }
     }
@@ -43,7 +47,7 @@ public class SkillCollection(Dictionary<string, HashSet<string>> categorySkills)
 
     public static async Task<SkillCollection> LoadSkillsAsync(Stream stream)
     {
-        var categorySkills = await JsonSerializer.DeserializeAsync<Dictionary<string, HashSet<string>>>(stream);
+        var categorySkills = await JsonSerializer.DeserializeAsync<Dictionary<string, List<string>>>(stream);
 
         return new(categorySkills ?? []);
     }

@@ -27,7 +27,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
                 foreach (ResumeEntryModel entry in model.Entries)
                 {
                     column.Item()
-                        .PaddingVertical(5.0f)
+                        .PaddingVertical(4.0f)
                         .Element(entry.CreateView(factory));
                 }
             });
