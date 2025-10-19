@@ -1,4 +1,7 @@
 
+using System.Text;
+using System.Text.Json;
+
 namespace ProjectLogging.Data;
 
 
@@ -31,5 +34,21 @@ public class DataCollection : IDataCollection
         }
 
         return (T)data;
+    }
+
+
+
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+
+        foreach (var key in _data.Keys)
+        {
+            sb.Append($"{key.label}:");
+            sb.Append(_data[key]);
+        }
+
+        return sb.ToString();
     }
 }

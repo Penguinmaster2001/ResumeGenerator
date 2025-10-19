@@ -3,6 +3,7 @@ using ProjectLogging.Data;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Projects;
 using ProjectLogging.ResumeGeneration;
+using ProjectLogging.ResumeGeneration.Filtering;
 using ProjectLogging.Skills;
 using ProjectLogging.Views.Pdf;
 using ProjectLogging.Views.ViewCreation;
@@ -53,10 +54,29 @@ public static class Program
         dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
         dataCollection.AddData("hobbies", hobbies.Result);
 
-        var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
+        TestFiltering(dataCollection);
 
-        GeneratePdf(resumeModel, args[9]);
-        GenerateWebsite(resumeModel, args[10]);
+        // var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
+
+        // GeneratePdf(resumeModel, args[9]);
+        // GenerateWebsite(resumeModel, args[10]);
+    }
+
+
+
+    private static void TestFiltering(IDataCollection data)
+    {
+        Console.WriteLine("Filtering");
+
+        var filter = new EmbeddingFilter("../testing/AiModels/model.onnx", "../testing/AiModels/vocab.txt");
+
+        var filtered = filter.FilterData(data, "fish");
+
+        Console.WriteLine("Filtering done");
+
+        using var writer = new StreamWriter("/tmp/testData.txt");
+
+        writer.Write(string.Join('\n', filtered.Select(f => $"{f.project.ShortDescription}: {f.score}")));
     }
 
 
