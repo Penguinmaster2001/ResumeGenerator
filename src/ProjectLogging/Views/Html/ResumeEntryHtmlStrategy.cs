@@ -30,7 +30,7 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
             section.Content.Add(Description(model));
         }
 
-        if (model.BulletPointsText.Count > 0)
+        if (model.pointsText.Count > 0)
         {
             var bulletPoints = BulletPoints(model);
             styleManager.ApplyStyle(bulletPoints);
@@ -58,5 +58,5 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 
 
     private IHtmlElement BulletPoints(ResumeEntryModel model)
-        => new ListElement(false, model.BulletPointsText.Select(HtmlText.BeginParagraph));
+        => new ListElement(false, model.pointsText.Select(HtmlText.BeginParagraph));
 }

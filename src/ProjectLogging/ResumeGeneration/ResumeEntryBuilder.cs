@@ -92,9 +92,20 @@ public class ResumeEntryBuilder
 
 
 
-    public ResumeEntryBuilder AddBulletPoint(string point)
+    public ResumeEntryBuilder AddPoint(string point)
     {
-        _resumeEntry.BulletPointsText.Add(point);
+        _resumeEntry.pointsText.Add(point);
+        return this;
+    }
+
+
+
+    public ResumeEntryBuilder AddPoints(IEnumerable<string> points)
+    {
+        foreach (var point in points)
+        {
+            AddPoint(point);
+        }
         return this;
     }
 
@@ -102,7 +113,23 @@ public class ResumeEntryBuilder
 
     public ResumeEntryBuilder ClearBulletPoints()
     {
-        _resumeEntry.BulletPointsText.Clear();
+        _resumeEntry.pointsText.Clear();
+        return this;
+    }
+
+
+
+    public ResumeEntryBuilder PointsModeBullets()
+    {
+        _resumeEntry.PointsListMode = ResumeEntryModel.ListModes.Bullets;
+        return this;
+    }
+
+
+
+    public ResumeEntryBuilder PointsModeCommaSeparated()
+    {
+        _resumeEntry.PointsListMode = ResumeEntryModel.ListModes.CommaSeparated;
         return this;
     }
 

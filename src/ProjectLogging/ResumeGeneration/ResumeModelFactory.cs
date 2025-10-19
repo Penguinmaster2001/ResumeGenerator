@@ -25,19 +25,19 @@ public static class ResumeModelFactory
         var skillSegment = new ResumeSegmentModel("tech skills");
         foreach (var category in skills.CategoryNames)
         {
-            skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
+            skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
         }
 
         var hobbySegment = new ResumeSegmentModel("hobbies");
         foreach (var category in data.GetData<SkillCollection>("hobbies").CategoryNames)
         {
-            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
+            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
         }
 
         var educationSegment = CreateModel<List<Education>>("education", data);
         foreach (var category in data.GetData<SkillCollection>("courses").CategoryNames)
         {
-            educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, [.. category.Value])));
+            educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
         }
 
         var volunteerSegment = CreateModel<List<Volunteer>>("volunteer / extracurricular", data);

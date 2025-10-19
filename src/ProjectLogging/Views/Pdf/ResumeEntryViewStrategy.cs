@@ -16,10 +16,11 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
     public override Action<IContainer> BuildView(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
         => (container) =>
         {
-            bool description = model.DescriptionText is not null;
             bool locationAndDate = !model.LocationText.IsEmpty || model.StartDate is not null;
-            bool bulletPoints = model.BulletPointsText.Count > 0;
-            bool oneLine = description && !locationAndDate && !bulletPoints;
+            bool bulletPoints = model.pointsText.Count > 0;
+            bool oneLine = model.PointsListMode == ResumeEntryModel.ListModes.CommaSeparated
+                && !locationAndDate
+                && bulletPoints;
 
             if (oneLine)
             {
@@ -27,7 +28,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 {
                     row.AutoItem().Element(Title($"{model.TitleText}:"));
                     row.ConstantItem(3.0f);
-                    row.RelativeItem().Element(Description(model));
+                    row.RelativeItem().Element(Description(string.Join(", ", model.pointsText)));
                 });
 
                 return;
@@ -38,9 +39,9 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
                 column.Item().Element(HeaderRow(model));
 
-                if (description)
+                if (model.DescriptionText is not null)
                 {
-                    column.Item().Element(Description(model));
+                    column.Item().Element(Description(model.DescriptionText));
                 }
 
                 if (bulletPoints)
@@ -70,15 +71,15 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
 
 
-    private Action<IContainer> Description(ResumeEntryModel model)
-        => (container) => container.Text(model.DescriptionText).FontSize(11.0f);
+    private Action<IContainer> Description(string descriptionText)
+        => (container) => container.Text(descriptionText).FontSize(11.0f);
 
 
 
     private Action<IContainer> BulletPoints(ResumeEntryModel model)
         => (container) => container.Column(column =>
             {
-                foreach (string bulletPoint in model.BulletPointsText)
+                foreach (string bulletPoint in model.pointsText)
                 {
                     column.Item().Row(row =>
                     {

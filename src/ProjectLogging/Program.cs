@@ -72,14 +72,20 @@ public static class Program
         var config = new AiFilterConfig("../testing/AiModels/all-MiniLM-L6-v2/model.onnx",
             "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt",
             "../testing/AiModels/jobDescription.txt",
+            -1,
             new()
             {
                 {"work experience", 2},
                 {"projects", 2},
-                {"volunteer / extracurricular", 2},
+                {"volunteer / extracurricular", 1},
             },
             -1,
-            -1);
+            new()
+            {
+                {"tech skills", 5},
+                {"education", 3},
+                {"hobbies", 3},
+            });
 
         using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
         var jobDescription = jobDescriptionFile.ReadToEnd();
@@ -112,7 +118,7 @@ public static class Program
 
         var path = Path.ChangeExtension(outDir, "pdf");
 
-        new ResumeDocument(resumeModel, viewFactory).GeneratePdf(outDir);
+        new ResumeDocument(resumeModel, viewFactory).GeneratePdf(path);
     }
 
 

@@ -10,6 +10,14 @@ namespace ProjectLogging.Models.Resume;
 
 public class ResumeEntryModel : IModel
 {
+    public enum ListModes
+    {
+        Bullets,
+        CommaSeparated,
+    }
+
+
+
     public string TitleText;
 
     public LocationText LocationText = LocationText.Empty;
@@ -18,7 +26,8 @@ public class ResumeEntryModel : IModel
     public DateOnly? EndDate = null;
 
     public string? DescriptionText = null;
-    public List<string> BulletPointsText = [];
+    public List<string> pointsText = [];
+    public ListModes PointsListMode = ListModes.Bullets;
 
 
 

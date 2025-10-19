@@ -30,7 +30,7 @@ public static class ResumeEntryFactory
 
         foreach (string bulletPoint in entryRecord.Points)
         {
-            entryBuilder.AddBulletPoint(bulletPoint);
+            entryBuilder.AddPoint(bulletPoint);
         }
 
         if (entryRecord.EndDate.HasValue)
@@ -60,7 +60,7 @@ public static class ResumeEntryFactory
 
 
     public static ResumeEntryModel CreateEntry(string title, IEnumerable<string> items)
-        => new ResumeEntryBuilder(title).SetDescription(string.Join(", ", items)).Build();
+        => new ResumeEntryBuilder(title).AddPoints(items).PointsModeCommaSeparated().Build();
 
 
 
