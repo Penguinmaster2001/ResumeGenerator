@@ -14,7 +14,7 @@ public static class ResumeEntryFactory
     public static ResumeEntryModel CreateEntry(object model) => model switch
     {
         BaseData baseModel => CreateEntry(baseModel),
-        Category category   => CreateEntry(category),
+        Category category => CreateEntry(category),
         _ => throw new NotImplementedException($"ResumeEntry factory method not implemented for {model.GetType()}"),
     };
 
@@ -56,7 +56,7 @@ public static class ResumeEntryFactory
 
         return entryBuilder.Build();
     }
-    
+
 
 
     public static ResumeEntryModel CreateEntry(string title, IEnumerable<string> items)
@@ -65,4 +65,18 @@ public static class ResumeEntryFactory
 
 
     public static ResumeEntryModel CreateEntry(Category category) => CreateEntry(category.Name, category.Items);
+
+
+    public static ResumeEntryModel DuplicateEntry(ResumeEntryModel entryModel)
+    {
+        return new ResumeEntryModel(entryModel.TitleText)
+        {
+            LocationText = entryModel.LocationText,
+            StartDate = entryModel.StartDate,
+            EndDate = entryModel.EndDate,
+            DescriptionText = entryModel.DescriptionText,
+            PointsText = entryModel.PointsText,
+            PointsListMode = entryModel.PointsListMode,
+        };
+    }
 }

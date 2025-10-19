@@ -94,7 +94,7 @@ public class ResumeEntryBuilder
 
     public ResumeEntryBuilder AddPoint(string point)
     {
-        _resumeEntry.pointsText.Add(point);
+        _resumeEntry.PointsText.Add(point);
         return this;
     }
 
@@ -113,7 +113,7 @@ public class ResumeEntryBuilder
 
     public ResumeEntryBuilder ClearBulletPoints()
     {
-        _resumeEntry.pointsText.Clear();
+        _resumeEntry.PointsText.Clear();
         return this;
     }
 

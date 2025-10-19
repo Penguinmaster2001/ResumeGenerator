@@ -26,7 +26,7 @@ public class ResumeEntryModel : IModel
     public DateOnly? EndDate = null;
 
     public string? DescriptionText = null;
-    public List<string> pointsText = [];
+    public List<string> PointsText = [];
     public ListModes PointsListMode = ListModes.Bullets;
 
 

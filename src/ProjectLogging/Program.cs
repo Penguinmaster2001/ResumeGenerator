@@ -75,6 +75,7 @@ public static class Program
             -1,
             new()
             {
+                {"tech skills", 3},
                 {"work experience", 2},
                 {"projects", 2},
                 {"volunteer / extracurricular", 1},
@@ -85,6 +86,9 @@ public static class Program
                 {"tech skills", 5},
                 {"education", 3},
                 {"hobbies", 3},
+                {"projects", 2},
+                {"work experience", 3},
+                {"volunteer / extracurricular", 2},
             });
 
         using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);

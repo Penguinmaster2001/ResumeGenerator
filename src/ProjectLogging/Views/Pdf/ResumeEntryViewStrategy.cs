@@ -17,7 +17,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
         => (container) =>
         {
             bool locationAndDate = !model.LocationText.IsEmpty || model.StartDate is not null;
-            bool bulletPoints = model.pointsText.Count > 0;
+            bool bulletPoints = model.PointsText.Count > 0;
             bool oneLine = model.PointsListMode == ResumeEntryModel.ListModes.CommaSeparated
                 && !locationAndDate
                 && bulletPoints;
@@ -28,7 +28,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 {
                     row.AutoItem().Element(Title($"{model.TitleText}:"));
                     row.ConstantItem(3.0f);
-                    row.RelativeItem().Element(Description(string.Join(", ", model.pointsText)));
+                    row.RelativeItem().Element(Description(string.Join(", ", model.PointsText)));
                 });
 
                 return;
@@ -79,7 +79,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
     private Action<IContainer> BulletPoints(ResumeEntryModel model)
         => (container) => container.Column(column =>
             {
-                foreach (string bulletPoint in model.pointsText)
+                foreach (string bulletPoint in model.PointsText)
                 {
                     column.Item().Row(row =>
                     {
