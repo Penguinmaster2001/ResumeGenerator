@@ -54,29 +54,46 @@ public static class Program
         dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
         dataCollection.AddData("hobbies", hobbies.Result);
 
-        TestFiltering(dataCollection);
+        var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
-        // var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
+        var filteredModel = FilterResume(resumeModel);
 
-        // GeneratePdf(resumeModel, args[9]);
+        var resumePath = Path.ChangeExtension(args[9], null);
+
+        GeneratePdf(resumeModel, resumePath);
+        GeneratePdf(filteredModel, resumePath + "Filtered");
         // GenerateWebsite(resumeModel, args[10]);
     }
 
 
 
-    private static void TestFiltering(IDataCollection data)
+    private static ResumeModel FilterResume(ResumeModel model)
     {
+        var config = new AiFilterConfig("../testing/AiModels/all-MiniLM-L6-v2/model.onnx",
+            "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt",
+            "../testing/AiModels/jobDescription.txt",
+            new()
+            {
+                {"work experience", 2},
+                {"projects", 2},
+                {"volunteer / extracurricular", 2},
+            },
+            -1,
+            -1);
+
+        using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
+        var jobDescription = jobDescriptionFile.ReadToEnd();
+
+        var filter = new EmbeddingFilter(config);
+
         Console.WriteLine("Filtering");
-
-        var filter = new EmbeddingFilter("../testing/AiModels/model.onnx", "../testing/AiModels/vocab.txt");
-
-        var filtered = filter.FilterData(data, "fish");
-
+        var filtered = filter.FilterData(model.ResumeBody.ResumeSegments, jobDescription);
         Console.WriteLine("Filtering done");
 
-        using var writer = new StreamWriter("/tmp/testData.txt");
+        var filteredBody = new ResumeBodyModel(filtered);
+        var filteredModel = new ResumeModel(model.ResumeHeader, filteredBody);
 
-        writer.Write(string.Join('\n', filtered.Select(f => $"{f.project.ShortDescription}: {f.score}")));
+        return filteredModel;
     }
 
 
@@ -92,6 +109,8 @@ public static class Program
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;
         QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
+
+        var path = Path.ChangeExtension(outDir, "pdf");
 
         new ResumeDocument(resumeModel, viewFactory).GeneratePdf(outDir);
     }

@@ -1,5 +1,5 @@
 
-using ProjectLogging.Data;
+using ProjectLogging.Models.Resume;
 
 
 
@@ -9,5 +9,5 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 
 public interface IResumeFilter
 {
-    public List<(float score, Project project)> FilterData(IDataCollection data, string jobDescription);
+    List<ResumeSegmentModel> FilterData(List<ResumeSegmentModel> resumeSegments, string jobDescription);
 }

@@ -1,5 +1,7 @@
 
-using ProjectLogging.Data;
+using ProjectLogging.Models.Resume;
+using ProjectLogging.Views.Text;
+using ProjectLogging.Views.ViewCreation;
 
 
 
@@ -7,27 +9,47 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 
 
 
-
 public class EmbeddingFilter : IResumeFilter
 {
-    EmbeddingGenerator _embeddingGenerator;
+    private readonly AiFilterConfig _config;
+    private readonly EmbeddingGenerator _embeddingGenerator;
+    private readonly ViewFactory<string> _promptFactory;
 
 
-    public EmbeddingFilter(string modelPath, string vocabPath)
+
+    public EmbeddingFilter(AiFilterConfig config)
     {
-        _embeddingGenerator = new EmbeddingGenerator(modelPath, vocabPath);
+        _config = config;
+
+        _embeddingGenerator = new EmbeddingGenerator(config.ModelPath, config.VocabPath);
+
+        _promptFactory = new ViewFactory<string>();
+        _promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
     }
 
 
 
-    public List<(float score, Project project)> FilterData(IDataCollection data, string jobDescription)
+    public List<ResumeSegmentModel> FilterData(List<ResumeSegmentModel> resumeSegments, string jobDescription)
     {
         var scorer = new ResumeRelevanceScorer(_embeddingGenerator, jobDescription);
-        var filtered = new DataCollection();
+        var filtered = new List<ResumeSegmentModel>();
 
-        return [.. data.GetData<List<Project>>("projects")
-            .Where(p => p.ShortDescription is not null)
-            .Select(p => (score: scorer.Score(p.ShortDescription ?? string.Empty), project: p))
-            .OrderByDescending(x => x.score)];
+        foreach (var resumeSegment in resumeSegments)
+        {
+            if (!_config.SegmentTitleEntryCounts.TryGetValue(resumeSegment.TitleText, out var count))
+            {
+                filtered.Add(resumeSegment);
+                continue;
+            }
+
+            filtered.Add(new ResumeSegmentModel(resumeSegment.TitleText,
+                resumeSegment.Entries
+                    .Select(e => (score: scorer.Score(e.CreateView(_promptFactory)), entry: e))
+                    .OrderByDescending(x => x.score)
+                    .Take(count)
+                    .Select(x => x.entry)));
+        }
+
+        return filtered;
     }
 }
