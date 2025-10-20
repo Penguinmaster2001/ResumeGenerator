@@ -3,7 +3,7 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 
 
 
-public class ResumeRelevanceScorer : IResumeScorer
+public class EmbeddingScorer : IResumeScorer
 {
     public EmbeddingGenerator EmbeddingGenerator { get; private set; }
 
@@ -27,7 +27,7 @@ public class ResumeRelevanceScorer : IResumeScorer
 
 
 
-    public ResumeRelevanceScorer(EmbeddingGenerator embeddingGenerator, string jobDescription)
+    public EmbeddingScorer(EmbeddingGenerator embeddingGenerator, string jobDescription)
     {
         EmbeddingGenerator = embeddingGenerator;
         JobDescription = jobDescription;

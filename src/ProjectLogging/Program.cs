@@ -54,6 +54,9 @@ public static class Program
         dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
         dataCollection.AddData("hobbies", hobbies.Result);
 
+        // TestCrossEncoding(jobs.Result, projects.Result);
+        // TestEmbedding(jobs.Result, projects.Result);
+
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
         var filteredModel = FilterResume(resumeModel);
@@ -69,8 +72,8 @@ public static class Program
 
     private static ResumeModel FilterResume(ResumeModel model)
     {
-        var config = new AiFilterConfig("../testing/AiModels/all-MiniLM-L6-v2/model.onnx",
-            "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt",
+        var config = new AiFilterConfig("../testing/AiModels/ms-marco-MiniLM-L6-v2/model.onnx",
+            "../testing/AiModels/ms-marco-MiniLM-L6-v2/vocab.txt",
             "../testing/AiModels/jobDescription.txt",
             -1,
             new()
@@ -94,7 +97,9 @@ public static class Program
         using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
         var jobDescription = jobDescriptionFile.ReadToEnd();
 
-        var filter = new EmbeddingFilter(config);
+        var encoder = new CrossEncoder(config.ModelPath, config.VocabPath, 512);
+        var scorer = new CrossEncodingScorer(encoder, jobDescription);
+        var filter = new EmbeddingFilter(config, scorer);
 
         Console.WriteLine("Filtering");
         var filtered = filter.FilterData(model.ResumeBody.ResumeSegments, jobDescription);

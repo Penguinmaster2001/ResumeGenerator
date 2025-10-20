@@ -27,7 +27,7 @@ public class EmbeddingGenerator : IDisposable
 
     public float[] GetEmbedding(string text)
     {
-        var ids = _tokenizer.EncodeToIds(text);
+        var ids = _tokenizer.EncodeToIds(text, 256, out var normalizedText, out var charsConsumed);
         var inputIds = ids.Select(id => (long)id).ToArray();
 
         // Build attention mask (1 for all tokens)

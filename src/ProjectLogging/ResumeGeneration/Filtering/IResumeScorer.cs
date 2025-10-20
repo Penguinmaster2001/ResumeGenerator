@@ -10,6 +10,4 @@ public interface IResumeScorer
 
 
     float Score(string entryText);
-
-    float Score(float[] entryEmbed);
 }

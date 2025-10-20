@@ -1,0 +1,58 @@
+
+namespace ProjectLogging.ResumeGeneration.Filtering;
+
+
+
+public class CrossEncodingScorer : IResumeScorer
+{
+    public CrossEncoder CrossEncoder { get; private set; }
+
+    private long[] _jobTokens = [];
+    private string _jobDescription = string.Empty;
+    public string JobDescription
+    {
+        get => _jobDescription;
+
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value) || _jobDescription == value)
+            {
+                return;
+            }
+
+            _jobDescription = "[CLS] Rate how good the following resume snippet is for this job.\nJob:\n" + value.Trim();
+
+            _jobTokens = [.. CrossEncoder.Tokenizer.EncodeToIds(_jobDescription).Select(i => (long)i)];
+        }
+    }
+
+
+
+    public CrossEncodingScorer(CrossEncoder crossEncoder, string jobDescription)
+    {
+        CrossEncoder = crossEncoder;
+        JobDescription = jobDescription;
+    }
+
+
+
+    public float Score(string entryText)
+    {
+        var query = JobDescription;
+        var prompt = CreatePrompt(entryText);
+        var score = CrossEncoder.Score(_jobTokens, prompt);
+
+        // Console.WriteLine($"{query} $$$ {prompt} $$$ {score}");
+        
+        return score;
+    
+        // return CrossEncoder.Score(JobDescription, CreatePrompt(entryText));
+    }
+
+
+
+    private string CreatePrompt(string text)
+    {
+        return $"Resume snippet:\n{text}";
+    }
+}

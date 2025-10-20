@@ -22,10 +22,10 @@ public class ResumeEntryPromptViewStrategy : ViewStrategy<string, ResumeEntryMod
             sb.AppendLine(model.DescriptionText);
         }
 
-        foreach (var point in model.PointsText)
-        {
-            sb.Append("- ").AppendLine(point);
-        }
+        // foreach (var point in model.PointsText)
+        // {
+        //     sb.Append("- ").AppendLine(point);
+        // }
 
         return sb.ToString();
     }

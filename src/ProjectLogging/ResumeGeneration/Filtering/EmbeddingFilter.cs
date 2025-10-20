@@ -12,16 +12,15 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 public class EmbeddingFilter : IResumeFilter
 {
     private readonly AiFilterConfig _config;
-    private readonly EmbeddingGenerator _embeddingGenerator;
     private readonly ViewFactory<string> _promptFactory;
+    private readonly IResumeScorer _resumeScorer;
 
 
 
-    public EmbeddingFilter(AiFilterConfig config)
+    public EmbeddingFilter(AiFilterConfig config, IResumeScorer resumeScorer)
     {
         _config = config;
-
-        _embeddingGenerator = new EmbeddingGenerator(config.ModelPath, config.VocabPath);
+        _resumeScorer = resumeScorer;
 
         _promptFactory = new ViewFactory<string>();
         _promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
@@ -31,7 +30,6 @@ public class EmbeddingFilter : IResumeFilter
 
     public List<ResumeSegmentModel> FilterData(List<ResumeSegmentModel> resumeSegments, string jobDescription)
     {
-        var scorer = new ResumeRelevanceScorer(_embeddingGenerator, jobDescription);
         var filteredSegments = new List<ResumeSegmentModel>();
 
         var defaultEntryCount = _config.DefaultEntryCount <= -1 ? int.MaxValue : _config.DefaultEntryCount;
@@ -46,10 +44,10 @@ public class EmbeddingFilter : IResumeFilter
             if (resumeSegment.Entries.Count > entryCount)
             {
                 filteredEntries = [.. resumeSegment.Entries
-                                    .Select(e => (score: scorer.Score(e.CreateView(_promptFactory)), entry: e))
-                                    .OrderByDescending(x => x.score)
-                                    .Take(entryCount)
-                                    .Select(x => x.entry)];
+                    .Select(e => (score: _resumeScorer.Score($"{resumeSegment.TitleText} entry: {e.CreateView(_promptFactory)}"), entry: e))
+                    .OrderByDescending(x => x.score)
+                    .Take(entryCount)
+                    .Select(x => x.entry)];
             }
 
             for (int i = 0; i < filteredEntries.Count; i++)
@@ -61,10 +59,10 @@ public class EmbeddingFilter : IResumeFilter
 
                 filteredEntries[i] = ResumeEntryFactory.DuplicateEntry(filteredEntries[i]);
                 filteredEntries[i].PointsText = [.. filteredEntries[i].PointsText
-                    .Select(t => (score: scorer.Score(t), text: t))
+                    .Select(t => (score: _resumeScorer.Score($"{resumeSegment.TitleText} bullet point under {filteredEntries[i].TitleText}: {t}"), text: t))
                     .OrderByDescending(x => x.score)
                     .Take(pointCount)
-                    .Select(x => x.text)];;
+                    .Select(x => x.text)];
             }
 
             filteredSegments.Add(new ResumeSegmentModel(resumeSegment.TitleText, filteredEntries));
