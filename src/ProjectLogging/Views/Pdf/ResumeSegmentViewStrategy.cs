@@ -18,14 +18,14 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
             {
                 column.Item()
                     .PaddingTop(2.0f)
-                    .PaddingBottom(1.0f)
+                    .PaddingBottom(2.0f)
                     .Text(model.TitleText.ToUpper())
                     .AlignCenter()
                     .FontSize(12.0f)
                     .Bold()
                     .FontColor(Colors.Green.Darken3);
 
-                foreach (ResumeEntryModel entry in model.Entries)
+                foreach (ResumeEntryModel entry in model.Entries.OrderByDescending(e => e.EndDate.GetValueOrDefault(DateOnly.MinValue)))
                 {
                     column.Item()
                         .PaddingVertical(4.0f)

@@ -28,7 +28,7 @@ public class ResumeHeaderViewStrategy : ViewStrategy<Action<IContainer>, ResumeH
                 column.Item().Element(Name(model));
                 column.Item().Element(ContactRow(model));
                 column.Item().Element(URLRow(model));
-                column.Item().PaddingVertical(2.0f).LineHorizontal(1.0f);
+                column.Item().PaddingTop(4.0f).PaddingBottom(3.0f).LineHorizontal(1.0f);
             });
     }
 

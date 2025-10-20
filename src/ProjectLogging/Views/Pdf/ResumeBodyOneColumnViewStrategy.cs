@@ -27,7 +27,7 @@ public class ResumeBodyOneColumnViewStrategy : ViewStrategy<Action<IContainer>, 
                             column.Item().Element(model.ResumeSegments[0].CreateView(factory));
                             model.ResumeSegments[1..].ForEach(segment =>
                                 {
-                                    column.Item().PaddingVertical(1.0f).LineHorizontal(0.5f);
+                                    column.Item().PaddingVertical(4.0f).LineHorizontal(0.5f);
                                     column.Item().Element(segment.CreateView(factory));
                                 });
                         });

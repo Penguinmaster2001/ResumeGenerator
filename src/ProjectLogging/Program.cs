@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using ProjectLogging.Data;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Projects;
@@ -54,12 +55,9 @@ public static class Program
         dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
         dataCollection.AddData("hobbies", hobbies.Result);
 
-        // TestCrossEncoding(jobs.Result, projects.Result);
-        // TestEmbedding(jobs.Result, projects.Result);
-
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
-        var filteredModel = FilterResume(resumeModel);
+        var filteredModel = FilterResume(resumeModel, args[11]);
 
         var resumePath = Path.ChangeExtension(args[9], null);
 
@@ -70,29 +68,24 @@ public static class Program
 
 
 
-    private static ResumeModel FilterResume(ResumeModel model)
+    private static ResumeModel FilterResume(ResumeModel model, string configPath)
     {
-        var config = new AiFilterConfig("../testing/AiModels/ms-marco-MiniLM-L6-v2/model.onnx",
-            "../testing/AiModels/ms-marco-MiniLM-L6-v2/vocab.txt",
-            "../testing/AiModels/jobDescription.txt",
-            -1,
-            new()
-            {
-                {"tech skills", 3},
-                {"work experience", 2},
-                {"projects", 2},
-                {"volunteer / extracurricular", 1},
-            },
-            -1,
-            new()
-            {
-                {"tech skills", 5},
-                {"education", 3},
-                {"hobbies", 3},
-                {"projects", 2},
-                {"work experience", 3},
-                {"volunteer / extracurricular", 2},
-            });
+        AiFilterConfig? config;
+        try
+        {
+            config = JsonSerializer.Deserialize<AiFilterConfig>(File.OpenRead(configPath));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error parsing config: {ex}");
+            config = null;
+        }
+
+        if (config is null)
+        {
+            Console.WriteLine("Unable to load ai config, no filtering done");
+            return model;
+        }
 
         using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
         var jobDescription = jobDescriptionFile.ReadToEnd();

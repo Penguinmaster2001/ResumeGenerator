@@ -31,7 +31,7 @@ public class ResumeDocument : IDocument
             page.Size(PageSizes.Letter);
             page.Margin(0.3f, Unit.Inch);
             page.PageColor(Colors.White);
-            page.DefaultTextStyle(textStyle => textStyle.FontSize(10.5f).FontFamily("Ubuntu").LineHeight(1.15f));
+            page.DefaultTextStyle(textStyle => textStyle.FontSize(10.5f).FontFamily("UbuntuCondensed").LineHeight(1.15f));
 
             page.Header().Element(ComposeHeader);
             page.Content().Element(ComposeBody);
