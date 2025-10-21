@@ -4,14 +4,12 @@ using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.Text;
 using ProjectLogging.Views.ViewCreation;
 
-
-
 namespace ProjectLogging.ResumeGeneration.Filtering;
-
-
 
 public class DiversityRanker
 {
+    private const float DiversityLambda = 0.7f;
+
     public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments, string configPath)
     {
         AiFilterConfig? config;
@@ -38,8 +36,7 @@ public class DiversityRanker
         var crossScorer = new CrossEncodingScorer(new CrossEncoder(config.ModelPath, config.VocabPath, 512), jobDescription);
 
         // Use this to compare the similarity between entries
-        var embeddingGenerator = new EmbeddingGenerator("../testing/AiModels/all-MiniLM-L6-v2/model.onnx", "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt");
-
+        var embeddingGenerator = new EmbeddingGenerator(config.EmbeddingModelPath, config.EmbeddingVocabPath);
 
         var promptFactory = new ViewFactory<string>();
         promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
@@ -103,8 +100,6 @@ public class DiversityRanker
 
         return [.. filteredSegments.Concat(segmentDatabase.Values).OrderBy(s => s.order).Select(s => s.segment)];
 
-
-
         DiversityRank CreateDiversityRank(string prompt, int id, int category)
         {
             var jobScore = NormalizeScore(crossScorer.Score(prompt));
@@ -113,8 +108,6 @@ public class DiversityRanker
             return new(jobScore, jobScore, prompt, embedding, id, category);
         }
     }
-
-
 
     private List<DiversityRank> SortRanks(List<DiversityRank> ranks, Dictionary<int, int> categoryNum)
     {
@@ -162,11 +155,7 @@ public class DiversityRanker
         return sortedRanks;
     }
 
-
-
     private float NormalizeScore(float score) => MathF.Tanh(score / 6.0f);
-
-
 
     private static float CosineSimilarity(float[] a, float[] b)
     {
@@ -184,16 +173,11 @@ public class DiversityRanker
         return dot / (MathF.Sqrt(magA) * MathF.Sqrt(magB));
     }
 
-
-
     private float CalculateTotalScore(DiversityRank rank)
     {
-        var l = 0.7f;
-        return (l * rank.JobScore) - ((1.0f - l) * rank.MaxSimilarity);
+        return (DiversityLambda * rank.JobScore) - ((1.0f - DiversityLambda) * rank.MaxSimilarity);
     }
 }
-
-
 
 public class DiversityRank(float jobScore,
     float totalScore,
@@ -202,15 +186,13 @@ public class DiversityRank(float jobScore,
     int id,
     int category) : IComparable<DiversityRank>
 {
-    public float JobScore = jobScore;
-    public float MaxSimilarity = -1.0f;
-    public float TotalScore = totalScore;
-    public string Prompt = prompt;
-    public float[] Embedding = embedding;
-    public int Id = id;
-    public int Category = category;
-
-
+    public float JobScore { get; set; } = jobScore;
+    public float MaxSimilarity { get; set; } = -1.0f;
+    public float TotalScore { get; set; } = totalScore;
+    public string Prompt { get; set; } = prompt;
+    public float[] Embedding { get; set; } = embedding;
+    public int Id { get; set; } = id;
+    public int Category { get; set; } = category;
 
     public int CompareTo(DiversityRank? other)
     {
@@ -222,8 +204,6 @@ public class DiversityRank(float jobScore,
 
         return 1;
     }
-
-
 
     public override string ToString()
     {
