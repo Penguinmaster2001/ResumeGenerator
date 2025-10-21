@@ -24,7 +24,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
             if (oneLine)
             {
-                container.Row(row =>
+                container.PaddingVertical(0.0f).Row(row =>
                 {
                     row.AutoItem().Element(Title($"{model.TitleText}:"));
                     row.ConstantItem(3.0f);
@@ -34,7 +34,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 return;
             }
 
-            container.Column(column =>
+            container.PaddingVertical(2.0f).Column(column =>
             {
 
                 column.Item().Element(HeaderRow(model));
@@ -86,7 +86,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                         row.ConstantItem(5.0f);
                         row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
                         row.ConstantItem(5.0f);
-                        row.RelativeItem().Text(bulletPoint);
+                        row.RelativeItem().Text(bulletPoint).LineHeight(1.3f);
                     });
                 }
             });

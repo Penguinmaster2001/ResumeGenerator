@@ -27,9 +27,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
 
                 foreach (ResumeEntryModel entry in model.Entries.OrderByDescending(e => e.EndDate.GetValueOrDefault(DateOnly.MinValue)))
                 {
-                    column.Item()
-                        .PaddingVertical(4.0f)
-                        .Element(entry.CreateView(factory));
+                    column.Item().Element(entry.CreateView(factory));
                 }
             });
 }
