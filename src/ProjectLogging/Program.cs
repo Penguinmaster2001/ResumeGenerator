@@ -57,12 +57,14 @@ public static class Program
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
 
-        var filteredModel = FilterResume(resumeModel, args[11]);
-
         var resumePath = Path.ChangeExtension(args[9], null);
-
         GeneratePdf(resumeModel, resumePath);
-        GeneratePdf(filteredModel, resumePath + "Filtered");
+
+        // var filteredModel = FilterResume(resumeModel, args[11]);
+
+        new DiversityRanker().FilterResume(resumeModel, args[11]);
+
+        // GeneratePdf(filteredModel, resumePath + "Filtered");
         // GenerateWebsite(resumeModel, args[10]);
     }
 
