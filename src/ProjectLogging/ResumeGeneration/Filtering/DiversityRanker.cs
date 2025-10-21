@@ -12,7 +12,7 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 
 public class DiversityRanker
 {
-    public ResumeModel FilterResume(ResumeModel model, string configPath)
+    public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments, string configPath)
     {
         AiFilterConfig? config;
         try
@@ -28,7 +28,7 @@ public class DiversityRanker
         if (config is null)
         {
             Console.WriteLine("Unable to load ai config, no filtering done");
-            return model;
+            return resumeSegments;
         }
 
         using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
@@ -40,13 +40,6 @@ public class DiversityRanker
         // Use this to compare the similarity between entries
         var embeddingGenerator = new EmbeddingGenerator("../testing/AiModels/all-MiniLM-L6-v2/model.onnx", "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt");
 
-        var projectSegment = model.ResumeBody.ResumeSegments.Find(s => string.Compare(s.TitleText, "projects", StringComparison.OrdinalIgnoreCase) == 0);
-
-        if (projectSegment is null)
-        {
-            Console.WriteLine("Unable to find segment, no filtering done");
-            return model;
-        }
 
         var promptFactory = new ViewFactory<string>();
         promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
@@ -54,16 +47,46 @@ public class DiversityRanker
         Console.WriteLine("Filtering");
 
         var ranks = new List<DiversityRank>();
+        var segmentDatabase = new Dictionary<int, (int order, ResumeSegmentModel segment)>();
         var entryDatabase = new Dictionary<int, ResumeEntryModel>();
 
-        foreach (var entry in projectSegment.Entries)
+        var numToTake = new Dictionary<int, int>();
+
+        var defaultEntryCount = config.DefaultEntryCount <= -1 ? int.MaxValue : config.DefaultEntryCount;
+
+        var filteredSegments = new List<(int order, ResumeSegmentModel segment)>();
+
+        int idCounter = 0;
+        for (int i = 0; i < resumeSegments.Count; i++)
         {
-            var newRank = CreateDiversityRank($"{projectSegment.TitleText} entry: {entry.CreateView(promptFactory)}");
-            entryDatabase.Add(newRank.Id, entry);
-            ranks.Add(newRank);
+            var segment = resumeSegments[i];
+
+            if (!config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
+            {
+                // Segment was not mutated
+                filteredSegments.Add((i, segment));
+                continue;
+            }
+
+            int segmentId = idCounter;
+            idCounter++;
+            // Copy the segment to the database
+            segmentDatabase.Add(segmentId, (i, new(segment.TitleText)));
+
+            numToTake.Add(segmentId, entryCount);
+
+            foreach (var entry in segment.Entries)
+            {
+                int entryId = idCounter;
+                idCounter++;
+                entryDatabase.Add(entryId, entry);
+
+                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(promptFactory)}", entryId, segmentId);
+                ranks.Add(newRank);
+            }
         }
 
-        var selectedEntries = SortRanks(ranks).ToList();
+        var selectedEntries = SortRanks(ranks, numToTake);
 
         Console.WriteLine("Filtering done");
 
@@ -72,7 +95,13 @@ public class DiversityRanker
             Console.WriteLine(entry);
         }
 
-        return model;
+        // Rebuild model
+        foreach (var selectedEntry in selectedEntries)
+        {
+            segmentDatabase[selectedEntry.Category].segment.Entries.Add(entryDatabase[selectedEntry.Id]);
+        }
+
+        return [.. filteredSegments.Concat(segmentDatabase.Values).OrderBy(s => s.order).Select(s => s.segment)];
 
 
 
@@ -87,25 +116,39 @@ public class DiversityRanker
 
 
 
-    private List<DiversityRank> SortRanks(List<DiversityRank> ranks, int numToTake = -1)
+    private List<DiversityRank> SortRanks(List<DiversityRank> ranks, Dictionary<int, int> categoryNum)
     {
-        int num = numToTake <= -1 ? ranks.Count : numToTake;
-
+        var unsortedRanks = ranks.ToList();
         var sortedRanks = new List<DiversityRank>();
+        var categoryLeft = categoryNum.ToDictionary();
 
-        while (num > 0)
+        var memoizedSimilarities = new Dictionary<(int, int), float>();
+
+        while (unsortedRanks.Count > 0)
         {
-            num--;
+            unsortedRanks.Sort();
+            var rankToAdd = unsortedRanks.Last();
+            sortedRanks.Add(rankToAdd);
+            unsortedRanks.RemoveAt(unsortedRanks.Count - 1);
 
-            ranks.Sort();
-            sortedRanks.Add(ranks.Last());
-            ranks.RemoveAt(ranks.Count - 1);
+            categoryLeft[rankToAdd.Category]--;
+            // Took as many from this category as is needed, remove the rest
+            if (categoryLeft[rankToAdd.Category] <= 0)
+            {
+                unsortedRanks.RemoveAll(r => r.Category == rankToAdd.Category);
+            }
 
-            foreach (var unsortedRank in ranks)
+            foreach (var unsortedRank in unsortedRanks)
             {
                 foreach (var sortedRank in sortedRanks)
                 {
-                    var similarity = CosineSimilarity(unsortedRank.Embedding, sortedRank.Embedding);
+                    if (!memoizedSimilarities.TryGetValue((unsortedRank.Id, sortedRank.Id), out var similarity)
+                        && !memoizedSimilarities.TryGetValue((sortedRank.Id, unsortedRank.Id), out similarity))
+                    {
+                        similarity = CosineSimilarity(unsortedRank.Embedding, sortedRank.Embedding);
+                        memoizedSimilarities.Add((unsortedRank.Id, sortedRank.Id), similarity);
+                    }
+
                     if (similarity > unsortedRank.MaxSimilarity)
                     {
                         unsortedRank.MaxSimilarity = similarity;

@@ -62,9 +62,10 @@ public static class Program
 
         // var filteredModel = FilterResume(resumeModel, args[11]);
 
-        new DiversityRanker().FilterResume(resumeModel, args[11]);
-
-        // GeneratePdf(filteredModel, resumePath + "Filtered");
+        var filteredSegments = new DiversityRanker().FilterResume(resumeModel.ResumeBody.ResumeSegments, args[11]);
+        var filteredBody = new ResumeBodyModel(filteredSegments);
+        var filteredModel = new ResumeModel(resumeModel.ResumeHeader, filteredBody);
+        GeneratePdf(filteredModel, resumePath + "Filtered");
         // GenerateWebsite(resumeModel, args[10]);
     }
 
