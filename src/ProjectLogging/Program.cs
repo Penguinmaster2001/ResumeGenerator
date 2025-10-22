@@ -23,7 +23,7 @@ public static class Program
     public static async Task Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        if (args.Length < 11)
+        if (args.Length <= 11)
         {
             Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
                 + "<education json> <courses json> <hobbies json> <skills json> <resume output> <website output>");
