@@ -54,7 +54,7 @@ public class DiversityRanker
 
         var defaultEntryCount = config.DefaultEntryCount <= -1 ? int.MaxValue : config.DefaultEntryCount;
 
-        var filteredSegments = new List<(int order, ResumeSegmentModel segment)>();
+        var orderedSegments = new List<(int order, ResumeSegmentModel segment)>();
 
         int idCounter = 0;
         for (int i = 0; i < resumeSegments.Count; i++)
@@ -64,7 +64,7 @@ public class DiversityRanker
             if (!config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
             {
                 // Segment was not mutated
-                filteredSegments.Add((i, segment));
+                orderedSegments.Add((i, segment));
                 continue;
             }
 
@@ -87,21 +87,64 @@ public class DiversityRanker
         }
 
         var selectedEntries = SortRanks(ranks, numToTake);
+        var pointDatabase = new Dictionary<int, string>();
+
+        numToTake.Clear();
+        ranks.Clear();
+
+        // Now filter entry bullet points
+        for (int i = 0; i < selectedEntries.Count; i++)
+        {
+            var entryRank = selectedEntries[i];
+            var segment = segmentDatabase[entryRank.Category].segment;
+
+            // Note *segment*.TitleText
+            if (!config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out var pointCount))
+            {
+                // Entry was not mutated
+                continue;
+            }
+
+            // Copy the Entry to the database
+            var oldEntry = entryDatabase[entryRank.Id];
+            entryDatabase[entryRank.Id] = ResumeEntryFactory.DuplicateEntry(entryDatabase[entryRank.Id]);
+            entryDatabase[entryRank.Id].PointsText = [];
+
+            numToTake.Add(entryRank.Id, pointCount);
+
+            foreach (var point in oldEntry.PointsText)
+            {
+                int pointId = idCounter;
+                idCounter++;
+                pointDatabase.Add(pointId, point);
+                var newRank = CreateDiversityRank($"{segment.TitleText} bullet point under {entryDatabase[entryRank.Id].TitleText}: {point}", pointId, entryRank.Id);
+                ranks.Add(newRank);
+            }
+        }
+
+        var selectedPoints = SortRanks(ranks, numToTake);
 
         Console.WriteLine("Filtering done");
 
-        foreach (var entry in selectedEntries)
+        // Rebuild entries
+        foreach (var selectedPoint in selectedPoints)
         {
-            Console.WriteLine(entry);
+            entryDatabase[selectedPoint.Category].PointsText.Add(pointDatabase[selectedPoint.Id]);
         }
 
-        // Rebuild model
+        // Rebuild segments
         foreach (var selectedEntry in selectedEntries)
         {
             segmentDatabase[selectedEntry.Category].segment.Entries.Add(entryDatabase[selectedEntry.Id]);
         }
 
-        return [.. filteredSegments.Concat(segmentDatabase.Values).OrderBy(s => s.order).Select(s => s.segment)];
+        var filteredSegments = orderedSegments
+            .Concat(segmentDatabase.Values)
+            .OrderBy(s => s.order)
+            .Select(s => s.segment)
+            .ToList();
+
+        return filteredSegments;
 
 
 

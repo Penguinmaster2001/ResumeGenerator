@@ -25,7 +25,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
                     .Bold()
                     .FontColor(Colors.Green.Darken3);
 
-                foreach (ResumeEntryModel entry in model.Entries.OrderByDescending(e => e.EndDate.GetValueOrDefault(DateOnly.MinValue)))
+                foreach (ResumeEntryModel entry in model.Entries)
                 {
                     column.Item().Element(entry.CreateView(factory));
                 }
