@@ -26,6 +26,12 @@ public class SkillCollection(Dictionary<string, List<string>> categorySkills) : 
             {
                 if (!CategoryNames.TryGetValue(skill.Category, out var categorySkills))
                 {
+                    // DESIGN ISSUE: The break statement here exits the inner loop (Skills loop), not the
+                    // outer loop (skillData loop). This means if a skill's category doesn't exist and
+                    // addNewCategories is false, we skip ALL remaining skills for this data item, even
+                    // if subsequent skills belong to existing categories. This is likely a logic bug.
+                    // Consider using 'continue' instead of 'break', or restructure to check categories
+                    // properly. This could cause skills to be silently dropped.
                     if (!addNewCategories) break;
                     categorySkills = [];
                     CategoryNames.Add(skill.Category, categorySkills);

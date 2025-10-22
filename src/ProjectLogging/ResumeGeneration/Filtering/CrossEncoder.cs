@@ -43,6 +43,11 @@ public class CrossEncoder : IDisposable
         // Truncate/pad to fit model input
         if (inputIds.Length > _maxLength)
         {
+            // DESIGN ISSUE: Console.WriteLine in library code creates unwanted side effects and couples
+            // the code to console I/O. Libraries should not write directly to console; instead, consider
+            // using a logging framework (e.g., ILogger), throwing an exception, or providing a callback
+            // mechanism for warnings. This also makes the code difficult to test and use in non-console
+            // applications (e.g., web services, GUI apps).
             Console.WriteLine($"Too long!! ({inputIds.Length} > {_maxLength})");
             inputIds = inputIds[.._maxLength];
         }

@@ -69,6 +69,11 @@ public static class ResumeEntryFactory
 
     public static ResumeEntryModel DuplicateEntry(ResumeEntryModel entryModel)
     {
+        // DESIGN ISSUE: This creates a shallow copy, which means the PointsText list is shared between
+        // the original and the copy. If either object modifies the list (Add/Remove/Clear), both will
+        // be affected. This violates the expectation of "duplicate" and can lead to subtle bugs.
+        // Consider creating a deep copy: "PointsText = new List<string>(entryModel.PointsText)" or
+        // using collection expressions: "PointsText = [..entryModel.PointsText]".
         return new ResumeEntryModel(entryModel.TitleText)
         {
             LocationText = entryModel.LocationText,

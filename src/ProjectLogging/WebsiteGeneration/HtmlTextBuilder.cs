@@ -46,6 +46,11 @@ public class HtmlText : IHtmlElement
     private readonly Stack<HtmlTag> _workingTags = [];
     private bool _inNestedTag = false;
 
+    // DESIGN ISSUE: This property throws NotImplementedException, which means the IHtmlElement interface
+    // is not fully implemented by this class. This violates the Liskov Substitution Principle - objects
+    // using IHtmlElement interface cannot safely use HtmlText without risking runtime exceptions.
+    // Either implement the property properly, or redesign the interface hierarchy to avoid forcing
+    // classes to implement members they don't support.
     public List<ITagAttribute> Attributes { get => throw new NotImplementedException(); }
 
 
@@ -230,6 +235,11 @@ public class HtmlText : IHtmlElement
 
 
 
+    // DESIGN ISSUE: These methods throw NotImplementedException, which violates the interface contract.
+    // Code that relies on the IHtmlElement interface will fail at runtime when calling these methods
+    // on HtmlText instances. This is a sign of a flawed interface design - consider using interface
+    // segregation to split IHtmlElement into smaller, more focused interfaces that classes can
+    // selectively implement based on their actual capabilities.
     public IHtmlElement AddAttribute(string name, string value)
     {
         throw new NotImplementedException();

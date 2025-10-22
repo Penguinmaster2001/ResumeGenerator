@@ -15,6 +15,10 @@ public class DiversityRanker
     private readonly CrossEncodingScorer _crossScorer;
     private readonly EmbeddingGenerator _embeddingGenerator;
     private readonly ViewFactory<string> _promptFactory;
+    // DESIGN ISSUE: Public mutable properties on a class with complex internal state management.
+    // These can be changed at any time, potentially invalidating cached calculations or breaking
+    // assumptions made during algorithm execution. Consider making these readonly or private with
+    // controlled setters, or pass them as parameters to methods that need them.
     public float Lambda { get; set; } = 0.3f;
     public float CrossDivisor { get; set; } = 6.0f;
 
@@ -38,6 +42,15 @@ public class DiversityRanker
 
     public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments)
     {
+        // DESIGN ISSUE: This method is doing too much and has very high cyclomatic complexity with deeply
+        // nested loops and conditionals. It handles database building, ranking, filtering, and rebuilding
+        // all in one method spanning ~100 lines. This makes it difficult to understand, test, and maintain.
+        // Consider breaking this into smaller, focused methods like:
+        // - BuildEntryDatabase()
+        // - RankAndSelectEntries()
+        // - FilterBulletPoints()
+        // - RebuildSegments()
+        // This would improve readability and make the algorithm's steps more explicit.
         var ranks = new List<DiversityRank>();
         var segmentDatabase = new Dictionary<int, (int order, ResumeSegmentModel segment)>();
         var entryDatabase = new Dictionary<int, ResumeEntryModel>();
@@ -48,6 +61,10 @@ public class DiversityRanker
 
         var orderedSegments = new List<(int order, ResumeSegmentModel segment)>();
 
+        // DESIGN ISSUE: Using a generic 'idCounter' for multiple different entity types (segments, entries,
+        // points) in the same method makes the code harder to reason about. The IDs have no semantic meaning
+        // and it's unclear which database they belong to. Consider using separate counter variables
+        // (segmentIdCounter, entryIdCounter, pointIdCounter) or a typed ID system to make intent clearer.
         int idCounter = 0;
         for (int i = 0; i < resumeSegments.Count; i++)
         {
@@ -81,6 +98,11 @@ public class DiversityRanker
         var selectedEntries = SortRanks(ranks, numToTake);
         var pointDatabase = new Dictionary<int, string>();
 
+        // DESIGN ISSUE: Reusing the same dictionaries (numToTake, ranks) for different purposes in
+        // sequential phases of the algorithm. After filtering entries, these are cleared and reused
+        // for filtering points. This makes the code harder to follow and could lead to bugs if the
+        // clear operations are missed. Consider using distinct variable names for each phase (e.g.,
+        // entryNumToTake/pointNumToTake, entryRanks/pointRanks) to make the separation explicit.
         numToTake.Clear();
         ranks.Clear();
 
@@ -151,10 +173,19 @@ public class DiversityRanker
 
     private List<DiversityRank> SortRanks(List<DiversityRank> ranks, Dictionary<int, int> categoryNum)
     {
+        // DESIGN ISSUE: This is an O(n³) algorithm in the worst case due to triple nested loops (while loop
+        // over unsortedRanks, foreach over unsortedRanks, foreach over sortedRanks). For large datasets,
+        // this could have significant performance implications. The similarity memoization helps but doesn't
+        // change the fundamental complexity. Consider using more efficient data structures (e.g., priority
+        // queue for ranking) or algorithmic approaches to reduce complexity.
         var unsortedRanks = ranks.ToList();
         var sortedRanks = new List<DiversityRank>();
         var categoryLeft = categoryNum.ToDictionary();
 
+        // DESIGN ISSUE: Mutable state shared across loop iterations. The memoizedSimilarities dictionary
+        // is populated during the algorithm execution and used for lookups. While this is a valid
+        // optimization, it makes the code harder to reason about and test because the behavior depends
+        // on accumulated state. Consider if this could be pre-computed or isolated into a separate method.
         var memoizedSimilarities = new Dictionary<(int, int), float>();
 
         while (unsortedRanks.Count > 0)

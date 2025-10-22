@@ -18,6 +18,11 @@ public class ResumeEntryModel : IModel
 
 
 
+    // DESIGN ISSUE: These are public fields, not properties, which violates encapsulation principles.
+    // Fields expose internal implementation details and cannot have validation, change notifications,
+    // or be overridden in derived classes. Consider converting to properties with appropriate access
+    // modifiers (e.g., "public string TitleText { get; set; }"). This is especially problematic for
+    // collection types like PointsText which can be modified externally without class control.
     public string TitleText;
 
     public LocationText LocationText = LocationText.Empty;
