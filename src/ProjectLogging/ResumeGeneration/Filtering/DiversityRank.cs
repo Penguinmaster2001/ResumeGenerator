@@ -8,11 +8,13 @@ public class DiversityRank(float jobScore,
     string prompt,
     float[] embedding,
     int id,
-    int category) : IComparable<DiversityRank>
+    int category,
+    float multiplier = 1.0f) : IComparable<DiversityRank>
 {
     public float JobScore { get; set; } = jobScore;
     public float MaxSimilarity { get; set; } = -1.0f;
     public float TotalScore { get; set; } = totalScore;
+    public float Multiplier { get; set; } = multiplier;
     public string Prompt { get; set; } = prompt;
     public float[] Embedding { get; set; } = embedding;
     public int Id { get; set; } = id;

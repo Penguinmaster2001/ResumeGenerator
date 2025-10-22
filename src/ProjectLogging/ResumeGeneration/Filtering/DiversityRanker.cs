@@ -73,7 +73,14 @@ public class DiversityRanker
                 idCounter++;
                 entryDatabase.Add(entryId, entry);
 
-                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(_promptFactory)}", entryId, segmentId);
+                var multiplier = 1.0f;
+                if (_config.EntryBoosts.TryGetValue(entry.TitleText, out var boost))
+                {
+                    multiplier += 0.01f * boost;
+                }
+
+                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(_promptFactory)}", entryId, segmentId, multiplier);
+
                 ranks.Add(newRank);
             }
         }
@@ -139,12 +146,12 @@ public class DiversityRanker
 
 
 
-    private DiversityRank CreateDiversityRank(string prompt, int id, int category)
+    private DiversityRank CreateDiversityRank(string prompt, int id, int category, float multiplier = 1.0f)
     {
-        var jobScore = NormalizeScore(_crossScorer.Score(prompt));
+        var jobScore = NormalizeScore(multiplier * _crossScorer.Score(prompt));
         var embedding = _embeddingGenerator.GetEmbedding(prompt);
 
-        return new(jobScore, jobScore, prompt, embedding, id, category);
+        return new(jobScore, jobScore, prompt, embedding, id, category, multiplier);
     }
 
 
@@ -204,6 +211,6 @@ public class DiversityRanker
 
     private float CalculateTotalScore(DiversityRank rank)
     {
-        return (Lambda * rank.JobScore) - ((1.0f - Lambda) * rank.MaxSimilarity);
+        return NormalizeScore(rank.Multiplier * ((Lambda * rank.JobScore) - ((1.0f - Lambda) * rank.MaxSimilarity)));
     }
 }
