@@ -28,39 +28,9 @@ public class CrossEncoder : IDisposable
 
     public float Score(string query, string text)
     {
-        // Tokenize both texts together
-        var ids = Tokenizer.EncodeToIds($"{query} [SEP] {text}").ToArray();
+        var queryIds = Tokenizer.EncodeToIds(query).Select(id => (long)id).ToArray();
 
-        // Truncate/pad to fit model input
-        if (ids.Length > _maxLength)
-        {
-            Console.WriteLine($"Too long!! ({ids.Length} > {_maxLength})");
-            ids = ids[.._maxLength];
-        }
-        else if (ids.Length < _maxLength)
-        {
-            ids = [.. ids, .. Enumerable.Repeat(0, _maxLength - ids.Length)];
-        }
-
-        var inputIds = ids.Select(i => (long)i).ToArray();
-        var attentionMask = inputIds.Select(id => id == 0 ? 0L : 1L).ToArray();
-        var tokenTypeIds = new long[_maxLength]; // all zeros (simplified single sequence)
-
-        // Create ONNX inputs
-        var shape = new[] { 1, _maxLength };
-        var inputs = new List<NamedOnnxValue>
-        {
-            NamedOnnxValue.CreateFromTensor("input_ids", new DenseTensor<long>(inputIds, shape)),
-            NamedOnnxValue.CreateFromTensor("attention_mask", new DenseTensor<long>(attentionMask, shape)),
-            NamedOnnxValue.CreateFromTensor("token_type_ids", new DenseTensor<long>(tokenTypeIds, shape)),
-        };
-
-        // Run model
-        using var results = _session.Run(inputs);
-        var logits = results[0].AsTensor<float>();
-
-        // The model outputs a single score [batch_size, 1]
-        return logits[0];
+        return Score(queryIds, text);
     }
 
 

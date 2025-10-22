@@ -42,23 +42,5 @@ public class EmbeddingScorer : IResumeScorer
 
 
 
-    public float Score(float[] entryEmbed) => CosineSimilarity(_jobDescriptionEmbed, entryEmbed);
-
-
-
-    private static float CosineSimilarity(float[] a, float[] b)
-    {
-        float dot = 0.0f;
-        float magA = 0.0f;
-        float magB = 0.0f;
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            dot += a[i] * b[i];
-            magA += a[i] * a[i];
-            magB += b[i] * b[i];
-        }
-
-        return dot / (MathF.Sqrt(magA) * MathF.Sqrt(magB));
-    }
+    public float Score(float[] entryEmbed) => MathHelpers.CosineSimilarity(_jobDescriptionEmbed, entryEmbed);
 }

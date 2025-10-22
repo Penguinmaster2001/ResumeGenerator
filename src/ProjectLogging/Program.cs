@@ -60,11 +60,8 @@ public static class Program
         var resumePath = Path.ChangeExtension(args[9], null);
         GeneratePdf(resumeModel, resumePath);
 
-        // var filteredModel = FilterResume(resumeModel, args[11]);
+        var filteredModel = FilterResume(resumeModel, args[11]);
 
-        var filteredSegments = new DiversityRanker().FilterResume(resumeModel.ResumeBody.ResumeSegments, args[11]);
-        var filteredBody = new ResumeBodyModel(filteredSegments);
-        var filteredModel = new ResumeModel(resumeModel.ResumeHeader, filteredBody);
         GeneratePdf(filteredModel, resumePath + "Filtered");
         // GenerateWebsite(resumeModel, args[10]);
     }
@@ -90,15 +87,10 @@ public static class Program
             return model;
         }
 
-        using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
-        var jobDescription = jobDescriptionFile.ReadToEnd();
-
-        var encoder = new CrossEncoder(config.ModelPath, config.VocabPath, 512);
-        var scorer = new CrossEncodingScorer(encoder, jobDescription);
-        var filter = new EmbeddingFilter(config, scorer);
+        var diversityRanker = new DiversityRanker(config);
 
         Console.WriteLine("Filtering");
-        var filtered = filter.FilterData(model.ResumeBody.ResumeSegments, jobDescription);
+        var filtered = diversityRanker.FilterResume(model.ResumeBody.ResumeSegments);
         Console.WriteLine("Filtering done");
 
         var filteredBody = new ResumeBodyModel(filtered);

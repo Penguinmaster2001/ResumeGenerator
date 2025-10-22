@@ -1,5 +1,4 @@
 
-using System.Text.Json;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.Text;
 using ProjectLogging.Views.ViewCreation;
@@ -12,47 +11,40 @@ namespace ProjectLogging.ResumeGeneration.Filtering;
 
 public class DiversityRanker
 {
-    public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments, string configPath)
+    private readonly AiFilterConfig _config;
+    private readonly CrossEncodingScorer _crossScorer;
+    private readonly EmbeddingGenerator _embeddingGenerator;
+    private readonly ViewFactory<string> _promptFactory;
+    public float Lambda { get; set; } = 0.3f;
+    public float CrossDivisor { get; set; } = 6.0f;
+
+
+
+
+    public DiversityRanker(AiFilterConfig config)
     {
-        AiFilterConfig? config;
-        try
-        {
-            config = JsonSerializer.Deserialize<AiFilterConfig>(File.OpenRead(configPath));
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error parsing config: {ex}");
-            config = null;
-        }
+        _config = config;
 
-        if (config is null)
-        {
-            Console.WriteLine("Unable to load ai config, no filtering done");
-            return resumeSegments;
-        }
-
-        using var jobDescriptionFile = File.OpenText(config.jobDescriptionPath);
+        using var jobDescriptionFile = File.OpenText(_config.jobDescriptionPath);
         var jobDescription = jobDescriptionFile.ReadToEnd();
+        _crossScorer = new CrossEncodingScorer(new CrossEncoder(_config.CrossEncoderModelPath, _config.CrossEncoderVocabPath, 512), jobDescription);
+        _embeddingGenerator = new EmbeddingGenerator(_config.EmbeddingModelPath, _config.EmbeddingVocabPath);
 
-        // Use this to compare with the job description
-        var crossScorer = new CrossEncodingScorer(new CrossEncoder(config.ModelPath, config.VocabPath, 512), jobDescription);
-
-        // Use this to compare the similarity between entries
-        var embeddingGenerator = new EmbeddingGenerator("../testing/AiModels/all-MiniLM-L6-v2/model.onnx", "../testing/AiModels/all-MiniLM-L6-v2/vocab.txt");
+        _promptFactory = new ViewFactory<string>();
+        _promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
+    }
 
 
-        var promptFactory = new ViewFactory<string>();
-        promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
 
-        Console.WriteLine("Filtering");
-
+    public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments)
+    {
         var ranks = new List<DiversityRank>();
         var segmentDatabase = new Dictionary<int, (int order, ResumeSegmentModel segment)>();
         var entryDatabase = new Dictionary<int, ResumeEntryModel>();
 
         var numToTake = new Dictionary<int, int>();
 
-        var defaultEntryCount = config.DefaultEntryCount <= -1 ? int.MaxValue : config.DefaultEntryCount;
+        var defaultEntryCount = _config.DefaultEntryCount <= -1 ? int.MaxValue : _config.DefaultEntryCount;
 
         var orderedSegments = new List<(int order, ResumeSegmentModel segment)>();
 
@@ -61,7 +53,7 @@ public class DiversityRanker
         {
             var segment = resumeSegments[i];
 
-            if (!config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
+            if (!_config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
             {
                 // Segment was not mutated
                 orderedSegments.Add((i, segment));
@@ -81,7 +73,7 @@ public class DiversityRanker
                 idCounter++;
                 entryDatabase.Add(entryId, entry);
 
-                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(promptFactory)}", entryId, segmentId);
+                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(_promptFactory)}", entryId, segmentId);
                 ranks.Add(newRank);
             }
         }
@@ -99,7 +91,7 @@ public class DiversityRanker
             var segment = segmentDatabase[entryRank.Category].segment;
 
             // Note *segment*.TitleText
-            if (!config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out var pointCount))
+            if (!_config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out var pointCount))
             {
                 // Entry was not mutated
                 continue;
@@ -124,8 +116,6 @@ public class DiversityRanker
 
         var selectedPoints = SortRanks(ranks, numToTake);
 
-        Console.WriteLine("Filtering done");
-
         // Rebuild entries
         foreach (var selectedPoint in selectedPoints)
         {
@@ -145,16 +135,16 @@ public class DiversityRanker
             .ToList();
 
         return filteredSegments;
+    }
 
 
 
-        DiversityRank CreateDiversityRank(string prompt, int id, int category)
-        {
-            var jobScore = NormalizeScore(crossScorer.Score(prompt));
-            var embedding = embeddingGenerator.GetEmbedding(prompt);
+    private DiversityRank CreateDiversityRank(string prompt, int id, int category)
+    {
+        var jobScore = NormalizeScore(_crossScorer.Score(prompt));
+        var embedding = _embeddingGenerator.GetEmbedding(prompt);
 
-            return new(jobScore, jobScore, prompt, embedding, id, category);
-        }
+        return new(jobScore, jobScore, prompt, embedding, id, category);
     }
 
 
@@ -175,6 +165,7 @@ public class DiversityRanker
             unsortedRanks.RemoveAt(unsortedRanks.Count - 1);
 
             categoryLeft[rankToAdd.Category]--;
+
             // Took as many from this category as is needed, remove the rest
             if (categoryLeft[rankToAdd.Category] <= 0)
             {
@@ -188,7 +179,7 @@ public class DiversityRanker
                     if (!memoizedSimilarities.TryGetValue((unsortedRank.Id, sortedRank.Id), out var similarity)
                         && !memoizedSimilarities.TryGetValue((sortedRank.Id, unsortedRank.Id), out similarity))
                     {
-                        similarity = CosineSimilarity(unsortedRank.Embedding, sortedRank.Embedding);
+                        similarity = MathHelpers.CosineSimilarity(unsortedRank.Embedding, sortedRank.Embedding);
                         memoizedSimilarities.Add((unsortedRank.Id, sortedRank.Id), similarity);
                     }
 
@@ -207,69 +198,12 @@ public class DiversityRanker
 
 
 
-    private float NormalizeScore(float score) => MathF.Tanh(score / 6.0f);
-
-
-
-    private static float CosineSimilarity(float[] a, float[] b)
-    {
-        float dot = 0.0f;
-        float magA = 0.0f;
-        float magB = 0.0f;
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            dot += a[i] * b[i];
-            magA += a[i] * a[i];
-            magB += b[i] * b[i];
-        }
-
-        return dot / (MathF.Sqrt(magA) * MathF.Sqrt(magB));
-    }
+    private float NormalizeScore(float score) => MathF.Tanh(score / CrossDivisor);
 
 
 
     private float CalculateTotalScore(DiversityRank rank)
     {
-        var l = 0.7f;
-        return (l * rank.JobScore) - ((1.0f - l) * rank.MaxSimilarity);
-    }
-}
-
-
-
-public class DiversityRank(float jobScore,
-    float totalScore,
-    string prompt,
-    float[] embedding,
-    int id,
-    int category) : IComparable<DiversityRank>
-{
-    public float JobScore = jobScore;
-    public float MaxSimilarity = -1.0f;
-    public float TotalScore = totalScore;
-    public string Prompt = prompt;
-    public float[] Embedding = embedding;
-    public int Id = id;
-    public int Category = category;
-
-
-
-    public int CompareTo(DiversityRank? other)
-    {
-        if (other == null) return 0;
-
-        if (TotalScore < other.TotalScore) return -1;
-
-        if (TotalScore == other.TotalScore) return 0;
-
-        return 1;
-    }
-
-
-
-    public override string ToString()
-    {
-        return $"JobScore: {JobScore:0.000}, TotalScore: {TotalScore:0.000}, MaxSimilarity: {MaxSimilarity:0.000}, Prompt: {Prompt}";
+        return (Lambda * rank.JobScore) - ((1.0f - Lambda) * rank.MaxSimilarity);
     }
 }

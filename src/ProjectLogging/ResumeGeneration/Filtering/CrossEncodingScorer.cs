@@ -38,15 +38,10 @@ public class CrossEncodingScorer : IResumeScorer
 
     public float Score(string entryText)
     {
-        var query = JobDescription;
         var prompt = CreatePrompt(entryText);
         var score = CrossEncoder.Score(_jobTokens, prompt);
-
-        // Console.WriteLine($"{query} $$$ {prompt} $$$ {score}");
         
         return score;
-    
-        // return CrossEncoder.Score(JobDescription, CreatePrompt(entryText));
     }
 
 
