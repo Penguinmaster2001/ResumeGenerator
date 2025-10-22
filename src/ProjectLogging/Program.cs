@@ -22,6 +22,9 @@ public static class Program
 {
     public static async Task Main()
     {
+        // DESIGN ISSUE: Hard-coded argument count and indices make this brittle and error-prone.
+        // Consider using a command-line parsing library (e.g., System.CommandLine) or a configuration
+        // object to make argument handling more maintainable and self-documenting.
         string[] args = Environment.GetCommandLineArgs();
         if (args.Length < 11)
         {
@@ -30,6 +33,9 @@ public static class Program
             return;
         }
 
+        // DESIGN ISSUE: Magic numbers for array indices make the code difficult to understand and maintain.
+        // If argument order changes, multiple locations must be updated. Consider using named constants
+        // or an enum to make the intent clear (e.g., const int PERSONAL_INFO_INDEX = 1).
         var personalInfo = RecordLoader.LoadPersonalInfoAsync(args[1]);
 
         var jobs = RecordLoader.LoadRecordsAsync<Job>(args[2]);
@@ -60,6 +66,9 @@ public static class Program
         var resumePath = Path.ChangeExtension(args[9], null);
         GeneratePdf(resumeModel, resumePath);
 
+        // DESIGN ISSUE: args[11] is accessed but the length check only verifies 11 arguments (indices 0-10).
+        // This will throw an IndexOutOfRangeException if exactly 11 arguments are provided.
+        // The check should be "args.Length < 12" to access args[11] safely.
         var filteredModel = FilterResume(resumeModel, args[11]);
 
         GeneratePdf(filteredModel, resumePath + "Filtered");
@@ -70,6 +79,10 @@ public static class Program
 
     private static ResumeModel FilterResume(ResumeModel model, string configPath)
     {
+        // DESIGN ISSUE: Catching generic Exception hides specific errors and makes debugging difficult.
+        // Consider catching specific exceptions (JsonException, FileNotFoundException, IOException)
+        // to handle different error scenarios appropriately. Also, silently returning the original
+        // model on error could mask configuration problems that should be reported to users.
         AiFilterConfig? config;
         try
         {

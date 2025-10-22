@@ -62,6 +62,12 @@ public class ViewFactory<V> : IViewFactory<V>
     {
         ArgumentNullException.ThrowIfNull(model, nameof(model));
 
+        // DESIGN ISSUE: Unsafe type casting without proper validation. If the strategy exists but is
+        // not of type ViewStrategy<V, T>, the cast to 'typedStrategy' will succeed (null check passes)
+        // but the strategy won't actually be usable. The pattern match should be combined with a null
+        // check, or use "is ViewStrategy<V, T> typedStrategy" in the condition for safer type checking.
+        // Additionally, consider whether TryGetValue and pattern matching can be refactored into a
+        // single, clearer operation to avoid this split validation logic.
         if (!_strategies.TryGetValue(model.GetType(), out var strategy)
             || strategy is not ViewStrategy<V, T> typedStrategy)
         {

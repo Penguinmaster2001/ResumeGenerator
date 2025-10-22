@@ -31,6 +31,11 @@ public class DataCollection : IDataCollection
     {
         if (!_data.TryGetValue((label, typeof(T)), out var data))
         {
+            // DESIGN ISSUE: Throwing generic Exception instead of a more specific exception type.
+            // Consider creating a custom exception (e.g., DataNotFoundException) or using built-in
+            // exceptions like KeyNotFoundException or InvalidOperationException for better error
+            // handling and clearer intent. Generic exceptions make it harder for calling code to
+            // handle specific error scenarios appropriately.
             throw new Exception($"Data of type {typeof(T)} and label {label} not found in collection.");
         }
 
