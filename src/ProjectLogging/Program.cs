@@ -61,8 +61,8 @@ public static class Program
         GeneratePdf(resumeModel, resumePath);
 
         var filteredModel = FilterResume(resumeModel, args[11]);
-
         GeneratePdf(filteredModel, resumePath + "Filtered");
+
         // GenerateWebsite(resumeModel, args[10]);
     }
 

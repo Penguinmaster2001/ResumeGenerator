@@ -83,9 +83,9 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 {
                     column.Item().Row(row =>
                     {
-                        row.ConstantItem(5.0f);
+                        row.ConstantItem(6.0f);
                         row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
-                        row.ConstantItem(5.0f);
+                        row.ConstantItem(4.0f);
                         row.RelativeItem().Text(bulletPoint).LineHeight(1.3f);
                     });
                 }
