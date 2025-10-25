@@ -12,6 +12,12 @@ namespace ProjectLogging.Views.Pdf;
 
 public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEntryModel>
 {
+    public static List<Color> BulletPointColors = [
+        Color.FromHex("#103610"),
+        Color.FromHex("#101840"),
+    ];
+
+
 
     public override Action<IContainer> BuildView(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
         => (container) =>
@@ -79,6 +85,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
     private Action<IContainer> BulletPoints(ResumeEntryModel model)
         => (container) => container.Column(column =>
             {
+                int colorIndex = 0;
                 foreach (string bulletPoint in model.PointsText)
                 {
                     column.Item().Row(row =>
@@ -86,8 +93,10 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                         row.ConstantItem(6.0f);
                         row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
                         row.ConstantItem(4.0f);
-                        row.RelativeItem().Text(bulletPoint).LineHeight(1.3f);
+                        row.RelativeItem().Text(bulletPoint).LineHeight(1.3f).FontColor(BulletPointColors[colorIndex]);
                     });
+
+                    colorIndex = (colorIndex + 1) % BulletPointColors.Count;
                 }
             });
 }
