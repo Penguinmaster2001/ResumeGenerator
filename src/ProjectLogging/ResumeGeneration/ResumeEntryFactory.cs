@@ -64,7 +64,7 @@ public static class ResumeEntryFactory
 
 
 
-    public static ResumeEntryModel CreateEntry(Category category) => CreateEntry(category.Name, category.Items);
+    public static ResumeEntryModel CreateEntry(Category category) => CreateEntry(category.Title, category.Items);
 
 
     public static ResumeEntryModel DuplicateEntry(ResumeEntryModel entryModel)

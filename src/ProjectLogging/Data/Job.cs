@@ -13,7 +13,7 @@ public record Job(string Company,
                   string Position,
                   string ShortDescription,
                   List<string> Points,
-                  List<Skill> Skills,
+                  SkillCollection Skills,
                   string Location,
                   DateOnly StartDate,
                   DateOnly? EndDate)

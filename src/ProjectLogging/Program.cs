@@ -22,6 +22,19 @@ public static class Program
 {
     public static async Task Main()
     {
+        // var testSkillCollection = new SkillCollection();
+        // Console.WriteLine(JsonSerializer.Serialize(testSkillCollection));
+
+        // testSkillCollection.Categories.Add(new Category("test1", ["a", "b", "c"]));
+        // testSkillCollection.Categories.Add(new Category("test2", ["x", "y", "z"]));
+
+        // Console.WriteLine(JsonSerializer.Serialize(testSkillCollection));
+
+        // var testProject = new Project("project title", "short desc", ["p1", "p2", "p3"], testSkillCollection, "loc", DateOnly.Parse("2025-01-01"), null);
+        // Console.WriteLine(JsonSerializer.Serialize(testProject));
+        // return;
+
+
         string[] args = Environment.GetCommandLineArgs();
         if (args.Length < 11)
         {
@@ -46,6 +59,8 @@ public static class Program
 
         var dataCollection = new DataCollection();
 
+        Console.WriteLine(skills.Result);
+
         dataCollection.AddData("personal info", personalInfo.Result);
         dataCollection.AddData("tech skills", skills.Result);
         dataCollection.AddData("education", education.Result);
@@ -60,8 +75,8 @@ public static class Program
         var resumePath = Path.ChangeExtension(args[9], null);
         GeneratePdf(resumeModel, resumePath);
 
-        var filteredModel = FilterResume(resumeModel, args[11]);
-        GeneratePdf(filteredModel, resumePath + "Filtered");
+        // var filteredModel = FilterResume(resumeModel, args[11]);
+        // GeneratePdf(filteredModel, resumePath + "Filtered");
 
         // GenerateWebsite(resumeModel, args[10]);
     }

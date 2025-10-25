@@ -14,7 +14,7 @@ public record Education(string School,
                         string? ShortDescription,
                         List<string> Points,
                         List<string> RelevantCourses,
-                        List<Skill> Skills,
+                        SkillCollection Skills,
                         string Location,
                         DateOnly StartDate,
                         DateOnly? EndDate)
