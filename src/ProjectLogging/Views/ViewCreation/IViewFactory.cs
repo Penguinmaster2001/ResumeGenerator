@@ -6,7 +6,7 @@ namespace ProjectLogging.Views.ViewCreation;
 public interface IViewFactory<V>
 {
     void AddHelper<T, U>() where U : T, new();
-    void AddHelper<T, U>(U helper) where U : T;
+    void AddHelper<T>(T helper);
     T GetHelper<T>();
 
 

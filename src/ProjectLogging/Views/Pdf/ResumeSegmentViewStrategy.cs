@@ -23,7 +23,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
                     .AlignCenter()
                     .FontSize(12.0f)
                     .Bold()
-                    .FontColor(Colors.Green.Darken3);
+                    .FontColor(factory.GetHelper<IPdfStyleManager>().SegmentHeaderColor);
 
                 foreach (ResumeEntryModel entry in model.Entries)
                 {

@@ -10,6 +10,7 @@ using ProjectLogging.Views.Pdf;
 using ProjectLogging.Views.ViewCreation;
 using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -103,11 +104,39 @@ public static class Program
 
     private static void GeneratePdf(ResumeModel resumeModel, string outDir)
     {
+        // var styleManager = new PdfStyleManager()
+        // {
+        //     PageColor = Color.FromHex("#FFFFFF"),
+        //     SectionHeaderColor = Color.FromHex("#0B3D91"),
+        //     PersonalInfoTextColor = Color.FromHex("#0B3D91"),
+        //     AccentColor = Color.FromHex("#6B7280"),
+        //     TextColor = Color.FromHex("#000000"),
+        //     BulletPointColors = [
+        //         Color.FromHex("#117A65"),
+        //         Color.FromHex("#0f4c40ff"),
+        //         ],
+        // };
+
+        var styleManager = new PdfStyleManager()
+        {
+            PageColor = Colors.White,
+            SegmentHeaderColor = Colors.Green.Darken3,
+            HeaderTextColor = Colors.Blue.Darken4,
+            AccentColor = Colors.Black,
+            TextColor = Colors.Black,
+            BulletPointColors = [
+                Color.FromHex("#103610"),
+                Color.FromHex("#101840"),
+                ],
+        };
+
         var viewFactory = new ViewFactory<Action<IContainer>>();
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
         viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
         viewFactory.AddStrategy<ResumeEntryViewStrategy>();
         viewFactory.AddStrategy<ResumeBodyOneColumnViewStrategy>();
+
+        viewFactory.AddHelper<IPdfStyleManager>(styleManager);
 
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;

@@ -1,5 +1,6 @@
 
 using ProjectLogging.Models.Resume;
+using ProjectLogging.ResumeGeneration;
 using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
@@ -12,13 +13,6 @@ namespace ProjectLogging.Views.Pdf;
 
 public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEntryModel>
 {
-    public static List<Color> BulletPointColors = [
-        Color.FromHex("#103610"),
-        Color.FromHex("#101840"),
-    ];
-
-
-
     public override Action<IContainer> BuildView(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
         => (container) =>
         {
@@ -52,7 +46,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
                 if (bulletPoints)
                 {
-                    column.Item().Element(BulletPoints(model));
+                    column.Item().Element(BulletPoints(model, factory));
                 }
             });
         };
@@ -82,10 +76,11 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
 
 
-    private Action<IContainer> BulletPoints(ResumeEntryModel model)
+    private Action<IContainer> BulletPoints(ResumeEntryModel model, IViewFactory<Action<IContainer>> factory)
         => (container) => container.Column(column =>
             {
                 int colorIndex = 0;
+                var bulletColors = factory.GetHelper<IPdfStyleManager>().BulletPointColors;
                 foreach (string bulletPoint in model.PointsText)
                 {
                     column.Item().Row(row =>
@@ -93,10 +88,10 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                         row.ConstantItem(6.0f);
                         row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
                         row.ConstantItem(4.0f);
-                        row.RelativeItem().Text(bulletPoint).LineHeight(1.3f).FontColor(BulletPointColors[colorIndex]);
+                        row.RelativeItem().Text(bulletPoint).LineHeight(1.3f).FontColor(bulletColors[colorIndex]);
                     });
 
-                    colorIndex = (colorIndex + 1) % BulletPointColors.Count;
+                    colorIndex = (colorIndex + 1) % bulletColors.Count;
                 }
             });
 }
