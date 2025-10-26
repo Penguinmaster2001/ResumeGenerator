@@ -1,6 +1,6 @@
 
 using ProjectLogging.Models.Resume;
-using ProjectLogging.ResumeGeneration;
+using ProjectLogging.ResumeGeneration.Styling;
 using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;

@@ -1,5 +1,6 @@
 
 using ProjectLogging.Models.Resume;
+using ProjectLogging.ResumeGeneration.Styling;
 using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -32,6 +33,7 @@ public class ResumeDocument : IDocument
             page.Margin(0.3f, Unit.Inch);
             page.PageColor(_viewFactory.GetHelper<IPdfStyleManager>().PageColor);
             page.DefaultTextStyle(textStyle => textStyle.FontSize(10.5f)
+                .FontColor(_viewFactory.GetHelper<IPdfStyleManager>().TextColor)
                 .FontFamily(_viewFactory.GetHelper<IPdfStyleManager>().FontFamily)
                 .LineHeight(1.2f));
 

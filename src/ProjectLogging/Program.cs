@@ -5,6 +5,7 @@ using ProjectLogging.Models.Resume;
 using ProjectLogging.Projects;
 using ProjectLogging.ResumeGeneration;
 using ProjectLogging.ResumeGeneration.Filtering;
+using ProjectLogging.ResumeGeneration.Styling;
 using ProjectLogging.Skills;
 using ProjectLogging.Views.Pdf;
 using ProjectLogging.Views.ViewCreation;
@@ -20,14 +21,22 @@ namespace ProjectLogging;
 
 public static class Program
 {
-    public static async Task Main()
+    public static async Task<int> Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        if (args.Length < 11)
+        if (args.Length <= 9)
         {
             Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
-                + "<education json> <courses json> <hobbies json> <skills json> <resume output> <website output>");
-            return;
+                + "<education json> <courses json> <hobbies json> <skills json> <settings path>");
+            return -1;
+        }
+
+        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(args[9]));
+
+        if (settings is null)
+        {
+            Console.WriteLine("Unable to read settings");
+            return -1;
         }
 
         var personalInfo = RecordLoader.LoadPersonalInfoAsync(args[1]);
@@ -56,14 +65,14 @@ public static class Program
         dataCollection.AddData("hobbies", hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
+        GeneratePdf(resumeModel, settings, "resume");
 
-        var resumePath = Path.ChangeExtension(args[9], null);
-        GeneratePdf(resumeModel, resumePath);
+        // var filteredModel = FilterResume(resumeModel, settings);
+        // GeneratePdf(filteredModel, "resumeFiltered");
 
-        // var filteredModel = FilterResume(resumeModel, args[11]);
-        // GeneratePdf(filteredModel, resumePath + "Filtered");
+        // GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
 
-        // GenerateWebsite(resumeModel, args[10]);
+        return 0;
     }
 
 
@@ -101,86 +110,11 @@ public static class Program
 
 
 
-    private static void GeneratePdf(ResumeModel resumeModel, string outDir)
+    private static void GeneratePdf(ResumeModel resumeModel, GenerationSettings settings, string fileName)
     {
-        // var styleManager = new PdfStyleManager();
-        
-        var styleManager = new PdfStyleManager()
-        {
-            PageColor = Color.FromHex("#F7F5F0"),
-            SegmentHeaderColor = Color.FromHex("#0B3D91"),
-            ResumeHeaderTextColor = Color.FromHex("#0B3D91"),
-            NameTextColor = Color.FromHex("#0B3D91"),
-            AccentColor = Color.FromHex("#6B7280"),
-            TextColor = Color.FromHex("#000000"),
-            BulletPointColors = [
-                    Color.FromHex("#323846"),
-                    Color.FromHex("#001315"),
-                ],
-            FontFamily = "Ubuntu Condensed",
-        };
+        var styles = JsonSerializer.Deserialize<Dictionary<string, PdfStyleConfig>>(File.OpenRead(settings.PdfStylesPath)) ?? [];
 
-        // var styleManager = new PdfStyleManager()
-        // {
-        //     PageColor = Colors.White,
-        //     SegmentHeaderColor = Colors.Green.Darken3,
-        //     ResumeHeaderTextColor = Colors.Blue.Darken4,
-        //     NameTextColor = Colors.Blue.Accent2,
-        //     AccentColor = Colors.Black,
-        //     TextColor = Colors.Black,
-        //     BulletPointColors = [
-        //         Color.FromHex("#103610"),
-        //         Color.FromHex("#101840"),
-        //         ],
-        //     FontFamily = "Ubuntu Condensed",
-        // };
-
-        // var styleManager = new PdfStyleManager()
-        // {
-        //     PageColor = Color.FromHex("#FAFAFA"),
-        //     SegmentHeaderColor = Color.FromHex("#111827"),
-        //     SegmentBackgroundColors = [Color.FromHex("#g0g0g0"), Color.FromHex("#00FFFFFF")],
-        //     ResumeHeaderTextColor = Color.FromHex("#111827"),
-        //     NameTextColor = Color.FromHex("#FF6B6B"),
-        //     AccentColor = Color.FromHex("#EAB308"),
-        //     TextColor = Color.FromHex("#374151"),
-        //     BulletPointColors = [
-        //             Color.FromHex("#4b1010"),
-        //             Color.FromHex("#4a3902"),
-        //         ],
-        //     FontFamily = "Ubuntu Condensed",
-        // };
-
-        // var styleManager = new PdfStyleManager()
-        // {
-        //     PageColor = Color.FromHex("#FFFFFF"),
-        //     SegmentHeaderColor = Color.FromHex("#312e81"),
-        //     ResumeHeaderTextColor = Color.FromHex("#06b6d4"),
-        //     NameTextColor = Color.FromHex("#312e81"),
-        //     AccentColor = Color.FromHex("#84cc16"),
-        //     TextColor = Color.FromHex("#0f172a"),
-        //     BulletPointColors = [
-        //             Color.FromHex("#06b6d4"),
-        //             Color.FromHex("#312e81"),
-        //             Color.FromHex("#84cc16"),
-        //         ],
-        //     FontFamily = "Ubuntu Condensed",
-        // };
-
-        // var styleManager = new PdfStyleManager()
-        // {
-        //     PageColor = Color.FromHex("#F7F5F0"),
-        //     SegmentHeaderColor = Color.FromHex("#6e6e73"),
-        //     ResumeHeaderTextColor = Color.FromHex("#6e6e73"),
-        //     NameTextColor = Color.FromHex("#4a1f23"),
-        //     AccentColor = Color.FromHex("#4a1f23"),
-        //     TextColor = Color.FromHex("#111111"),
-        //     BulletPointColors = [
-        //             Color.FromHex("#111111"),
-        //         ],
-
-        //     FontFamily = "URW Gothic"
-        // };
+        var styleManager = styles.TryGetValue(settings.PdfStyle, out var styleConfig) ? PdfStyleManager.CreateFromConfig(styleConfig) : new();
 
         var viewFactory = new ViewFactory<Action<IContainer>>();
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
@@ -194,7 +128,7 @@ public static class Program
         QuestPDF.Settings.UseEnvironmentFonts = false;
         QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
 
-        var path = Path.ChangeExtension(outDir, "pdf");
+        var path = Path.ChangeExtension(Path.Combine(settings.ResumeOutputPath, fileName), Constants.Resources.Pdf);
 
         new ResumeDocument(resumeModel, viewFactory).GeneratePdf(path);
     }
