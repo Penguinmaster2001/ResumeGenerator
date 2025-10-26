@@ -2,7 +2,6 @@
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -27,7 +26,7 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
 
                 foreach (ResumeEntryModel entry in model.Entries)
                 {
-                    column.Item().Element(entry.CreateView(factory));
+                    column.Item().PaddingHorizontal(3.0f).Element(entry.CreateView(factory));
                 }
             });
 }

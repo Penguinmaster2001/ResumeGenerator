@@ -10,7 +10,6 @@ using ProjectLogging.Views.Pdf;
 using ProjectLogging.Views.ViewCreation;
 using ProjectLogging.WebsiteGeneration;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -104,31 +103,84 @@ public static class Program
 
     private static void GeneratePdf(ResumeModel resumeModel, string outDir)
     {
+        // var styleManager = new PdfStyleManager();
+        
+        var styleManager = new PdfStyleManager()
+        {
+            PageColor = Color.FromHex("#F7F5F0"),
+            SegmentHeaderColor = Color.FromHex("#0B3D91"),
+            ResumeHeaderTextColor = Color.FromHex("#0B3D91"),
+            NameTextColor = Color.FromHex("#0B3D91"),
+            AccentColor = Color.FromHex("#6B7280"),
+            TextColor = Color.FromHex("#000000"),
+            BulletPointColors = [
+                    Color.FromHex("#323846"),
+                    Color.FromHex("#001315"),
+                ],
+            FontFamily = "Ubuntu Condensed",
+        };
+
+        // var styleManager = new PdfStyleManager()
+        // {
+        //     PageColor = Colors.White,
+        //     SegmentHeaderColor = Colors.Green.Darken3,
+        //     ResumeHeaderTextColor = Colors.Blue.Darken4,
+        //     NameTextColor = Colors.Blue.Accent2,
+        //     AccentColor = Colors.Black,
+        //     TextColor = Colors.Black,
+        //     BulletPointColors = [
+        //         Color.FromHex("#103610"),
+        //         Color.FromHex("#101840"),
+        //         ],
+        //     FontFamily = "Ubuntu Condensed",
+        // };
+
+        // var styleManager = new PdfStyleManager()
+        // {
+        //     PageColor = Color.FromHex("#FAFAFA"),
+        //     SegmentHeaderColor = Color.FromHex("#111827"),
+        //     SegmentBackgroundColors = [Color.FromHex("#g0g0g0"), Color.FromHex("#00FFFFFF")],
+        //     ResumeHeaderTextColor = Color.FromHex("#111827"),
+        //     NameTextColor = Color.FromHex("#FF6B6B"),
+        //     AccentColor = Color.FromHex("#EAB308"),
+        //     TextColor = Color.FromHex("#374151"),
+        //     BulletPointColors = [
+        //             Color.FromHex("#4b1010"),
+        //             Color.FromHex("#4a3902"),
+        //         ],
+        //     FontFamily = "Ubuntu Condensed",
+        // };
+
         // var styleManager = new PdfStyleManager()
         // {
         //     PageColor = Color.FromHex("#FFFFFF"),
-        //     SectionHeaderColor = Color.FromHex("#0B3D91"),
-        //     PersonalInfoTextColor = Color.FromHex("#0B3D91"),
-        //     AccentColor = Color.FromHex("#6B7280"),
-        //     TextColor = Color.FromHex("#000000"),
+        //     SegmentHeaderColor = Color.FromHex("#312e81"),
+        //     ResumeHeaderTextColor = Color.FromHex("#06b6d4"),
+        //     NameTextColor = Color.FromHex("#312e81"),
+        //     AccentColor = Color.FromHex("#84cc16"),
+        //     TextColor = Color.FromHex("#0f172a"),
         //     BulletPointColors = [
-        //         Color.FromHex("#117A65"),
-        //         Color.FromHex("#0f4c40ff"),
+        //             Color.FromHex("#06b6d4"),
+        //             Color.FromHex("#312e81"),
+        //             Color.FromHex("#84cc16"),
         //         ],
+        //     FontFamily = "Ubuntu Condensed",
         // };
 
-        var styleManager = new PdfStyleManager()
-        {
-            PageColor = Colors.White,
-            SegmentHeaderColor = Colors.Green.Darken3,
-            HeaderTextColor = Colors.Blue.Darken4,
-            AccentColor = Colors.Black,
-            TextColor = Colors.Black,
-            BulletPointColors = [
-                Color.FromHex("#103610"),
-                Color.FromHex("#101840"),
-                ],
-        };
+        // var styleManager = new PdfStyleManager()
+        // {
+        //     PageColor = Color.FromHex("#F7F5F0"),
+        //     SegmentHeaderColor = Color.FromHex("#6e6e73"),
+        //     ResumeHeaderTextColor = Color.FromHex("#6e6e73"),
+        //     NameTextColor = Color.FromHex("#4a1f23"),
+        //     AccentColor = Color.FromHex("#4a1f23"),
+        //     TextColor = Color.FromHex("#111111"),
+        //     BulletPointColors = [
+        //             Color.FromHex("#111111"),
+        //         ],
+
+        //     FontFamily = "URW Gothic"
+        // };
 
         var viewFactory = new ViewFactory<Action<IContainer>>();
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
