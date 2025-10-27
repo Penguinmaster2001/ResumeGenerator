@@ -1,5 +1,4 @@
 
-using System.Collections;
 using System.Text.Json;
 
 
@@ -8,37 +7,59 @@ namespace ProjectLogging.Skills;
 
 
 
-public class SkillCollection(Dictionary<string, List<string>> categorySkills) : IEnumerable, IEnumerable<Category>
+public class SkillCollection
 {
-    public Dictionary<string, List<string>> CategoryNames { get; set; } = categorySkills;
+    public List<Category> Categories { get; set; } = [];
 
 
 
-    public SkillCollection() : this([]) { }
-
-
-
-    public void AddSkills(List<ISkillData> skillData, bool addNewCategories = false)
+    public SkillCollection(List<Category> categories)
     {
-        foreach (var data in skillData)
-        {
-            foreach (var skill in data.Skills)
-            {
-                if (!CategoryNames.TryGetValue(skill.Category, out var categorySkills))
-                {
-                    if (!addNewCategories) break;
-                    categorySkills = [];
-                    CategoryNames.Add(skill.Category, categorySkills);
-                }
+        Categories = categories;
+    }
 
-                // Can't use a set, need to preserve order
-                if (!categorySkills.Contains(skill.Name))
-                {
-                    categorySkills.Add(skill.Name);
-                }
-            }
+
+
+    public SkillCollection() { }
+
+
+
+    public void Aggregate(IEnumerable<ISkillData> skillDataCollection, bool addNewCategories = true)
+    {
+        foreach (var data in skillDataCollection)
+        {
+            Combine(data.Skills, addNewCategories);
         }
     }
+
+
+
+    public void Combine(SkillCollection skills, bool addNewCategories = true)
+    {
+        foreach (var category in skills.Categories)
+        {
+            var ownCategory = Categories.Find(c => c.Title == category.Title);
+
+            if (ownCategory is null)
+            {
+                if (addNewCategories)
+                {
+                    Categories.Add(category.Copy());
+                }
+
+                continue;
+            }
+
+            ownCategory.Combine(category);
+        }
+    }
+
+
+
+    public static readonly JsonSerializerOptions SkillCollectionJsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
 
 
 
@@ -47,19 +68,13 @@ public class SkillCollection(Dictionary<string, List<string>> categorySkills) : 
 
     public static async Task<SkillCollection> LoadSkillsAsync(Stream stream)
     {
-        var categorySkills = await JsonSerializer.DeserializeAsync<Dictionary<string, List<string>>>(stream);
-
-        return new(categorySkills ?? []);
+        return await JsonSerializer.DeserializeAsync<SkillCollection>(stream, SkillCollectionJsonOptions) ?? new();
     }
 
 
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public IEnumerator<Category> GetEnumerator()
+    public override string ToString()
     {
-        foreach (string category in CategoryNames.Keys)
-        {
-            yield return new Category(category, CategoryNames[category]);
-        }
+        return $"SkillCollection(Categories: {string.Join('\n', Categories)})";
     }
 }

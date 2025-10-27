@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using ProjectLogging.Data;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Skills;
@@ -17,27 +18,27 @@ public static class ResumeModelFactory
 
         foreach (var skillData in data.GetDataOfType<IEnumerable<ISkillData>>().Select(s => s.data))
         {
-            skills.AddSkills([.. skillData]);
+            skills.Aggregate(skillData);
         }
 
         ResumeHeaderModel resumeHeader = new(data.GetData<PersonalInfo>("personal info"));
 
         var skillSegment = new ResumeSegmentModel("tech skills");
-        foreach (var category in skills.CategoryNames)
+        foreach (var category in skills.Categories)
         {
-            skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
+            skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
         }
 
-        var hobbySegment = new ResumeSegmentModel("hobbies");
-        foreach (var category in data.GetData<SkillCollection>("hobbies").CategoryNames)
-        {
-            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
-        }
+        // var hobbySegment = new ResumeSegmentModel("hobbies");
+        // foreach (var category in data.GetData<SkillCollection>("hobbies").Categories)
+        // {
+        //     hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
+        // }
 
         var educationSegment = CreateModel<List<Education>>("education", data);
-        foreach (var category in data.GetData<SkillCollection>("courses").CategoryNames)
+        foreach (var category in data.GetData<SkillCollection>("courses").Categories)
         {
-            educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(new Category(category.Key, category.Value)));
+            educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
         }
 
         var volunteerSegment = CreateModel<List<Volunteer>>("volunteer / extracurricular", data);
@@ -51,7 +52,7 @@ public static class ResumeModelFactory
                 careerSegment,
                 projectSegment,
                 volunteerSegment,
-                hobbySegment,
+                // hobbySegment,
             };
 
         ResumeBodyModel resumeBody = new(resumeSegments);

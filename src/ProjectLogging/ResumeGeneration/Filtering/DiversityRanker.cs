@@ -15,9 +15,8 @@ public class DiversityRanker
     private readonly CrossEncodingScorer _crossScorer;
     private readonly EmbeddingGenerator _embeddingGenerator;
     private readonly ViewFactory<string> _promptFactory;
-    public float Lambda { get; set; } = 0.3f;
-    public float CrossDivisor { get; set; } = 6.0f;
-
+    private readonly float[] _jobDescriptionEmbedding;
+    public float Lambda { get; set; } = 0.7f;
 
 
 
@@ -29,6 +28,7 @@ public class DiversityRanker
         var jobDescription = jobDescriptionFile.ReadToEnd();
         _crossScorer = new CrossEncodingScorer(new CrossEncoder(_config.CrossEncoderModelPath, _config.CrossEncoderVocabPath, 512), jobDescription);
         _embeddingGenerator = new EmbeddingGenerator(_config.EmbeddingModelPath, _config.EmbeddingVocabPath);
+        _jobDescriptionEmbedding = _embeddingGenerator.GetEmbedding($"Job description: {jobDescription}");
 
         _promptFactory = new ViewFactory<string>();
         _promptFactory.AddStrategy<ResumeEntryPromptViewStrategy>();
@@ -38,13 +38,49 @@ public class DiversityRanker
 
     public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments)
     {
+        resumeSegments = [.. resumeSegments];
+
+        // Hardcoding this for now
+        // This entire file is potentially the worst code I've ever written
+
+        // Choose 4 best courses
+        var educationSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == "education");
+        var educationSegment = resumeSegments[educationSegmentIndex];
+
+        var educationSegmentEntries = educationSegment.Entries.ToList();
+        var relevantCoursesEntry = educationSegmentEntries.Find(e => e.TitleText == "Relevant Courses")!;
+
+        relevantCoursesEntry.PointsText = [.. relevantCoursesEntry.PointsText.Select(p => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"University course taken: {p}")), text: p)).OrderByDescending(p => p.score).Take(4).Select(p => p.text)];
+
+        resumeSegments[educationSegmentIndex] = new(educationSegment.TitleText, educationSegmentEntries);
+
+        // Choose best skills, limit to 90 chars in length
+        var skillsSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == "tech skills");
+        var skillsSegment = resumeSegments[skillsSegmentIndex];
+        var skillsSegmentEntries = skillsSegment.Entries.ToList();
+
+        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s)).OrderByDescending(s => s.score).Take(4).Select(s => s.category).ToList();
+
+        foreach (var skillCategory in bestSkillCategories)
+        {
+            int totalLength = skillCategory.TitleText.Length + 2;
+            skillCategory.PointsText = [.. skillCategory.PointsText.Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill in category: {skillCategory.TitleText}: {s}")), text: s))
+                .OrderByDescending(s => s.score)
+                .TakeWhile(s =>
+                {
+                    totalLength += s.text.Length + 2;
+                    return totalLength <= 120;
+                })
+                .Select(s => s.text)];
+        }
+        resumeSegments[skillsSegmentIndex] = new(skillsSegment.TitleText, bestSkillCategories);
+
+
         var ranks = new List<DiversityRank>();
         var segmentDatabase = new Dictionary<int, (int order, ResumeSegmentModel segment)>();
         var entryDatabase = new Dictionary<int, ResumeEntryModel>();
 
         var numToTake = new Dictionary<int, int>();
-
-        var defaultEntryCount = _config.DefaultEntryCount <= -1 ? int.MaxValue : _config.DefaultEntryCount;
 
         var orderedSegments = new List<(int order, ResumeSegmentModel segment)>();
 
@@ -73,7 +109,14 @@ public class DiversityRanker
                 idCounter++;
                 entryDatabase.Add(entryId, entry);
 
-                var newRank = CreateDiversityRank($"{segment.TitleText} entry: {entry.CreateView(_promptFactory)}", entryId, segmentId);
+                var multiplier = 1.0f;
+                if (_config.EntryBoosts.TryGetValue(entry.TitleText, out var boost))
+                {
+                    multiplier += 0.01f * boost;
+                }
+
+                var newRank = CreateDiversityRank($"Resume section title: {segment.TitleText}\nEntry title and summary: {entry.CreateView(_promptFactory)}", entryId, segmentId, multiplier);
+
                 ranks.Add(newRank);
             }
         }
@@ -139,12 +182,18 @@ public class DiversityRanker
 
 
 
-    private DiversityRank CreateDiversityRank(string prompt, int id, int category)
+    private DiversityRank CreateDiversityRank(string prompt, int id, int category, float multiplier = 1.0f)
     {
-        var jobScore = NormalizeScore(_crossScorer.Score(prompt));
+        var jobScore = _crossScorer.Score(prompt);
         var embedding = _embeddingGenerator.GetEmbedding(prompt);
 
-        return new(jobScore, jobScore, prompt, embedding, id, category);
+        var rank = new DiversityRank(jobScore, 0.0f, prompt, embedding, multiplier)
+        {
+            Id = id,
+            Category = category
+        };
+
+        return rank;
     }
 
 
@@ -155,7 +204,7 @@ public class DiversityRanker
         var sortedRanks = new List<DiversityRank>();
         var categoryLeft = categoryNum.ToDictionary();
 
-        var memoizedSimilarities = new Dictionary<(int, int), float>();
+        PreprocessRanks(unsortedRanks);
 
         while (unsortedRanks.Count > 0)
         {
@@ -174,23 +223,14 @@ public class DiversityRanker
 
             foreach (var unsortedRank in unsortedRanks)
             {
-                foreach (var sortedRank in sortedRanks)
-                {
-                    if (!memoizedSimilarities.TryGetValue((unsortedRank.Id, sortedRank.Id), out var similarity)
-                        && !memoizedSimilarities.TryGetValue((sortedRank.Id, unsortedRank.Id), out similarity))
-                    {
-                        similarity = MathHelpers.CosineSimilarity(unsortedRank.Embedding, sortedRank.Embedding);
-                        memoizedSimilarities.Add((unsortedRank.Id, sortedRank.Id), similarity);
-                    }
+                var similarity = 0.5f * (1.0f + MathHelpers.CosineSimilarity(unsortedRank.Embedding, rankToAdd.Embedding));
 
-                    if (similarity > unsortedRank.MaxSimilarity)
-                    {
-                        unsortedRank.MaxSimilarity = similarity;
-                    }
-                }
+                CalculateAverage(unsortedRank, similarity, unsortedRanks.Count);
 
                 unsortedRank.TotalScore = CalculateTotalScore(unsortedRank);
             }
+
+            Console.WriteLine($"{rankToAdd}\n");
         }
 
         return sortedRanks;
@@ -198,12 +238,54 @@ public class DiversityRanker
 
 
 
-    private float NormalizeScore(float score) => MathF.Tanh(score / CrossDivisor);
+    private void PreprocessRanks(List<DiversityRank> ranks)
+    {
+        var lowestScore = ranks.Min(r => r.JobScore);
+        var highestScore = ranks.Max(r => r.JobScore);
+        var averageJobScore = ranks.Average(r => r.JobScore);
+        var variance = 0.0f;
+        foreach (var rank in ranks)
+        {
+            variance += (rank.JobScore - averageJobScore) * (rank.JobScore - averageJobScore);
+        }
+
+        variance = MathF.Sqrt(variance / (ranks.Count - 1));
+
+        Console.WriteLine($"Min: {lowestScore}\taverageJobScore: {averageJobScore}\tMax: {highestScore}\tvariance: {variance}\n");
+
+        foreach (var rank in ranks)
+        {
+            rank.JobScore = NormalizeScore((rank.JobScore - averageJobScore) / variance);
+
+            rank.TotalScore = CalculateTotalScore(rank);
+        }
+    }
+
+
+
+    private float NormalizeScore(float score) => 0.5f * (1.0f + MathF.Tanh(score));
+
+
+
+    private void CalculateAverage(DiversityRank rank, float added, int num)
+    {
+        // Max
+        // rank.AverageSimilarity = rank.AverageSimilarity > added ? rank.AverageSimilarity : added;
+
+        // Arithmetic average
+        // rank.TotalSimilarity += added;
+        // rank.AverageSimilarity = rank.TotalSimilarity / num;
+
+        // P-Mean
+        var p = 10.0f;
+        rank.TotalSimilarity += MathF.Pow(added, p);
+        rank.AverageSimilarity = MathF.Pow(rank.TotalSimilarity / num, 1.0f / p);
+    }
 
 
 
     private float CalculateTotalScore(DiversityRank rank)
     {
-        return (Lambda * rank.JobScore) - ((1.0f - Lambda) * rank.MaxSimilarity);
+        return rank.Multiplier * ((Lambda * rank.JobScore) - ((1.0f - Lambda) * rank.AverageSimilarity));
     }
 }

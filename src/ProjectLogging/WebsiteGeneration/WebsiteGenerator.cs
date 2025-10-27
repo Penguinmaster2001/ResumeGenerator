@@ -30,14 +30,14 @@ public class WebsiteGenerator
         viewFactory.AddStrategy<ResumeHtmlStrategy>();
         viewFactory.AddStrategy<NavLinksStrategy>();
 
-        viewFactory.AddHelper<IPageLinker, PageLinker>(new PageLinker(fileOrganizer));
-        viewFactory.AddHelper<IStyleManager, StyleManager>();
+        viewFactory.AddHelper<IPageLinker>(new PageLinker(fileOrganizer));
+        viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
 
         viewFactory.AddPostAction((htmlItem, factory) =>
             {
                 if (htmlItem is IHtmlElement htmlElement)
                 {
-                    factory.GetHelper<IStyleManager>().ApplyStyle(htmlElement);
+                    factory.GetHelper<IHtmlStyleManager>().ApplyStyle(htmlElement);
                 }
             });
 

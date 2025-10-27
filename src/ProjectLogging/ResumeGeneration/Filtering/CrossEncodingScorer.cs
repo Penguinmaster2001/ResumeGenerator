@@ -20,7 +20,7 @@ public class CrossEncodingScorer : IResumeScorer
                 return;
             }
 
-            _jobDescription = "[CLS] Rate how good the following resume snippet is for this job.\nJob:\n" + value.Trim();
+            _jobDescription = ("How well does the resume snippet match this job description?\n" + value.Trim()).ToLower();
 
             _jobTokens = [.. CrossEncoder.Tokenizer.EncodeToIds(_jobDescription).Select(i => (long)i)];
         }

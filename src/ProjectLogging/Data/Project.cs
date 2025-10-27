@@ -9,7 +9,7 @@ namespace ProjectLogging.Data;
 
 
 [JsonSerializable(typeof(Project))]
-public record Project(string Title, string ShortDescription, List<string> Points, List<Skill> Skills,
+public record Project(string Title, string ShortDescription, List<string> Points, SkillCollection Skills,
     string Location, DateOnly StartDate, DateOnly? EndDate) : BaseData(ShortDescription,
                         Points,
                         Skills,

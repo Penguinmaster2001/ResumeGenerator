@@ -7,7 +7,7 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 
 
 
-public interface IStyleManager
+public interface IHtmlStyleManager
 {
     void AddStyle(IHtmlElement element, string property, string value);
 

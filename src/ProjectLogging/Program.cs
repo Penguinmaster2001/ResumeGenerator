@@ -5,6 +5,7 @@ using ProjectLogging.Models.Resume;
 using ProjectLogging.Projects;
 using ProjectLogging.ResumeGeneration;
 using ProjectLogging.ResumeGeneration.Filtering;
+using ProjectLogging.ResumeGeneration.Styling;
 using ProjectLogging.Skills;
 using ProjectLogging.Views.Pdf;
 using ProjectLogging.Views.ViewCreation;
@@ -20,14 +21,26 @@ namespace ProjectLogging;
 
 public static class Program
 {
-    public static async Task Main()
+    public static async Task<int> Main()
     {
         string[] args = Environment.GetCommandLineArgs();
+<<<<<<< HEAD
         if (args.Length <= 11)
+=======
+        if (args.Length <= 9)
+>>>>>>> ai_filtering
         {
             Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
-                + "<education json> <courses json> <hobbies json> <skills json> <resume output> <website output>");
-            return;
+                + "<education json> <courses json> <hobbies json> <skills json> <settings path>");
+            return -1;
+        }
+
+        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(args[9]));
+
+        if (settings is null)
+        {
+            Console.WriteLine("Unable to read settings");
+            return -1;
         }
 
         var personalInfo = RecordLoader.LoadPersonalInfoAsync(args[1]);
@@ -56,14 +69,14 @@ public static class Program
         dataCollection.AddData("hobbies", hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
+        GeneratePdf(resumeModel, settings, "resume");
 
-        var resumePath = Path.ChangeExtension(args[9], null);
-        GeneratePdf(resumeModel, resumePath);
+        var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
+        GeneratePdf(filteredModel, settings, "resumeFiltered");
 
-        var filteredModel = FilterResume(resumeModel, args[11]);
+        // GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
 
-        GeneratePdf(filteredModel, resumePath + "Filtered");
-        // GenerateWebsite(resumeModel, args[10]);
+        return 0;
     }
 
 
@@ -101,19 +114,25 @@ public static class Program
 
 
 
-    private static void GeneratePdf(ResumeModel resumeModel, string outDir)
+    private static void GeneratePdf(ResumeModel resumeModel, GenerationSettings settings, string fileName)
     {
+        var styles = JsonSerializer.Deserialize<Dictionary<string, PdfStyleConfig>>(File.OpenRead(settings.PdfStylesPath)) ?? [];
+
+        var styleManager = styles.TryGetValue(settings.PdfStyle, out var styleConfig) ? PdfStyleManager.CreateFromConfig(styleConfig) : new();
+
         var viewFactory = new ViewFactory<Action<IContainer>>();
         viewFactory.AddStrategy<ResumeSegmentViewStrategy>();
         viewFactory.AddStrategy<ResumeHeaderViewStrategy>();
         viewFactory.AddStrategy<ResumeEntryViewStrategy>();
         viewFactory.AddStrategy<ResumeBodyOneColumnViewStrategy>();
 
+        viewFactory.AddHelper<IPdfStyleManager>(styleManager);
+
         QuestPDF.Settings.License = LicenseType.Community;
         QuestPDF.Settings.UseEnvironmentFonts = false;
         QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
 
-        var path = Path.ChangeExtension(outDir, "pdf");
+        var path = Path.ChangeExtension(Path.Combine(settings.ResumeOutputPath, fileName), Constants.Resources.Pdf);
 
         new ResumeDocument(resumeModel, viewFactory).GeneratePdf(path);
     }

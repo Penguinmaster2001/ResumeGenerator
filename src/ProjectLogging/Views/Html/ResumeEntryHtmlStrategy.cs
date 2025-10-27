@@ -16,7 +16,7 @@ public class ResumeEntryHtmlStrategy : ViewStrategy<IHtmlItem, ResumeEntryModel>
 {
     public override IHtmlItem BuildView(ResumeEntryModel model, IViewFactory<IHtmlItem> factory)
     {
-        var styleManager = factory.GetHelper<IStyleManager>();
+        var styleManager = factory.GetHelper<IHtmlStyleManager>();
 
         var section = new HtmlSection(HtmlTag.Section, Title(model));
 

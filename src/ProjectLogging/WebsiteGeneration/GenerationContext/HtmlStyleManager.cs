@@ -8,7 +8,7 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 
 
 
-public class StyleManager : IStyleManager
+public class HtmlStyleManager : IHtmlStyleManager
 {
     private readonly Dictionary<IHtmlElement, StyleCollection> _elementStyles = [];
 

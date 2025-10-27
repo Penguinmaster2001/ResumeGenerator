@@ -1,8 +1,8 @@
 
 using ProjectLogging.Models.Resume;
+using ProjectLogging.ResumeGeneration.Styling;
 using ProjectLogging.Views.ViewCreation;
 using QuestPDF.Fluent;
-using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 
@@ -23,11 +23,11 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
                     .AlignCenter()
                     .FontSize(12.0f)
                     .Bold()
-                    .FontColor(Colors.Green.Darken3);
+                    .FontColor(factory.GetHelper<IPdfStyleManager>().SegmentHeaderColor);
 
                 foreach (ResumeEntryModel entry in model.Entries)
                 {
-                    column.Item().Element(entry.CreateView(factory));
+                    column.Item().PaddingHorizontal(3.0f).Element(entry.CreateView(factory));
                 }
             });
 }

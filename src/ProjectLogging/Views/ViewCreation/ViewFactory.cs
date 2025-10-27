@@ -18,7 +18,7 @@ public class ViewFactory<V> : IViewFactory<V>
 
 
 
-    public void AddHelper<T, U>(U helper) where U : T
+    public void AddHelper<T>(T helper)
     {
         ArgumentNullException.ThrowIfNull(helper, nameof(helper));
 
