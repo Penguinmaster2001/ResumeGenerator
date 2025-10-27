@@ -67,8 +67,8 @@ public static class Program
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
         GeneratePdf(resumeModel, settings, "resume");
 
-        // var filteredModel = FilterResume(resumeModel, settings);
-        // GeneratePdf(filteredModel, "resumeFiltered");
+        var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
+        GeneratePdf(filteredModel, settings, "resumeFiltered");
 
         // GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
 

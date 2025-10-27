@@ -29,11 +29,11 @@ public static class ResumeModelFactory
             skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
         }
 
-        var hobbySegment = new ResumeSegmentModel("hobbies");
-        foreach (var category in data.GetData<SkillCollection>("hobbies").Categories)
-        {
-            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
-        }
+        // var hobbySegment = new ResumeSegmentModel("hobbies");
+        // foreach (var category in data.GetData<SkillCollection>("hobbies").Categories)
+        // {
+        //     hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
+        // }
 
         var educationSegment = CreateModel<List<Education>>("education", data);
         foreach (var category in data.GetData<SkillCollection>("courses").Categories)
@@ -52,7 +52,7 @@ public static class ResumeModelFactory
                 careerSegment,
                 projectSegment,
                 volunteerSegment,
-                hobbySegment,
+                // hobbySegment,
             };
 
         ResumeBodyModel resumeBody = new(resumeSegments);

@@ -37,8 +37,18 @@ public class CrossEncoder : IDisposable
 
     public float Score(long[] query, string text)
     {
+        long clsId = 101L;
+        long sepId = 102L;
         // Tokenize both texts together
-        var inputIds = query.Concat(Tokenizer.EncodeToIds($" [SEP] {text} [SEP]").Select(id => (long)id)).ToArray();
+        var inputIds = query.Prepend(clsId).Append(sepId).Concat(Tokenizer.EncodeToIds(text.ToLower(), 512, out _, out _).Select(id => (long)id)).Append(sepId).ToArray();
+
+        var tokenTypeIds = new long[inputIds.Length];
+        bool segmentB = false;
+        for (int i = 0; i < inputIds.Length; i++)
+        {
+            tokenTypeIds[i] = segmentB ? 1 : 0;
+            if (!segmentB && inputIds[i] == sepId) segmentB = true;
+        }
 
         // Truncate/pad to fit model input
         if (inputIds.Length > _maxLength)
@@ -46,16 +56,21 @@ public class CrossEncoder : IDisposable
             Console.WriteLine($"Too long!! ({inputIds.Length} > {_maxLength})");
             inputIds = inputIds[.._maxLength];
         }
-        else if (inputIds.Length < _maxLength)
-        {
-            inputIds = [.. inputIds, .. Enumerable.Repeat(0, _maxLength - inputIds.Length)];
-        }
+        // else if (inputIds.Length < _maxLength)
+        // {
+        //     inputIds = [.. inputIds, .. Enumerable.Repeat(0, _maxLength - inputIds.Length)];
+        // }
 
-        var attentionMask = inputIds.Select(id => id == 0 ? 0L : 1L).ToArray();
-        var tokenTypeIds = new long[_maxLength]; // all zeros (simplified single sequence)
+        var attentionMask = Enumerable.Repeat(1L, inputIds.Length).ToArray();// inputIds.Select(id => id == 0 ? 0L : 1L).ToArray();
+                                                                             // var tokenTypeIds = new long[_maxLength]; // all zeros (simplified single sequence)
+
+        // Console.WriteLine(text);
+        // Console.WriteLine(string.Join(", ", inputIds));
+        // Console.WriteLine(string.Join(", ", tokenTypeIds));
+        // Console.WriteLine(string.Join(", ", attentionMask));
 
         // Create ONNX inputs
-        var shape = new[] { 1, _maxLength };
+        var shape = new[] { 1, inputIds.Length };
         var inputs = new List<NamedOnnxValue>
         {
             NamedOnnxValue.CreateFromTensor("input_ids", new DenseTensor<long>(inputIds, shape)),

@@ -26,9 +26,9 @@ public class ResumeHeaderViewStrategy : ViewStrategy<Action<IContainer>, ResumeH
                  .Column(column =>
             {
                 column.Item().AlignCenter().Element(Name(model, factory));
-                column.Item().AlignCenter().Element(ContactRow(model));
-                column.Item().AlignCenter().Element(URLRow(model));
-                // column.Item().AlignCenter().Element(CombinedRow(model, factory));
+                // column.Item().AlignCenter().Element(ContactRow(model));
+                // column.Item().AlignCenter().Element(URLRow(model));
+                column.Item().AlignCenter().Element(CombinedRow(model));
                 column.Item().PaddingTop(4.0f).PaddingBottom(3.0f).LineHorizontal(0.5f).LineColor(factory.GetHelper<IPdfStyleManager>().AccentColor);
             });
     }
