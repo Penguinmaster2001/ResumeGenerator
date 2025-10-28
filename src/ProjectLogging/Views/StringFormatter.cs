@@ -10,47 +10,63 @@ namespace ProjectLogging.Views;
 
 public static class StringFormatter
 {
+    private static DateOnly? _currentDate = null;
+    public static DateOnly CurrentDate
+    {
+        get
+        {
+            if (_currentDate is not DateOnly date)
+            {
+                date = DateOnly.FromDateTime(DateTime.Now);
+                _currentDate = date;
+            }
+
+            return date;
+        }
+    }
+
+
     public static string FormatDate(DateOnly? startDate, DateOnly? endDate)
     {
-        if (startDate is null) return string.Empty;
+        if (startDate is not DateOnly start) return string.Empty;
 
         StringBuilder sb = new();
 
-        sb.Append(startDate.Value.ToString("MMM"))
+        sb.Append(start.ToString("MMM"))
           .Append(' ');
 
-        if (endDate.HasValue)
+        if (endDate is DateOnly end && end.Month != CurrentDate.Month)
         {
-            bool ongoing = endDate > DateOnly.FromDateTime(DateTime.Now);
+            bool ongoing = end > CurrentDate;
 
-            if (startDate.Value.Year == endDate.Value.Year && !ongoing)
+            if (start.Year == end.Year && !ongoing)
             {
-                if (startDate.Value.Month == endDate.Value.Month)
+                if (start.Month == end.Month)
                 {
-                    return sb.Append(startDate.Value.ToString("yyyy"))
+                    return sb.Append(start.ToString("yyyy"))
                              .ToString();
                 }
 
                 return sb.Append("- ")
-                         .Append(endDate.Value.ToString("MMM"))
+                         .Append(end.ToString("MMM"))
                          .Append(' ')
-                         .Append(startDate.Value.ToString("yyyy"))
+                         .Append(start.ToString("yyyy"))
                          .ToString();
             }
 
-            sb.Append(startDate.Value.ToString("yyyy"))
+            sb.Append(start.ToString("yyyy"))
               .Append(" - ");
+
+            sb.Append(end.ToString("MMM yyyy"));
 
             if (ongoing)
             {
-                sb.Append("exp. ");
+                sb.Append(" (expected)");
             }
-
-            sb.Append(endDate.Value.ToString("MMM yyyy"));
         }
         else
         {
-            sb.Append(startDate.Value.ToString("yyyy"))
+            sb.Append(start.ToString("yyyy"))
               .Append(" - Present");
         }
 

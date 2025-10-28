@@ -61,7 +61,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 row.ConstantItem(5.0f).AlignMiddle().AlignCenter().Svg("Resources/star.svg");
                 row.ConstantItem(5.0f);
                 row.AutoItem().Text(StringFormatter.FormatLocationText(model.LocationText)).FontSize(11.0f).Bold();
-                row.RelativeItem().AlignRight().Text(StringFormatter.FormatDate(model.StartDate, model.EndDate)).FontSize(11.0f).Bold();
+                row.RelativeItem().AlignRight().Text(StringFormatter.FormatDate(model.StartDate, model.EndDate)).FontSize(11.0f).Italic();
             });
 
 
