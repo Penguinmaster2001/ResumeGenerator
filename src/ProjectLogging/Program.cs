@@ -24,11 +24,7 @@ public static class Program
     public static async Task<int> Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-<<<<<<< HEAD
-        if (args.Length <= 11)
-=======
         if (args.Length <= 9)
->>>>>>> ai_filtering
         {
             Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
                 + "<education json> <courses json> <hobbies json> <skills json> <settings path>");
