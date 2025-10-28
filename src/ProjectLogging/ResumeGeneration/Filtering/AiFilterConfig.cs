@@ -10,4 +10,5 @@ public record AiFilterConfig(string CrossEncoderModelPath, string CrossEncoderVo
     Dictionary<string, int> SegmentTitleEntryCounts,
     int DefaultPointCount,
     Dictionary<string, int> SegmentTitlePointCounts,
-    Dictionary<string, float> EntryBoosts);
+    Dictionary<string, float> EntryBoosts,
+    bool DoAiFiltering);

@@ -67,10 +67,10 @@ public static class Program
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
         GeneratePdf(resumeModel, settings, "resume");
 
-        // var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
-        // GeneratePdf(filteredModel, settings, "resumeFiltered");
+        var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
+        GeneratePdf(filteredModel, settings, "resumeFiltered");
 
-        // GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
+        GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
 
         return 0;
     }
@@ -93,6 +93,12 @@ public static class Program
         if (config is null)
         {
             Console.WriteLine("Unable to load ai config, no filtering done");
+            return model;
+        }
+
+        if (!config.DoAiFiltering)
+        {
+            Console.WriteLine("DoAiFiltering false");
             return model;
         }
 

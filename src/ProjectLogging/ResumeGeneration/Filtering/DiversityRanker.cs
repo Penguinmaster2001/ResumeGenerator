@@ -59,19 +59,39 @@ public class DiversityRanker
         var skillsSegment = resumeSegments[skillsSegmentIndex];
         var skillsSegmentEntries = skillsSegment.Entries.ToList();
 
-        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s)).OrderByDescending(s => s.score).Take(4).Select(s => s.category).ToList();
+        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: s.TitleText == "Programming Languages" ? 10000.0 : MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s)).OrderByDescending(s => s.score).Take(4).Select(s => s.category).ToList();
 
+        var skillsSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var skillCategory in bestSkillCategories)
         {
             int totalLength = skillCategory.TitleText.Length + 2;
-            skillCategory.PointsText = [.. skillCategory.PointsText.Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill in category: {skillCategory.TitleText}: {s}")), text: s))
-                .OrderByDescending(s => s.score)
-                .TakeWhile(s =>
-                {
-                    totalLength += s.text.Length + 2;
-                    return totalLength <= 120;
-                })
-                .Select(s => s.text)];
+
+            var filteredSkills = new List<string>();
+
+            foreach (var (score, text) in skillCategory.PointsText
+                .Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill in category: {skillCategory.TitleText}: {s}")), text: s))
+                .OrderByDescending(s => s.score))
+            {
+                // In case of duplicate skills
+                if (totalLength + text.Length + 2 > 120) break;
+
+                if (!skillsSet.Add(text)) continue;
+                
+                totalLength += text.Length + 2;
+                
+                filteredSkills.Add(text);
+            }
+
+            skillCategory.PointsText = filteredSkills;
+
+            // skillCategory.PointsText = [.. skillCategory.PointsText.Select(s => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill in category: {skillCategory.TitleText}: {s}")), text: s))
+            //     .OrderByDescending(s => s.score)
+            //     .TakeWhile(s =>
+            //     {
+            //         totalLength += s.text.Length + 2;
+            //         return totalLength <= 120;
+            //     })
+            //     .Select(s => s.text)];
         }
         resumeSegments[skillsSegmentIndex] = new(skillsSegment.TitleText, bestSkillCategories);
 
