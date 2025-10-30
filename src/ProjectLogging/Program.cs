@@ -61,7 +61,7 @@ public static class Program
         dataCollection.AddData("courses", courses.Result);
         dataCollection.AddData("work experience", jobs.Result);
         dataCollection.AddData("projects", projects.Result);
-        dataCollection.AddData("volunteer / extracurricular", volunteers.Result);
+        dataCollection.AddData("leadership & volunteering", volunteers.Result);
         dataCollection.AddData("hobbies", hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);

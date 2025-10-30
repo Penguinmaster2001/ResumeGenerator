@@ -41,7 +41,7 @@ public static class ResumeModelFactory
             educationSegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
         }
 
-        var volunteerSegment = CreateModel<List<Volunteer>>("volunteer / extracurricular", data);
+        var volunteerSegment = CreateModel<List<Volunteer>>("leadership & volunteering", data);
         var careerSegment = CreateModel<List<Job>>("work experience", data);
         var projectSegment = CreateModel<List<Project>>("projects", data);
 
