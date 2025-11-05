@@ -3,14 +3,37 @@ namespace ProjectLogging.Cli;
 
 
 
-public record CliArgument(string Name,
-                          string ShortName,
-                          bool Required,
-                          string Description,
-                          Type ArgumentType,
-                          Func<string, object?> ParseFunc,
-                          object? DefaultValue)
+public class CliArgument
 {
+    public string Name { get; }
+    public string ShortName { get; }
+    public bool Required { get; }
+    public string Description { get; }
+    public Type ArgumentType { get; }
+    public Func<string, object?> ParseFunc { get; }
+    public object? DefaultValue { get; }
+
+
+
+    private CliArgument(string name,
+                          string shortName,
+                          bool required,
+                          string description,
+                          Type argumentType,
+                          Func<string, object?> parseFunc,
+                          object? defaultValue)
+    {
+        Name = name;
+        ShortName = shortName;
+        Required = required;
+        Description = description;
+        ArgumentType = argumentType;
+        ParseFunc = parseFunc;
+        DefaultValue = defaultValue;
+    }
+
+
+
     public static CliArgument Create<T>(string Name,
                           string ShortName,
                           bool Required,

@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 
 
@@ -33,7 +34,7 @@ public class CliActionCollection : ICollection<CliAction>
 
 
 
-    public bool TryGetAction(string command, string subCommand, out CliAction? action)
+    public bool TryGetAction(string command, string subCommand, [NotNullWhen(true)] out CliAction? action)
     {
         if (!_actions.TryGetValue(command, out var subCommands))
         {

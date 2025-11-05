@@ -24,95 +24,48 @@ public class CliParser
 
     public CliParseResults ParseArgs(string[] args)
     {
-        var receivedParameters = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        var parsedArguments = new ParsedCliArguments();
-        var parsedOptions = new ParsedCliArguments();
-
-        string? commandString = null;
-        string? subCommandString = null;
-
-        List<(string Parameter, string? Value, bool ShortName)> parameterValues = [];
-
-        for (int i = 1; i < args.Length; i++)
+        if (args.Length < 3)
         {
-            var arg = args[i];
-            bool lastArg = i >= args.Length - 1;
+            throw new Exception("Not enough arguments.");
+        }
 
-            if (arg.StartsWith('-'))
+        if (!_cliActions.TryGetAction(args[1], args[2], out var action))
+        {
+            throw new Exception($"Unknown command: {args[1]} {args[2]}.");
+        }
+
+        var expectedParameters = new ExpectedArguments(action.ExpectedArguments);
+
+        for (int i = 3; i < args.Length; i++)
+        {
+            if (!args[i].StartsWith('-'))
             {
-                bool shortName = !arg.StartsWith("--");
-
-                var parameter = arg.TrimStart('-');
-
-                if (!receivedParameters.Add(parameter))
-                {
-                    throw new Exception($"Already received parameter {parameter}");
-                }
-
-                string? value = null;
-                if (!lastArg)
-                {
-                    var nextArg = args[i + 1];
-                    if (!nextArg.StartsWith('-'))
-                    {
-                        if (commandString is not null)
-                        {
-                            if (subCommandString is not null)
-                            {
-                                value = nextArg;
-                                i++;
-                            }
-                            else if (!_cliActions.ContainsCommand(commandString, nextArg))
-                            {
-                                value = nextArg;
-                                i++;
-                            }
-                        }
-                        else if (!_cliActions.ContainsCommand(nextArg))
-                        {
-                            value = nextArg;
-                            i++;
-                        }
-                    }
-                }
-                parameterValues.Add((parameter, value, shortName));
+                throw new Exception($"Unexpected argument {args[i]}");
             }
-            else if (commandString is not null)
+
+            ExpectedArguments currentArgList;
+            CliArgument argument;
+            if (expectedParameters.TryGetUnsatisfied(args[i], out argument))
             {
-                if (subCommandString is null && _cliActions.ContainsCommand(commandString, arg))
-                {
-                    subCommandString = arg;
-                }
-                else
-                {
-                    throw new Exception($"Unexpected argument {arg}");
-                }
+                currentArgList = expectedParameters;
             }
-            else if (_cliActions.ContainsCommand(arg))
+            else if (_expectedOptions.TryGetUnsatisfied(args[i], out argument))
             {
-                commandString = arg;
+                currentArgList = _expectedOptions;
             }
             else
             {
-                throw new Exception($"Unexpected argument {arg}");
+                throw new Exception($"Could not find argument {args[i]}");
             }
-        }
 
-        if (commandString is null || subCommandString is null)
-        {
-            throw new Exception("Command not found");
-        }
-
-        var action = _cliActions.GetAction(commandString, subCommandString);
-
-        var expectedArguments = new ExpectedArguments(action.ExpectedArguments);
-
-        foreach (var (parameter, value, shortName) in parameterValues)
-        {
-            if (expectedArguments.AddArgument(shortName, parameter, !string.IsNullOrWhiteSpace(value)))
+            if (i + 1 >= args.Length || args[i + 1].StartsWith('-'))
             {
-                receivedParameters
+                if (argument.DefaultValue is not null)
+                {
+                    throw new Exception($"Expected value for {args[i]}");
+                }
+
+                currentArgList.AddArgument(args[i], false);
             }
         }
 
@@ -144,17 +97,20 @@ public class CliParser
 
 public class CliParseResults
 {
-    public ParsedCliArguments Arguments { get; set; }
-    public ParsedCliArguments Options { get; set; }
-    public CliAction Action { get; set; }
+    public required ParsedCliArguments Arguments { get; init; }
+    public required ParsedCliArguments Options { get; init; }
+    public required CliAction Action { get; init; }
 
 
 
 
-    public CliParseResults(ParsedCliArguments arguments, ParsedCliArguments options, CliAction action)
+    public static CliParseResults Success(ParsedCliArguments arguments, ParsedCliArguments options, CliAction action)
     {
-        Arguments = arguments;
-        Options = options;
-        Action = action;
+        return new CliParseResults
+        {
+            Arguments = arguments,
+            Options = options,
+            Action = action,
+        };
     }
 }
