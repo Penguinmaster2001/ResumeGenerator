@@ -111,7 +111,12 @@ public class DiversityRanker
         {
             var segment = resumeSegments[i];
 
-            if (!_config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
+            if (!_config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out int entryCount))
+            {
+                entryCount = _config.DefaultEntryCount <= -1 ? int.MaxValue : _config.DefaultEntryCount;
+            }
+
+            if (entryCount == 0)
             {
                 // Segment was not mutated
                 orderedSegments.Add((i, segment));
@@ -155,8 +160,14 @@ public class DiversityRanker
             var entryRank = selectedEntries[i];
             var segment = segmentDatabase[entryRank.Category].segment;
 
-            // Note *segment*.TitleText
-            if (!_config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out var pointCount))
+            // Check for entry first, then fall back to segment, then fall back to the default. Skip if 0
+            if (!_config.SegmentTitlePointCounts.TryGetValue(entryDatabase[entryRank.Id].TitleText, out int pointCount)
+                && !_config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out pointCount))
+            {
+                pointCount = _config.DefaultPointCount <= -1 ? int.MaxValue : _config.DefaultPointCount;
+            }
+
+            if (pointCount == 0)
             {
                 // Entry was not mutated
                 continue;
