@@ -63,7 +63,11 @@ public class DiversityRanker
         var skillsSegment = resumeSegments[skillsSegmentIndex];
         var skillsSegmentEntries = skillsSegment.Entries.ToList();
 
-        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: s.TitleText == "Programming Languages" ? 10000.0 : MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s)).OrderByDescending(s => s.score).Take(4).Select(s => s.category).ToList();
+        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: string.Equals(s.TitleText, "Languages", StringComparison.OrdinalIgnoreCase) ? 100000.0 : MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s))
+            .OrderByDescending(s => s.score)
+            .Take(_config.SegmentTitlePointCounts.GetValueOrDefault("tech skills", 3))
+            .Select(s => s.category)
+            .ToList();
 
         var skillsSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var skillCategory in bestSkillCategories)
