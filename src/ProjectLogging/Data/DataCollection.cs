@@ -9,7 +9,15 @@ namespace ProjectLogging.Data;
 
 public class DataCollection : IDataCollection
 {
+    public DataConfig DataConfig { get; }
     private readonly Dictionary<(string label, Type type), object> _data = [];
+
+
+
+    public DataCollection(DataConfig dataConfig)
+    {
+        DataConfig = dataConfig;
+    }
 
 
 

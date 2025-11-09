@@ -35,40 +35,48 @@ public static class Program
 
         if (settings is null)
         {
-            Console.WriteLine("Unable to read settings");
+            Console.WriteLine("Unable to read settings.");
             return -1;
         }
 
-        var personalInfo = RecordLoader.LoadPersonalInfoAsync(args[1]);
+        var dataConfig = JsonSerializer.Deserialize<DataConfig>(File.OpenRead(settings.DataConfigPath));
 
-        var jobs = RecordLoader.LoadRecordsAsync<Job>(args[2]);
-        var projects = RecordLoader.LoadRecordsAsync<Project>(args[3]);
-        var volunteers = RecordLoader.LoadRecordsAsync<Volunteer>(args[4]);
+        if (dataConfig is null)
+        {
+            Console.WriteLine("Unable to read data config.");
+            return -1;
+        }
 
-        var education = RecordLoader.LoadRecordsAsync<Education>(args[5]);
-        var courses = SkillCollection.LoadSkillsAsync(args[6]);
+        var personalInfo = RecordLoader.LoadPersonalInfoAsync(settings.GetFullPath(dataConfig.PersonalInfo.Path));
 
-        var hobbies = SkillCollection.LoadSkillsAsync(args[7]);
-        var skills = SkillCollection.LoadSkillsAsync(args[8]);
+        var jobs = RecordLoader.LoadRecordsAsync<Job>(settings.GetFullPath(dataConfig.Jobs.Path));
+        var projects = RecordLoader.LoadRecordsAsync<Project>(settings.GetFullPath(dataConfig.Projects.Path));
+        var volunteers = RecordLoader.LoadRecordsAsync<Volunteer>(settings.GetFullPath(dataConfig.Volunteering.Path));
+
+        var education = RecordLoader.LoadRecordsAsync<Education>(settings.GetFullPath(dataConfig.Education.Path));
+        var courses = SkillCollection.LoadSkillsAsync(settings.GetFullPath(dataConfig.Courses.Path));
+
+        var hobbies = SkillCollection.LoadSkillsAsync(settings.GetFullPath(dataConfig.Hobbies.Path));
+        var skills = SkillCollection.LoadSkillsAsync(settings.GetFullPath(dataConfig.Skills.Path));
 
         await Task.WhenAll(personalInfo, jobs, projects, volunteers, education, courses, skills, hobbies);
 
-        var dataCollection = new DataCollection();
+        var dataCollection = new DataCollection(dataConfig);
 
-        dataCollection.AddData("personal info", personalInfo.Result);
-        dataCollection.AddData("tech skills", skills.Result);
-        dataCollection.AddData("education", education.Result);
-        dataCollection.AddData("courses", courses.Result);
-        dataCollection.AddData("work experience", jobs.Result);
-        dataCollection.AddData("projects", projects.Result);
-        dataCollection.AddData("leadership & volunteering", volunteers.Result);
-        dataCollection.AddData("hobbies", hobbies.Result);
+        dataCollection.AddData(dataConfig.PersonalInfo.Title, personalInfo.Result);
+        dataCollection.AddData(dataConfig.Skills.Title, skills.Result);
+        dataCollection.AddData(dataConfig.Education.Title, education.Result);
+        dataCollection.AddData(dataConfig.Courses.Title, courses.Result);
+        dataCollection.AddData(dataConfig.Jobs.Title, jobs.Result);
+        dataCollection.AddData(dataConfig.Projects.Title, projects.Result);
+        dataCollection.AddData(dataConfig.Volunteering.Title, volunteers.Result);
+        dataCollection.AddData(dataConfig.Hobbies.Title, hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
         GeneratePdf(resumeModel, settings, "resume");
 
         var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
-        GeneratePdf(filteredModel, settings, "resumeFiltered");
+        GeneratePdf(filteredModel, settings, "AnthonyCieriResume");
 
         GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
 

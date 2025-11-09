@@ -5,6 +5,10 @@ namespace ProjectLogging.Data;
 
 public interface IDataCollection
 {
+    DataConfig DataConfig { get; }
+
+
+
     IEnumerable<(string label, T data)> GetDataOfType<T>();
 
 
