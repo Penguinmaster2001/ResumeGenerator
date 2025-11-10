@@ -84,11 +84,6 @@ public class CliParser
             }
         }
 
-        if (!_expectedOptions.FullySatisfied || !expectedParameters.FullySatisfied)
-        {
-            throw new Exception("Unsatisfied arguments.");
-        }
-
         return new(parsedParameters, parsedOptions, action);
     }
 
