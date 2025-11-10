@@ -1,8 +1,6 @@
 
 using ProjectLogging.Cli;
-using ProjectLogging.Models.Resume;
 using ProjectLogging.ResumeGeneration;
-using ProjectLogging.WebsiteGeneration;
 
 
 
@@ -16,12 +14,12 @@ public static class Program
     {
         var cliParser = new CliParser(
             [GenerateResumeCliAction.CliAction],
-            []
+            [CliOptions.Verbose]
         );
 
         var parseResults = cliParser.ParseArgs(Environment.GetCommandLineArgs());
 
-        var result = await parseResults.Action.Action.Invoke(parseResults.Arguments);
+        var result = await parseResults.Action.Action.Invoke(parseResults);
 
         switch (result)
         {
@@ -34,12 +32,5 @@ public static class Program
         }
 
         return 0;
-    }
-
-
-
-    public static void GenerateWebsite(ResumeModel resumeModel, string outDir)
-    {
-        WebsiteGenerator.GenerateWebsite(resumeModel, outDir).CreateFiles();
     }
 }

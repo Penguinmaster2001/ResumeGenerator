@@ -1,5 +1,4 @@
 
-using ProjectLogging.Models.Resume;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Views.Html;
 using ProjectLogging.Views.ViewCreation;
@@ -13,9 +12,9 @@ namespace ProjectLogging.WebsiteGeneration;
 
 
 
-public class WebsiteGenerator
+public static class WebsiteGenerator
 {
-    public static Website GenerateWebsite(ResumeModel resumeModel, string outDir)
+    public static Website GenerateWebsite(string outDir)
     {
         var fileOrganizer = new WebsiteFileOrganizer
         {
@@ -23,31 +22,9 @@ public class WebsiteGenerator
         };
 
         var viewFactory = new ViewFactory<IHtmlItem>();
-        viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
-        viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
-        viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
-        viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
-        viewFactory.AddStrategy<ResumeHtmlStrategy>();
-        viewFactory.AddStrategy<NavLinksStrategy>();
-
-        viewFactory.AddHelper<IPageLinker>(new PageLinker(fileOrganizer));
-        viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
-
-        viewFactory.AddPostAction((htmlItem, factory) =>
-            {
-                if (htmlItem is IHtmlElement htmlElement)
-                {
-                    factory.GetHelper<IHtmlStyleManager>().ApplyStyle(htmlElement);
-                }
-            });
+        SetUpFactory(viewFactory, new PageLinker(fileOrganizer));
 
         var website = new Website(fileOrganizer);
-
-        website.Pages.Add(new HtmlPageBuilder("page0", "styles/styles.css")
-            .AddHeader(new NavLinksModel(["page1", "page2"]).CreateView(viewFactory))
-            .AddBody(resumeModel.CreateView(viewFactory))
-            .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-            .Build());
 
         website.Pages.Add(new HtmlPageBuilder("page1", "styles/styles.css")
             .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
@@ -62,5 +39,28 @@ public class WebsiteGenerator
             .Build());
 
         return website;
+    }
+
+
+
+    private static void SetUpFactory(ViewFactory<IHtmlItem> viewFactory, IPageLinker pageLinker)
+    {
+        viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
+        viewFactory.AddStrategy<ResumeHtmlStrategy>();
+        viewFactory.AddStrategy<NavLinksStrategy>();
+
+        viewFactory.AddHelper(pageLinker);
+        viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
+
+        viewFactory.AddPostAction((htmlItem, factory) =>
+            {
+                if (htmlItem is IHtmlElement htmlElement)
+                {
+                    factory.GetHelper<IHtmlStyleManager>().ApplyStyle(htmlElement);
+                }
+            });
     }
 }

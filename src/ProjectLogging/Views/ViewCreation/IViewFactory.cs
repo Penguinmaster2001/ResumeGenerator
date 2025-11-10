@@ -16,6 +16,7 @@ public interface IViewFactory<V>
 
 
     void AddStrategy<T>(ViewStrategy<V, T> strategy);
+    void AddStrategy<S>() where S : IViewStrategy<V>, new();
 
 
 

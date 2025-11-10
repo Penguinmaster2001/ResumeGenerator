@@ -27,9 +27,9 @@ public static class GenerateResumeCliAction
 
 
 
-    public static async Task<ICliActionResult> GenerateResumeAsync(ParsedCliArguments arguments)
+    public static async Task<ICliActionResult> GenerateResumeAsync(CliParseResults arguments)
     {
-        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(arguments.GetArgument<string>("settings")));
+        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(arguments.Arguments.GetArgument<string>("settings")));
 
         if (settings is null)
         {

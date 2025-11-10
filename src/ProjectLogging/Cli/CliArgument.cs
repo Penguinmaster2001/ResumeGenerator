@@ -44,6 +44,23 @@ public class CliArgument
         string shortName,
         bool required,
         string description,
+        T? defaultValue)
+        where T : IParsable<T>
+        => Create(
+            name,
+            shortName,
+            required,
+            description,
+            s => T.TryParse(s, null, out var result) ? result : defaultValue,
+            defaultValue);
+
+
+
+    public static CliArgument Create<T>(
+        string name,
+        string shortName,
+        bool required,
+        string description,
         Func<string, T> parseFunc,
         T? defaultValue)
     {
