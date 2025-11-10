@@ -29,13 +29,17 @@ public class CliParser
             throw new Exception("Not enough arguments.");
         }
 
+        // Get command and subcommand
         if (!_cliActions.TryGetAction(args[1], args[2], out var action))
         {
             throw new Exception($"Unknown command: {args[1]} {args[2]}.");
         }
 
         var expectedParameters = new ExpectedArguments(action.ExpectedArguments);
+        var parsedParameters = new ParsedCliArguments();
+        var parsedOptions = new ParsedCliArguments();
 
+        // Get parameters and options
         for (int i = 3; i < args.Length; i++)
         {
             if (!args[i].StartsWith('-'))
@@ -43,21 +47,25 @@ public class CliParser
                 throw new Exception($"Unexpected argument {args[i]}");
             }
 
+            // Check for parameter or option
             ExpectedArguments currentArgList;
-            CliArgument argument;
-            if (expectedParameters.TryGetUnsatisfied(args[i], out argument))
+            ParsedCliArguments currentCliArgs;
+            if (expectedParameters.TryGetUnsatisfied(args[i], out var argument))
             {
                 currentArgList = expectedParameters;
+                currentCliArgs = parsedParameters;
             }
             else if (_expectedOptions.TryGetUnsatisfied(args[i], out argument))
             {
                 currentArgList = _expectedOptions;
+                currentCliArgs = parsedOptions;
             }
             else
             {
                 throw new Exception($"Could not find argument {args[i]}");
             }
 
+            // Check for default value or get next value
             if (i + 1 >= args.Length || args[i + 1].StartsWith('-'))
             {
                 if (argument.DefaultValue is not null)
@@ -66,10 +74,22 @@ public class CliParser
                 }
 
                 currentArgList.AddArgument(args[i], false);
+                currentCliArgs.SetArgument(argument);
+            }
+            else
+            {
+                currentArgList.AddArgument(args[i], true);
+                currentCliArgs.SetArgument(argument, args[i + 1]);
+                i++;
             }
         }
 
-        return new(parsedArguments, parsedOptions, action);
+        if (!_expectedOptions.FullySatisfied || !expectedParameters.FullySatisfied)
+        {
+            throw new Exception("Unsatisfied arguments.");
+        }
+
+        return new(parsedParameters, parsedOptions, action);
     }
 
 
@@ -97,20 +117,17 @@ public class CliParser
 
 public class CliParseResults
 {
-    public required ParsedCliArguments Arguments { get; init; }
-    public required ParsedCliArguments Options { get; init; }
-    public required CliAction Action { get; init; }
+    public ParsedCliArguments Arguments { get; init; }
+    public ParsedCliArguments Options { get; init; }
+    public CliAction Action { get; init; }
 
 
 
 
-    public static CliParseResults Success(ParsedCliArguments arguments, ParsedCliArguments options, CliAction action)
+    public CliParseResults(ParsedCliArguments arguments, ParsedCliArguments options, CliAction action)
     {
-        return new CliParseResults
-        {
-            Arguments = arguments,
-            Options = options,
-            Action = action,
-        };
+        Arguments = arguments;
+        Options = options;
+        Action = action;
     }
 }

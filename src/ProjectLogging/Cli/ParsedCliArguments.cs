@@ -56,11 +56,19 @@ public class ParsedCliArguments
 
 
 
-    public void SetArgument(CliArgument argument, string value)
+    public void SetArgument(CliArgument argument, string? value = null)
     {
         try
         {
-            var parsed = argument.ParseFunc(value);
+            object? parsed;
+            if (value is null)
+            {
+                parsed = argument.DefaultValue;
+            }
+            else
+            {
+                parsed = argument.ParseFunc(value);
+            }
 
             var id = _parsedArgDatabase.Count;
             _parsedArgDatabase.Add(parsed);

@@ -15,13 +15,14 @@ public class CliArgument
 
 
 
-    private CliArgument(string name,
-                          string shortName,
-                          bool required,
-                          string description,
-                          Type argumentType,
-                          Func<string, object?> parseFunc,
-                          object? defaultValue)
+    private CliArgument(
+        string name,
+        string shortName,
+        bool required,
+        string description,
+        Type argumentType,
+        Func<string, object?> parseFunc,
+        object? defaultValue)
     {
         Name = name;
         ShortName = shortName;
@@ -34,13 +35,14 @@ public class CliArgument
 
 
 
-    public static CliArgument Create<T>(string Name,
-                          string ShortName,
-                          bool Required,
-                          string Description,
-                          Func<string, T> ParseFunc,
-                          T? DefaultValue)
+    public static CliArgument Create<T>(
+        string name,
+        string shortName,
+        bool required,
+        string description,
+        Func<string, T> parseFunc,
+        T? defaultValue)
     {
-        return new(Name, ShortName, Required, Description, typeof(T), s => ParseFunc(s), DefaultValue);
+        return new(name, shortName, required, description, typeof(T), s => parseFunc(s), defaultValue);
     }
 }
