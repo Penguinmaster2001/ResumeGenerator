@@ -24,14 +24,13 @@ public static class Program
     public static async Task<int> Main()
     {
         string[] args = Environment.GetCommandLineArgs();
-        if (args.Length <= 9)
+        if (args.Length <= 1)
         {
-            Console.WriteLine($"Usage: {args[0]} <personal info json> <job json> <project json> <volunteer json> "
-                + "<education json> <courses json> <hobbies json> <skills json> <settings path>");
+            Console.WriteLine($"Usage: {args[0]} <settings path>");
             return -1;
         }
 
-        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(args[9]));
+        var settings = JsonSerializer.Deserialize<GenerationSettings>(File.OpenRead(args[1]));
 
         if (settings is null)
         {
@@ -75,7 +74,7 @@ public static class Program
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
         GeneratePdf(resumeModel, settings, "resume");
 
-        var filteredModel = FilterResume(resumeModel, settings.AiConfigPath);
+        var filteredModel = FilterResume(resumeModel, settings, dataConfig, settings.AiConfigPath);
         GeneratePdf(filteredModel, settings, "AnthonyCieriResume");
 
         GenerateWebsite(resumeModel, settings.WebsiteOutputPath);
@@ -85,7 +84,7 @@ public static class Program
 
 
 
-    private static ResumeModel FilterResume(ResumeModel model, string configPath)
+    private static ResumeModel FilterResume(ResumeModel model, GenerationSettings settings, DataConfig dataConfig,string configPath)
     {
         AiFilterConfig? config;
         try
@@ -110,10 +109,10 @@ public static class Program
             return model;
         }
 
-        var diversityRanker = new DiversityRanker(config);
+        var diversityRanker = new DiversityRanker(settings, config);
 
         Console.WriteLine("Filtering");
-        var filtered = diversityRanker.FilterResume(model.ResumeBody.ResumeSegments);
+        var filtered = diversityRanker.FilterResume(model.ResumeBody.ResumeSegments, dataConfig);
         Console.WriteLine("Filtering done");
 
         var filteredBody = new ResumeBodyModel(filtered);

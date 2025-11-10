@@ -28,11 +28,11 @@ public static class ResumeModelFactory
             skillSegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
         }
 
-        // var hobbySegment = new ResumeSegmentModel("hobbies");
-        // foreach (var category in data.GetData<SkillCollection>("hobbies").Categories)
-        // {
-        //     hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
-        // }
+        var hobbySegment = new ResumeSegmentModel("hobbies");
+        foreach (var category in data.GetData<SkillCollection>("hobbies").Categories)
+        {
+            hobbySegment.Entries.Add(ResumeEntryFactory.CreateEntry(category));
+        }
 
         var educationSegment = CreateModel<List<Education>>(data.DataConfig.Education.Title, data);
         foreach (var category in data.GetData<SkillCollection>(data.DataConfig.Courses.Title).Categories)
@@ -44,15 +44,37 @@ public static class ResumeModelFactory
         var careerSegment = CreateModel<List<Job>>(data.DataConfig.Jobs.Title, data);
         var projectSegment = CreateModel<List<Project>>(data.DataConfig.Projects.Title, data);
 
-        var resumeSegments = new List<ResumeSegmentModel>
-            {
-                skillSegment,
-                educationSegment,
-                careerSegment,
-                projectSegment,
-                volunteerSegment,
-                // hobbySegment,
-            };
+        var resumeSegments = new List<ResumeSegmentModel>();
+
+        if (data.DataConfig.Skills.Include)
+        {
+            resumeSegments.Add(skillSegment);
+        }
+
+        if (data.DataConfig.Education.Include)
+        {
+            resumeSegments.Add(educationSegment);
+        }
+
+        if (data.DataConfig.Jobs.Include)
+        {
+            resumeSegments.Add(careerSegment);
+        }
+
+        if (data.DataConfig.Projects.Include)
+        {
+            resumeSegments.Add(projectSegment);
+        }
+
+        if (data.DataConfig.Volunteering.Include)
+        {
+            resumeSegments.Add(volunteerSegment);
+        }
+
+        if (data.DataConfig.Hobbies.Include)
+        {
+            resumeSegments.Add(hobbySegment);
+        }
 
         ResumeBodyModel resumeBody = new(resumeSegments);
 

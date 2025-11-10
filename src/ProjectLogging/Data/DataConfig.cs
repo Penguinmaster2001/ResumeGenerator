@@ -15,4 +15,4 @@ public record DataConfig(
 
 
 
-public record DataEntry(string Path, string Title = "");
+public record DataEntry(string Path, string Title = "", bool Include = false);
