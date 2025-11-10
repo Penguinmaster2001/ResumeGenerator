@@ -16,12 +16,21 @@ public class CliAction
 
 
 
-    public CliAction(string command, string subCommand, string helpText, Func<ParsedCliArguments, Task<ICliActionResult>> action, List<CliArgument> expectedArguments)
+    public CliAction(
+        string command,
+        string subCommand,
+        string helpText,
+        Func<ParsedCliArguments, Task<ICliActionResult>> action,
+        List<CliArgument> expectedArguments)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(command, nameof(command));
+        ArgumentException.ThrowIfNullOrWhiteSpace(subCommand, nameof(subCommand));
+        ArgumentException.ThrowIfNullOrWhiteSpace(helpText, nameof(helpText));
+
         Command = command;
         SubCommand = subCommand;
         HelpText = helpText;
-        Action = action;
-        ExpectedArguments = expectedArguments;
+        Action = action ?? throw new ArgumentNullException(nameof(action));
+        ExpectedArguments = expectedArguments ?? throw new ArgumentNullException(nameof(expectedArguments));
     }
 }

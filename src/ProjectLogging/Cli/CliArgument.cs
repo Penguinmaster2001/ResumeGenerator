@@ -24,12 +24,16 @@ public class CliArgument
         Func<string, object?> parseFunc,
         object? defaultValue)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        ArgumentException.ThrowIfNullOrWhiteSpace(shortName, nameof(shortName));
+        ArgumentException.ThrowIfNullOrWhiteSpace(description, nameof(description));
+
         Name = name;
         ShortName = shortName;
         Required = required;
         Description = description;
-        ArgumentType = argumentType;
-        ParseFunc = parseFunc;
+        ArgumentType = argumentType ?? throw new ArgumentNullException(nameof(argumentType));
+        ParseFunc = parseFunc ?? throw new ArgumentNullException(nameof(parseFunc));
         DefaultValue = defaultValue;
     }
 
@@ -43,6 +47,10 @@ public class CliArgument
         Func<string, T> parseFunc,
         T? defaultValue)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name, nameof(name));
+        ArgumentException.ThrowIfNullOrWhiteSpace(shortName, nameof(shortName));
+        ArgumentException.ThrowIfNullOrWhiteSpace(description, nameof(description));
+
         return new(name, shortName, required, description, typeof(T), s => parseFunc(s), defaultValue);
     }
 }
