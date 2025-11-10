@@ -27,7 +27,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 container.PaddingVertical(0.0f).Row(row =>
                 {
                     row.AutoItem().Element(Title($"{model.TitleText}:"));
-                    row.ConstantItem(3.0f);
+                    row.ConstantItem(1.5f);
                     row.RelativeItem().Element(Description(string.Join(", ", model.PointsText)));
                 });
 
@@ -36,12 +36,11 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
 
             container.PaddingVertical(2.0f).Column(column =>
             {
-
-                column.Item().Element(HeaderRow(model));
+                column.Item().PaddingBottom(0.5f).Element(HeaderRow(model));
 
                 if (model.DescriptionText is not null)
                 {
-                    column.Item().Element(Description(model.DescriptionText));
+                    column.Item().PaddingBottom(2.0f).Element(Description(model.DescriptionText));
                 }
 
                 if (bulletPoints)
@@ -83,11 +82,11 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                 var bulletColors = factory.GetHelper<IPdfStyleManager>().BulletPointColors;
                 foreach (string bulletPoint in model.PointsText)
                 {
-                    column.Item().Row(row =>
+                    column.Item().PaddingVertical(0.2f).Row(row =>
                     {
-                        row.ConstantItem(6.0f);
+                        row.ConstantItem(8.0f);
                         row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
-                        row.ConstantItem(4.0f);
+                        row.ConstantItem(5.0f);
                         row.RelativeItem().Text(bulletPoint).LineHeight(1.3f).FontColor(bulletColors[colorIndex]);
                     });
 

@@ -1,4 +1,5 @@
 
+using ProjectLogging.Data;
 using ProjectLogging.Models.Resume;
 using ProjectLogging.Views.Text;
 using ProjectLogging.Views.ViewCreation;
@@ -20,14 +21,14 @@ public class DiversityRanker
 
 
 
-    public DiversityRanker(AiFilterConfig config)
+    public DiversityRanker(GenerationSettings settings, AiFilterConfig config)
     {
         _config = config;
 
-        using var jobDescriptionFile = File.OpenText(_config.jobDescriptionPath);
+        using var jobDescriptionFile = File.OpenText(settings.GetFullPath(_config.jobDescriptionPath));
         var jobDescription = jobDescriptionFile.ReadToEnd();
-        _crossScorer = new CrossEncodingScorer(new CrossEncoder(_config.CrossEncoderModelPath, _config.CrossEncoderVocabPath, 512), jobDescription);
-        _embeddingGenerator = new EmbeddingGenerator(_config.EmbeddingModelPath, _config.EmbeddingVocabPath);
+        _crossScorer = new CrossEncodingScorer(new CrossEncoder(settings.GetFullPath(_config.CrossEncoderModelPath), settings.GetFullPath(_config.CrossEncoderVocabPath), 512), jobDescription);
+        _embeddingGenerator = new EmbeddingGenerator(settings.GetFullPath(_config.EmbeddingModelPath), settings.GetFullPath(_config.EmbeddingVocabPath));
         _jobDescriptionEmbedding = _embeddingGenerator.GetEmbedding($"Job description: {jobDescription}");
 
         _promptFactory = new ViewFactory<string>();
@@ -36,7 +37,7 @@ public class DiversityRanker
 
 
 
-    public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments)
+    public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments, DataConfig dataConfig)
     {
         resumeSegments = [.. resumeSegments];
 
@@ -44,7 +45,7 @@ public class DiversityRanker
         // This entire file is potentially the worst code I've ever written
 
         // Choose 4 best courses
-        var educationSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == "education");
+        var educationSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == dataConfig.Education.Title);
         var educationSegment = resumeSegments[educationSegmentIndex];
 
         var educationSegmentEntries = educationSegment.Entries.ToList();
@@ -59,11 +60,15 @@ public class DiversityRanker
         resumeSegments[educationSegmentIndex] = new(educationSegment.TitleText, educationSegmentEntries);
 
         // Choose best skills, limit to 90 chars in length
-        var skillsSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == "tech skills");
+        var skillsSegmentIndex = resumeSegments.FindIndex(s => s.TitleText == dataConfig.Skills.Title);
         var skillsSegment = resumeSegments[skillsSegmentIndex];
         var skillsSegmentEntries = skillsSegment.Entries.ToList();
 
-        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: s.TitleText == "Programming Languages" ? 10000.0 : MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s)).OrderByDescending(s => s.score).Take(4).Select(s => s.category).ToList();
+        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: _config.EntryBoosts.GetValueOrDefault(s.TitleText, 1.0f) * MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s))
+            .OrderByDescending(s => s.score)
+            .Take(_config.SegmentTitlePointCounts.GetValueOrDefault(dataConfig.Skills.Title, 3))
+            .Select(s => s.category)
+            .ToList();
 
         var skillsSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var skillCategory in bestSkillCategories)
@@ -111,7 +116,12 @@ public class DiversityRanker
         {
             var segment = resumeSegments[i];
 
-            if (!_config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out var entryCount))
+            if (!_config.SegmentTitleEntryCounts.TryGetValue(segment.TitleText, out int entryCount))
+            {
+                entryCount = _config.DefaultEntryCount <= -1 ? int.MaxValue : _config.DefaultEntryCount;
+            }
+
+            if (entryCount <= 0)
             {
                 // Segment was not mutated
                 orderedSegments.Add((i, segment));
@@ -155,8 +165,14 @@ public class DiversityRanker
             var entryRank = selectedEntries[i];
             var segment = segmentDatabase[entryRank.Category].segment;
 
-            // Note *segment*.TitleText
-            if (!_config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out var pointCount))
+            // Check for entry first, then fall back to segment, then fall back to the default. Skip if 0
+            if (!_config.SegmentTitlePointCounts.TryGetValue(entryDatabase[entryRank.Id].TitleText, out int pointCount)
+                && !_config.SegmentTitlePointCounts.TryGetValue(segment.TitleText, out pointCount))
+            {
+                pointCount = _config.DefaultPointCount <= -1 ? int.MaxValue : _config.DefaultPointCount;
+            }
+
+            if (pointCount == 0)
             {
                 // Entry was not mutated
                 continue;

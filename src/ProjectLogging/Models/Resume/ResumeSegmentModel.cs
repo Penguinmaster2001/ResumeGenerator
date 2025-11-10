@@ -18,6 +18,11 @@ public class ResumeSegmentModel : IModel
     {
         TitleText = title;
         Entries = [.. entries];
+
+        if (TitleText == "Languages")
+        {
+            Console.WriteLine(string.Join(", ", Entries.Select(e => e.TitleText)));
+        }
     }
 
 

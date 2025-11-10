@@ -17,8 +17,8 @@ public class ResumeSegmentViewStrategy : ViewStrategy<Action<IContainer>, Resume
         => (container) => container.Column(column =>
             {
                 column.Item()
-                    .PaddingTop(2.0f)
-                    .PaddingBottom(2.0f)
+                    .PaddingTop(0.0f)
+                    .PaddingBottom(0.0f)
                     .Text(model.TitleText.ToUpper())
                     .AlignCenter()
                     .FontSize(12.0f)
