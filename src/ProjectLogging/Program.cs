@@ -1,6 +1,7 @@
 
 using ProjectLogging.Cli;
 using ProjectLogging.ResumeGeneration;
+using ProjectLogging.WebsiteGeneration;
 
 
 
@@ -13,9 +14,13 @@ public static class Program
     public static async Task<int> Main()
     {
         var cliParser = new CliParser(
-            [GenerateResumeCliAction.CliAction],
-            [CliOptions.Verbose]
-        );
+            [
+                GenerateResumeCliAction.CliAction,
+                GenerateWebsiteCliAction.CliAction,
+            ],
+            [
+                CliOptions.Verbose,
+            ]);
 
         var parseResults = cliParser.ParseArgs(Environment.GetCommandLineArgs());
 

@@ -1,4 +1,5 @@
 
+using ProjectLogging.Data;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Views.Html;
 using ProjectLogging.Views.ViewCreation;
@@ -14,8 +15,10 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public static class WebsiteGenerator
 {
-    public static Website GenerateWebsite(string outDir)
+    public static Website GenerateWebsite(string outDir, List<ProjectReadme> projectReadmes)
     {
+        var projects = projectReadmes.Select(p => new ProjectCard(p)).ToList();
+
         var fileOrganizer = new WebsiteFileOrganizer
         {
             RootDirectory = outDir,
@@ -26,13 +29,13 @@ public static class WebsiteGenerator
 
         var website = new Website(fileOrganizer);
 
-        website.Pages.Add(new HtmlPageBuilder("page1", "styles/styles.css")
+        website.Pages.Add(new HtmlPageBuilder("page1", "styles/stylesNew.css")
             .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
-            .AddBody(HtmlText.BeginHeader(1, "Page1"))
+            .AddBody(IHtmlElement.Div(projects.Select(p => p.CreateView(viewFactory))))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
             .Build());
 
-        website.Pages.Add(new HtmlPageBuilder("page2", "styles/styles.css")
+        website.Pages.Add(new HtmlPageBuilder("page2", "styles/stylesNew.css")
             .AddHeader(new NavLinksModel(["page0"]).CreateView(viewFactory))
             .AddBody(HtmlText.BeginHeader(1, "Page2"))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
@@ -47,6 +50,7 @@ public static class WebsiteGenerator
     {
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
+        viewFactory.AddStrategy<ProjectCardHtmlStrategy>();
         viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
         viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHtmlStrategy>();

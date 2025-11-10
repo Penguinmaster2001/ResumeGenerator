@@ -1,4 +1,5 @@
 
+using ProjectLogging.WebsiteGeneration.HtmlRepresentation;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
@@ -44,7 +45,7 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
 
     public HtmlPageBuilder AddHeader(IHtmlItem header)
     {
-        _header = header;
+        _header = new HtmlSection(HtmlTag.HtmlTags.Header, header);
         return this;
     }
 
@@ -52,7 +53,7 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
 
     public HtmlPageBuilder AddBody(IHtmlItem body)
     {
-        _body = body;
+        _body = new HtmlSection(HtmlTag.HtmlTags.Body, body);
         return this;
     }
 
@@ -60,7 +61,7 @@ public class HtmlPageBuilder(string title = "", string style = "", string favico
 
     public HtmlPageBuilder AddFooter(IHtmlItem footer)
     {
-        _footer = footer;
+        _footer = new HtmlSection(HtmlTag.HtmlTags.Footer, footer);
         return this;
     }
 

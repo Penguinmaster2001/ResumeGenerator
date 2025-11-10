@@ -25,7 +25,7 @@ public static class RecordLoader
     }
 
     public async static Task<List<T>> LoadRecordsAsync<T>(Stream stream) where T : BaseData
-        => await JsonSerializer.DeserializeAsync<List<T>>(stream) ?? new();
+        => await JsonSerializer.DeserializeAsync<List<T>>(stream) ?? [];
 
 
     public async static Task<PersonalInfo> LoadPersonalInfoAsync(string filePath)
@@ -33,5 +33,12 @@ public static class RecordLoader
 
     public async static Task<PersonalInfo> LoadPersonalInfoAsync(Stream stream)
         => await JsonSerializer.DeserializeAsync<PersonalInfo>(stream)
-            ?? new(string.Empty, string.Empty, string.Empty, string.Empty, new());
+            ?? new(string.Empty, string.Empty, string.Empty, string.Empty, []);
+
+    public async static Task<List<ProjectReadme>> LoadProjectReadmeAsync(string filePath)
+    {
+        var readmes = await JsonSerializer.DeserializeAsync<List<ProjectReadme>>(File.OpenRead(filePath), ProjectReadme.JsonOptions);
+
+        return readmes ?? [];
+    }
 }
