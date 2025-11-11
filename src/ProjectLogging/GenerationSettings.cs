@@ -15,6 +15,7 @@ public class GenerationSettings
     public string AiConfigPath { get; }
     public string WebsiteOutputPath { get; }
     public string ResumeOutputPath { get; }
+    public string ResumeName { get; }
     public string DataConfigPath { get; }
 
 
@@ -27,6 +28,7 @@ public class GenerationSettings
         string aiConfigPath,
         string websiteOutputPath,
         string resumeOutputPath,
+        string resumeName,
         string dataConfigPath)
     {
         BasePath = Path.GetFullPath(basePath);
@@ -35,6 +37,7 @@ public class GenerationSettings
         AiConfigPath = GetFullPath(aiConfigPath);
         WebsiteOutputPath = GetFullPath(websiteOutputPath);
         ResumeOutputPath = GetFullPath(resumeOutputPath);
+        ResumeName = resumeName;
         DataConfigPath = GetFullPath(dataConfigPath);
     }
 

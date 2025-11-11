@@ -9,6 +9,7 @@ namespace ProjectLogging.Models.Resume;
 
 public class ResumeModel : IModel
 {
+    public string Name { get; set; } = string.Empty;
     public ResumeHeaderModel ResumeHeader { get; set; }
     public ResumeBodyModel ResumeBody { get; set; }
 

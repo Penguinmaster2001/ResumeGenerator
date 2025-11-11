@@ -69,17 +69,18 @@ public static class GenerateResumeCliAction
         dataCollection.AddData(dataConfig.Hobbies.Title, hobbies.Result);
 
         var resumeModel = ResumeModelFactory.GenerateResume(dataCollection);
-        GeneratePdf(resumeModel, settings, "resume");
+        resumeModel.Name = settings.ResumeName;
+        GeneratePdf(resumeModel, settings);
 
         var filteredModel = FilterResume(resumeModel, settings, dataConfig, settings.AiConfigPath);
-        GeneratePdf(filteredModel, settings, "AnthonyCieriResume");
+        GeneratePdf(filteredModel, settings);
 
         return new GenerateResumeResult();
     }
 
 
 
-    private static ResumeModel FilterResume(ResumeModel model, GenerationSettings settings, DataConfig dataConfig,string configPath)
+    private static ResumeModel FilterResume(ResumeModel model, GenerationSettings settings, DataConfig dataConfig, string configPath)
     {
         AiFilterConfig? config;
         try
@@ -112,13 +113,14 @@ public static class GenerateResumeCliAction
 
         var filteredBody = new ResumeBodyModel(filtered);
         var filteredModel = new ResumeModel(model.ResumeHeader, filteredBody);
+        filteredModel.Name = config.FilteredResumeName;
 
         return filteredModel;
     }
 
 
 
-    private static void GeneratePdf(ResumeModel resumeModel, GenerationSettings settings, string fileName)
+    private static void GeneratePdf(ResumeModel resumeModel, GenerationSettings settings)
     {
         var styles = JsonSerializer.Deserialize<Dictionary<string, PdfStyleConfig>>(File.OpenRead(settings.PdfStylesPath)) ?? [];
 
@@ -136,7 +138,7 @@ public static class GenerateResumeCliAction
         QuestPDF.Settings.UseEnvironmentFonts = false;
         QuestPDF.Settings.FontDiscoveryPaths.Add("Resources/Fonts/");
 
-        var path = Path.ChangeExtension(Path.Combine(settings.ResumeOutputPath, fileName), Constants.Resources.Pdf);
+        var path = Path.ChangeExtension(Path.Combine(settings.ResumeOutputPath, resumeModel.Name), Constants.Resources.Pdf);
 
         new ResumeDocument(resumeModel, viewFactory).GeneratePdf(path);
     }
