@@ -20,9 +20,8 @@ public class PdfStyleManager : IPdfStyleManager
     public Color AccentColor { get; set; } = Colors.Grey.Darken2;
     public List<Color> BulletPointColors { get; set; } = [Colors.Grey.Darken4, Colors.Black];
 
-
-
     public string FontFamily { get; set; } = string.Empty;
+    public float DefaultLineHeight { get; set; } = 1.2f;
 
 
 
@@ -38,7 +37,8 @@ public class PdfStyleManager : IPdfStyleManager
             AccentColor = HexToColor(config.AccentColor),
             TextColor = HexToColor(config.TextColor),
             BulletPointColors = [.. config.BulletPointColors.Select(HexToColor)],
-            FontFamily = "Ubuntu Condensed",
+            FontFamily = config.FontFamily,
+            DefaultLineHeight = config.DefaultLineHeight,
         };
     }
 
@@ -67,7 +67,8 @@ public class PdfStyleManager : IPdfStyleManager
             ColorToHex(AccentColor),
             ColorToHex(TextColor),
             [.. BulletPointColors.Select(ColorToHex)],
-            FontFamily);
+            FontFamily,
+            DefaultLineHeight);
     }
 
 

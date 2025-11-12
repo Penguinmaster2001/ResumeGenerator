@@ -29,14 +29,16 @@ public class ResumeDocument : IDocument
 
     public void Compose(IDocumentContainer container) => container.Page(page =>
         {
+            var styleManager = _viewFactory.GetHelper<IPdfStyleManager>();
+
             page.Size(PageSizes.Letter);
             page.Margin(0.3f, Unit.Inch);
-            page.PageColor(_viewFactory.GetHelper<IPdfStyleManager>().PageColor);
-            page.DefaultTextStyle(textStyle => textStyle.FontSize(10.5f)
+            page.PageColor(styleManager.PageColor);
+            page.DefaultTextStyle(textStyle => textStyle.FontSize(11.0f)
                 .Weight(FontWeight.Light)
-                .FontColor(_viewFactory.GetHelper<IPdfStyleManager>().TextColor)
-                .FontFamily(_viewFactory.GetHelper<IPdfStyleManager>().FontFamily)
-                .LineHeight(1.2f));
+                .FontColor(styleManager.TextColor)
+                .FontFamily(styleManager.FontFamily)
+                .LineHeight(styleManager.DefaultLineHeight));
 
             page.Header().Element(ComposeHeader);
             page.Content().Element(ComposeBody);

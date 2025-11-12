@@ -53,4 +53,6 @@ public interface IPdfStyleManager
     /// Font family to use for the resume.
     /// </summary>
     string FontFamily { get; }
+
+    float DefaultLineHeight { get; }
 }

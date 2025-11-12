@@ -11,4 +11,5 @@ public record PdfStyleConfig(string PageColor,
     string AccentColor,
     string TextColor,
     List<string> BulletPointColors,
-    string FontFamily);
+    string FontFamily,
+    float DefaultLineHeight);

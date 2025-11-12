@@ -22,7 +22,7 @@ public class ResumeBodyOneColumnViewStrategy : ViewStrategy<Action<IContainer>, 
                 model.ResumeSegments[1..].ForEach(segment =>
                     {
                         segmentNum++;
-                        column.Item().PaddingVertical(4.0f).LineHorizontal(0.5f).LineColor(factory.GetHelper<IPdfStyleManager>().AccentColor);
+                        column.Item().PaddingVertical(3.0f).LineHorizontal(0.5f).LineColor(factory.GetHelper<IPdfStyleManager>().AccentColor);
                         column.Item().Background(segmentBackgroundColors[segmentNum % segmentBackgroundColors.Count]).Element(segment.CreateView(factory));
                     });
             });

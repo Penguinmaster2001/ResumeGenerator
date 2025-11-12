@@ -57,7 +57,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
             {
                 row.AutoItem().Element(Title(model.TitleText));
                 row.ConstantItem(5.0f);
-                row.ConstantItem(5.0f).AlignMiddle().AlignCenter().Svg("Resources/star.svg");
+                row.ConstantItem(5.0f).PaddingTop(6.0f, Unit.Point).AlignCenter().Svg("Resources/star.svg");
                 row.ConstantItem(5.0f);
                 row.AutoItem().Text(StringFormatter.FormatLocationText(model.LocationText)).FontSize(11.0f).Bold();
                 row.RelativeItem().AlignRight().Text(StringFormatter.FormatDate(model.StartDate, model.EndDate)).FontSize(11.0f).Italic();
@@ -85,7 +85,7 @@ public class ResumeEntryViewStrategy : ViewStrategy<Action<IContainer>, ResumeEn
                     column.Item().PaddingVertical(0.2f).Row(row =>
                     {
                         row.ConstantItem(8.0f);
-                        row.ConstantItem(3.0f).AlignMiddle().AlignCenter().Svg("Resources/bullet.svg");
+                        row.ConstantItem(3.0f).PaddingTop(7.0f, Unit.Point).AlignCenter().Svg("Resources/bullet.svg");
                         row.ConstantItem(5.0f);
                         row.RelativeItem().Text(bulletPoint).LineHeight(1.3f).FontColor(bulletColors[colorIndex]);
                     });
