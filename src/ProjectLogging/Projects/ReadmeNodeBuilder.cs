@@ -27,6 +27,33 @@ public class ReadmeNodeBuilder
 
 
 
+    public ReadmeNodeBuilder ParseContent(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content)) return Content(content);
+
+        return content[0] switch
+        {
+            '-' => Content(List(content)),
+            '|' => Content(Table(content)),
+            _ => Content(content),
+        };
+    }
+
+
+    private List<string[]> Table(string content)
+    {
+        return [.. content.Split('\n').Select(l => l.Split('|').Select(i => i.Trim()).ToArray())];
+    }
+
+
+
+    private List<string> List(string content)
+    {
+        return [.. content.Split('\n').Select(l => l.Trim().Trim('-').Trim())];
+    }
+
+
+
     public ReadmeNodeBuilder Content<T>(T content)
     {
         _content = content;

@@ -26,7 +26,7 @@ public static class ProjectReadmeParser
 
         var rootBuilder = new ReadmeNodeBuilder(1);
         rootBuilder.Title(titleLine[2..])
-            .Content(await GetContent(reader));
+            .ParseContent(await GetContent(reader));
 
         var nodeStack = new Stack<ReadmeNodeBuilder>();
         nodeStack.Push(rootBuilder);
@@ -51,7 +51,7 @@ public static class ProjectReadmeParser
 
             nodeStack.Push(new ReadmeNodeBuilder(currentLevel)
                 .Title(titleLine.TrimStart('#').Trim())
-                .Content(await GetContent(reader)));
+                .ParseContent(await GetContent(reader)));
         }
 
         while (nodeStack.Count > 1)
