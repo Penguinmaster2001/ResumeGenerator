@@ -1,5 +1,6 @@
 
 using ProjectLogging.Cli;
+using ProjectLogging.Projects;
 using ProjectLogging.ResumeGeneration;
 using ProjectLogging.WebsiteGeneration;
 
@@ -17,6 +18,7 @@ public static class Program
             [
                 GenerateResumeCliAction.CliAction,
                 GenerateWebsiteCliAction.CliAction,
+                TestParseReadmeCliAction.CliAction,
             ],
             [
                 CliOptions.Verbose,
@@ -28,9 +30,20 @@ public static class Program
 
         switch (result)
         {
-            case CliActionFailureResult cliActionFailureResult:
-                Console.WriteLine($"Error: {cliActionFailureResult.Message}");
+            case CliActionFailureResult failure:
+                if (failure.Message is not null)
+                {
+                    Console.WriteLine($"Failure: {failure.Message}");
+                }
                 return -1;
+
+            case CliActionSuccessResult success:
+                if (success.Message is not null)
+                {
+                    Console.WriteLine($"Success: {success.Message}");
+                }
+                return 0;
+
             case GenerateResumeResult generateResumeResult:
                 Console.WriteLine("Finished generating resume.");
                 return 0;

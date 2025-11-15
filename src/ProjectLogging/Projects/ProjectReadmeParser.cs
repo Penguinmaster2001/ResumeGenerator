@@ -2,6 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using ProjectLogging.Cli;
 
 
 
@@ -30,13 +31,15 @@ public static class ProjectReadmeParser
 
         while (!reader.EndOfStream)
         {
+            titleLine = await reader.ReadLineAsync() ?? throw new Exception("Invalid readme.");
             currentLevel = titleLine.TakeWhile(c => c == '#').Count();
 
             if (currentLevel <= 1) throw new Exception("Invalid readme.");
 
             while (currentLevel <= nodeStack.Peek().Level)
             {
-                nodeStack.Peek().AddChild(nodeStack.Pop().Build());
+                var node = nodeStack.Pop().Build();
+                nodeStack.Peek().AddChild(node);
             }
 
             nodeStack.Push(new ReadmeNodeBuilder(currentLevel)
@@ -44,9 +47,10 @@ public static class ProjectReadmeParser
                 .Content(await GetContent(reader)));
         }
 
-        while (nodeStack.Count > 0)
+        while (nodeStack.Count > 1)
         {
-            nodeStack.Peek().AddChild(nodeStack.Pop().Build());
+            var node = nodeStack.Pop().Build();
+            nodeStack.Peek().AddChild(node);
         }
 
         return new(nodeStack.Pop().Build());
@@ -64,7 +68,7 @@ public static class ProjectReadmeParser
 
             line = line.Trim();
 
-            content.Append(line);
+            content.AppendLine(line);
         }
 
         return content.ToString();
@@ -102,6 +106,13 @@ public class ProjectReadmeParseResult(IReadmeNode root)
         foundNode = null;
         return false;
     }
+
+
+
+    public override string ToString()
+    {
+        return $"ProjectReadmeParseResult(Root: {Root})";
+    }
 }
 
 
@@ -124,7 +135,7 @@ public class ReadmeNodeBuilder
 
     public ReadmeNodeBuilder Title(string title)
     {
-        _title = title;
+        _title = title.Trim();
         return this;
     }
 
@@ -150,7 +161,7 @@ public class ReadmeNodeBuilder
     {
         return _content switch
         {
-            _ => new ReadmeNode<string>(_content?.ToString() ?? string.Empty, _title, Level, _nodes),
+            _ => new ReadmeNode<string>(_content?.ToString()?.Trim() ?? string.Empty, _title, Level, _nodes),
         };
     }
 }
@@ -182,7 +193,7 @@ public class ReadmeNode<T> : IReadmeNode<T>
 
     public override string ToString()
     {
-        return $"{(Level - 1) * '\t'}ReadmeNode(Level: {Level}, Title: {Title}, Child Count: {Nodes.Count}, Content: {Content}, Children: {string.Join('\n', Nodes)})";
+        return $"{new string('\t', Level - 1)}ReadmeNode(Level: {Level}, Title: {Title}, Child Count: {Nodes.Count}, Content: {Content}{(Nodes.Count > 0 ? $", Children:\n{string.Join('\n', Nodes)}" : string.Empty)})";
     }
 }
 
@@ -203,4 +214,26 @@ public interface IReadmeNode
 public interface IReadmeNode<out T> : IReadmeNode
 {
     T Content { get; }
+}
+
+
+public static class TestParseReadmeCliAction
+{
+    public static CliAction CliAction => new("test", "readme-parser", "Print out parsed readme", TestParseReadmeAsync, new([
+        CliArgument.Create<string>("path", "p", true, "Readme path", null),
+    ]));
+
+
+
+
+    public static async Task<ICliActionResult> TestParseReadmeAsync(CliParseResults parsedCli)
+    {
+        var input = parsedCli.Arguments.GetArgument<string>("path");
+
+        var result = await ProjectReadmeParser.ParseReadmeAsync(input);
+
+        Console.WriteLine(result);
+
+        return ICliActionResult.Success;
+    }
 }
