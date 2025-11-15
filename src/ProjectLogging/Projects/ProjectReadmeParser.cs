@@ -11,6 +11,8 @@ public static class ProjectReadmeParser
 {
     public static async Task<ProjectReadmeParseResult> ParseReadmeAsync(string path)
     {
+        if (string.IsNullOrWhiteSpace(path)) return ProjectReadmeParseResult.Failure;
+
         using var reader = new StreamReader(path);
 
         await GetContent(reader);

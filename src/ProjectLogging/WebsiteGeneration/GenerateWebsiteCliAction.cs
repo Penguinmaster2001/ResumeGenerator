@@ -1,7 +1,6 @@
 
 using ProjectLogging.Cli;
 using ProjectLogging.Projects;
-using ProjectLogging.ResumeGeneration;
 
 
 
@@ -26,10 +25,10 @@ public static class GenerateWebsiteCliAction
 
         var projects = await RecordLoader.LoadProjectReadmeAsync(projectJson);
 
-        var website = WebsiteGenerator.GenerateWebsite(outDir, projects);
+        var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, projects);
 
         await website.CreateFilesAsync();
 
-        return new GenerateResumeResult();
+        return ICliActionResult.Success;
     }
 }

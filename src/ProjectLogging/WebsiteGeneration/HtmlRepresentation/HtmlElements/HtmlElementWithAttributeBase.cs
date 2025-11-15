@@ -6,7 +6,7 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 public abstract class HtmlElementWithAttributeBase<T>(HtmlTag tag) : IHtmlElement
     where T : HtmlElementWithAttributeBase<T>
 {
-    protected HtmlTag Tag { get; set; } = tag;
+    public HtmlTag Tag { get; protected set; } = tag;
     public List<ITagAttribute> Attributes { get => Tag.Attributes; }
 
 

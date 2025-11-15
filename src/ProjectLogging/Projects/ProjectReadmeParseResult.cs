@@ -43,11 +43,32 @@ public class ProjectReadmeParseResult
         [NotNullWhen(true)] out IReadmeNode<T>? foundNode,
         StringComparison comparison = StringComparison.CurrentCulture)
     {
-        if (Root is null)
-        {
-            foundNode = null;
-            return false;
-        }
+        foundNode = FindSectionOrNull<T>(title, comparison);
+
+        return foundNode is not null;
+    }
+
+
+
+    public T? GetSectionContentOrDefault<T>(
+        string title,
+        T? defaultValue = default,
+        StringComparison comparison = StringComparison.CurrentCulture)
+    {
+        var found = FindSectionOrNull<T>(title, comparison);
+
+        if (found is not null) return found.Content;
+
+        return defaultValue;
+    }
+
+
+
+    public IReadmeNode<T>? FindSectionOrNull<T>(
+        string title,
+        StringComparison comparison = StringComparison.CurrentCulture)
+    {
+        if (Root is null) return null;
 
         var searchQueue = new Queue<IReadmeNode>();
         searchQueue.Enqueue(Root);
@@ -56,8 +77,7 @@ public class ProjectReadmeParseResult
         {
             if (string.Equals(node.Title, title, comparison) && node is IReadmeNode<T> typedReadmeNode)
             {
-                foundNode = typedReadmeNode;
-                return true;
+                return typedReadmeNode;
             }
 
             foreach (var child in node.Nodes)
@@ -66,8 +86,7 @@ public class ProjectReadmeParseResult
             }
         }
 
-        foundNode = null;
-        return false;
+        return null;
     }
 
 

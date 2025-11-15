@@ -43,3 +43,10 @@ public class HtmlSection : HtmlSection<HtmlSection>
 
     public HtmlSection(params IEnumerable<IHtmlItem> content) : base(HtmlTag.Section, content) { }
 }
+
+
+
+public class HtmlContainer : HtmlSection<HtmlSection>
+{
+    public HtmlContainer(params IEnumerable<IHtmlItem> content) : base(null, content) { }
+}
