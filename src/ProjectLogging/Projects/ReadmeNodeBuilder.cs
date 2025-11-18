@@ -74,6 +74,8 @@ public class ReadmeNodeBuilder
     {
         return _content switch
         {
+            List<string> list => new ReadmeNode<List<string>>(list, _title, Level, _nodes),
+            List<string[]> table => new ReadmeNode<List<string[]>>(table, _title, Level, _nodes),
             _ => new ReadmeNode<string>(_content?.ToString()?.Trim() ?? string.Empty, _title, Level, _nodes),
         };
     }

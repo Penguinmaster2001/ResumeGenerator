@@ -79,6 +79,10 @@ public class ProjectReadmeParseResult
             {
                 return typedReadmeNode;
             }
+            else if (string.Equals(node.Title, title, comparison))
+            {
+                Console.WriteLine(node.GetType());
+            }
 
             foreach (var child in node.Nodes)
             {

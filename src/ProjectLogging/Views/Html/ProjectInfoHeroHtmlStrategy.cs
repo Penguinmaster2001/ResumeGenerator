@@ -28,7 +28,7 @@ public class ProjectInfoHeroHtmlStrategy : ViewStrategy<IHtmlItem, ProjectInfo>
         var main = new HtmlSection(HtmlTag.Main, [
             new HtmlSection([
                 HtmlText.BeginHeader(2, "Overview"),
-                HtmlText.BeginParagraph(model.Description ?? string.Empty),
+                HtmlText.BeginParagraph(model.Description?.Replace("\n", "<br>") ?? string.Empty),
             ]).AddCssClass("overview"),
 
             new HtmlSection([
@@ -45,10 +45,14 @@ public class ProjectInfoHeroHtmlStrategy : ViewStrategy<IHtmlItem, ProjectInfo>
             new HtmlSection([
                 HtmlText.BeginHeader(2, "Features"),
                 IHtmlElement.Div(model.Features?.Select(f =>
-                        IHtmlElement.Div(
+                    {
+                        if (f.Length < 2) return (IHtmlItem)IHtmlElement.Raw("None");
+
+                        return IHtmlElement.Div(
                             HtmlText.BeginHeader(4, f[0]),
                             HtmlText.BeginParagraph(f[1])
-                        ).AddCssClass($"card {f[1].Replace(' ', '-')}"))
+                        ).AddCssClass($"card {f[1].Replace(' ', '-')}");
+                    })
                     ?? []
                 ).AddCssClass("feature-cards"),
             ]).AddCssClass("features"),
