@@ -82,7 +82,7 @@ public partial class HtmlTemplate : IHtmlItem
                 && m.Groups.TryGetValue("content", out var contentGroup)
                 && dataStringEnumerables.TryGetValue(collectionNameGroup.Value, out var enumerable))
             {
-                var enumerableTemplate = ReplaceVariables(contentGroup.Value, dataStrings, true);
+                var enumerableTemplate = ReplaceVariables(contentGroup.Value, dataStrings, false);
 
                 var sb = new StringBuilder();
 
@@ -96,7 +96,7 @@ public partial class HtmlTemplate : IHtmlItem
 
             if (Strict) throw new Exception("");
 
-            return m.Name;
+            return m.Value;
         });
 
         return ReplaceVariables(enumerableReplacement, dataStrings);
@@ -104,42 +104,42 @@ public partial class HtmlTemplate : IHtmlItem
 
 
 
-    private string ReplaceVariables(string template, Dictionary<string, string?> variableValues, bool overrideStrict = false)
+    private string ReplaceVariables(string template, Dictionary<string, string?> variableValues, bool? overrideStrict = null)
     {
         return _templateVariableRegex.Replace(template, (m) =>
         {
             if (m.Groups.TryGetValue("name", out var nameGroup)
                 && variableValues.TryGetValue(nameGroup.Value, out var value))
             {
-                return FormatVariable(value!, m.Groups[3].Captures);;
+                return FormatVariable(value!, m.Groups[3].Captures, false);
             }
 
-            if (overrideStrict || Strict) throw new Exception($"Unknown variable {nameGroup!.Name}.");
+            if (overrideStrict ?? Strict) throw new Exception($"Unknown variable {nameGroup!.Name}.");
 
-            return m.Name;
+            return m.Value;
         });
     }
 
 
 
-    private string ReplaceVariable(string variableName, string value, string template, bool overrideStrict = false)
+    private string ReplaceVariable(string variableName, string value, string template, bool? overrideStrict = null)
     {
         return _templateVariableRegex.Replace(template, (m) =>
         {
             if (m.Groups.TryGetValue("name", out var nameGroup) && nameGroup.Value == variableName)
             {
-                return FormatVariable(value, m.Groups[3].Captures);
+                return FormatVariable(value, m.Groups[3].Captures, false);
             }
 
-            if (overrideStrict || Strict) throw new Exception("");
+            if (overrideStrict ?? Strict) throw new Exception("");
 
-            return m.Name;
+            return m.Value;
         });
     }
 
 
 
-    private string FormatVariable(string value, CaptureCollection formats)
+    private string FormatVariable(string value, CaptureCollection formats, bool? overrideStrict = null)
     {
         for (int i = 0; i < formats.Count; i++)
         {
@@ -153,7 +153,7 @@ public partial class HtmlTemplate : IHtmlItem
                         value = value.ToLower();
                         break;
                     default:
-                        if (Strict) throw new Exception("Invalid format.");
+                        if (overrideStrict ?? Strict) throw new Exception("Invalid format.");
                         break;
                 }
             }

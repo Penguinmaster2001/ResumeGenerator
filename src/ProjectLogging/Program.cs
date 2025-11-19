@@ -18,6 +18,7 @@ public static class Program
             [
                 GenerateResumeCliAction.CliAction,
                 GenerateWebsiteCliAction.CliAction,
+                GenerateWebsiteCliAction.TestHtmlTemplateCliAction,
                 TestParseReadmeCliAction.CliAction,
             ],
             [
