@@ -16,7 +16,7 @@ public class ProjectInfo : IModel
     public string? Motivation { get; }
     public List<string>? Goals { get; }
     public List<string>? BuiltWith { get; }
-    public List<string[]>? Features { get; }
+    public ReadmeTable? Features { get; }
     public ProjectReadmeParseResult ReadmeResult { get; }
 
 
@@ -28,7 +28,7 @@ public class ProjectInfo : IModel
         string? motivation = null,
         List<string>? goals = null,
         List<string>? builtWith = null,
-        List<string[]>? features = null,
+        ReadmeTable? features = null,
         ProjectReadmeParseResult? readmeResult = null)
     {
         ProjectTitle = projectTitle;
@@ -59,7 +59,7 @@ public class ProjectInfo : IModel
             parseResult.GetSectionContentOrDefault<string>("motivation", null, StringComparison.OrdinalIgnoreCase),
             parseResult.GetSectionContentOrDefault<List<string>>("goals", null, StringComparison.OrdinalIgnoreCase),
             parseResult.GetSectionContentOrDefault<List<string>>("built with", null, StringComparison.OrdinalIgnoreCase),
-            parseResult.GetSectionContentOrDefault<List<string[]>>("features", null, StringComparison.OrdinalIgnoreCase)
+            parseResult.GetSectionContentOrDefault<ReadmeTable>("features", null, StringComparison.OrdinalIgnoreCase)
         );
     }
 

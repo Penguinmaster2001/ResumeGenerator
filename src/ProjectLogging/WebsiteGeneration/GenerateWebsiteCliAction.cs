@@ -61,6 +61,8 @@ public static class GenerateWebsiteCliAction
         var card = new ProjectCard(project!);
         var info = await ProjectInfo.CreateFromCardAsync(card);
 
+        Console.WriteLine(info.Features);
+
         var htmlTemplate = await HtmlTemplate.LoadFromFile(templatePath);
         htmlTemplate.Strict = parsedCli.Arguments.TryGetArgument<bool>("strict", out var strict) && strict;
         var html = htmlTemplate.GenerateHtml(info)!;

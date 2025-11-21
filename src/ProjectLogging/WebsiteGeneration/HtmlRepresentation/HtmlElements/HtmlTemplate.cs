@@ -1,6 +1,9 @@
 
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ProjectLogging.Projects;
 
 
 
@@ -10,7 +13,7 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 public partial class HtmlTemplate : IHtmlItem
 {
-    [GeneratedRegex("""{{ ?(?<name>\w+)(\.\w+)*( ?\|( ?\w+)+)? ?}}""")]
+    [GeneratedRegex("""{{ ?(?<variable>(\.?\w+)+)( ?\|(?<formats>( ?\w+)+))? ?}}""")]
     private static partial Regex _templateVariableRegex { get; }
 
     [GeneratedRegex("""{% ?for (?<itemLabel>\w+) in (?<collectionName>\w+) ?%}(?<content>.*?){% ?endfor ?%}""", RegexOptions.Singleline)]
@@ -59,36 +62,32 @@ public partial class HtmlTemplate : IHtmlItem
 
     public string GenerateHtml(object data)
     {
-        var dataStrings = data
-            .GetType()
-            .GetProperties()
-            .Where(p => p.PropertyType.IsAssignableTo(typeof(string)))
-            .Select(p => (name: p.Name, value: p.GetValue(data)))
-            .Where(p => p.value is not null)
-            .ToDictionary(p => p.name, p => p.value!.ToString());
-
-        var dataStringEnumerables = data
-            .GetType()
-            .GetProperties()
-            .Where(p => p.PropertyType.IsAssignableTo(typeof(IEnumerable<string>)))
-            .Select(p => (name: p.Name, value: p.GetValue(data)))
-            .Where(p => p.value is not null)
-            .ToDictionary(p => p.name, p => p.value as IEnumerable<string>);
+        var dataCache = IDataCache.Create(data);
 
         var enumerableReplacement = _templateEnumerableRegex.Replace(_template, (m) =>
         {
             if (m.Groups.TryGetValue("itemLabel", out var nameGroup)
                 && m.Groups.TryGetValue("collectionName", out var collectionNameGroup)
                 && m.Groups.TryGetValue("content", out var contentGroup)
-                && dataStringEnumerables.TryGetValue(collectionNameGroup.Value, out var enumerable))
+                && dataCache.TryGetValue(collectionNameGroup.Value, out var value))
             {
-                var enumerableTemplate = ReplaceVariables(contentGroup.Value, dataStrings, false);
+                var enumerableTemplate = ReplaceVariables(contentGroup.Value, dataCache, false);
+
+                if (value is not IEnumerable<object> enumerable)
+                {
+                    if (Strict)
+                    {
+                        throw new Exception($"\"{collectionNameGroup.Value}\" is not enumerable.");
+                    }
+
+                    return m.Value;
+                }
 
                 var sb = new StringBuilder();
 
-                foreach (var item in enumerable!)
+                foreach (var item in enumerable)
                 {
-                    sb.Append(ReplaceVariable(nameGroup.Value, item, enumerableTemplate));
+                    sb.Append(ReplaceVariables(enumerableTemplate, dataCache.Extended(nameGroup.Value, item)));
                 }
 
                 return sb.ToString();
@@ -99,22 +98,28 @@ public partial class HtmlTemplate : IHtmlItem
             return m.Value;
         });
 
-        return ReplaceVariables(enumerableReplacement, dataStrings);
+        return ReplaceVariables(enumerableReplacement, dataCache);
     }
 
 
 
-    private string ReplaceVariables(string template, Dictionary<string, string?> variableValues, bool? overrideStrict = null)
+    private string ReplaceVariables(string template, IDataCache dataCache, bool? overrideStrict = null)
     {
         return _templateVariableRegex.Replace(template, (m) =>
         {
-            if (m.Groups.TryGetValue("name", out var nameGroup)
-                && variableValues.TryGetValue(nameGroup.Value, out var value))
+            if (m.Groups.TryGetValue("variable", out var variableGroup)
+                && dataCache.TryGetValue(variableGroup.Value, out var value))
             {
-                return FormatVariable(value!, m.Groups[3].Captures, false);
+                var variableString = value.ToString() ?? ((overrideStrict ?? Strict)
+                    ? throw new Exception($"Unknown variable \"{variableGroup.Value}\".")
+                    : m.Value);
+
+                return m.Groups.TryGetValue("formats", out var formats)
+                    ? FormatVariable(variableString, formats.Value, false)
+                    : variableString;
             }
 
-            if (overrideStrict ?? Strict) throw new Exception($"Unknown variable {nameGroup!.Name}.");
+            if (overrideStrict ?? Strict) throw new Exception($"Unknown variable \"{variableGroup?.Value ?? m.Value}\".");
 
             return m.Value;
         });
@@ -122,43 +127,148 @@ public partial class HtmlTemplate : IHtmlItem
 
 
 
-    private string ReplaceVariable(string variableName, string value, string template, bool? overrideStrict = null)
+    private string FormatVariable(string value, string formats, bool? overrideStrict = null)
     {
-        return _templateVariableRegex.Replace(template, (m) =>
+        foreach (var format in formats.Split(' '))
         {
-            if (m.Groups.TryGetValue("name", out var nameGroup) && nameGroup.Value == variableName)
+            switch (format.ToLower())
             {
-                return FormatVariable(value, m.Groups[3].Captures, false);
-            }
-
-            if (overrideStrict ?? Strict) throw new Exception("");
-
-            return m.Value;
-        });
-    }
-
-
-
-    private string FormatVariable(string value, CaptureCollection formats, bool? overrideStrict = null)
-    {
-        for (int i = 0; i < formats.Count; i++)
-        {
-            var format = formats[i];
-
-            if (format is not null)
-            {
-                switch (format.Value.ToLower())
-                {
-                    case "lower":
-                        value = value.ToLower();
-                        break;
-                    default:
-                        if (overrideStrict ?? Strict) throw new Exception("Invalid format.");
-                        break;
-                }
+                case "lower":
+                    value = value.ToLower();
+                    break;
+                case "snake":
+                    value = value.Replace(' ', '_');
+                    break;
+                default:
+                    if (overrideStrict ?? Strict) throw new Exception($"Invalid format \"{format}\".");
+                    break;
             }
         }
 
         return value;
+    }
+
+
+
+    private interface IDataCache
+    {
+        object Value { get; }
+
+
+
+        public bool TryGetValue(string variable, [NotNullWhen(true)] out object? value)
+        {
+            var nestedVariables = variable.Split('.');
+
+            IDataCache? currentData = this;
+
+            foreach (var nestedVariable in nestedVariables)
+            {
+                if (!currentData.TryGetData(nestedVariable, out currentData))
+                {
+                    value = null;
+                    return false;
+                }
+            }
+
+            value = currentData.Value;
+            return true;
+        }
+
+
+
+        bool TryGetData(string variable, [NotNullWhen(true)] out IDataCache? data);
+
+
+
+        IDataCache Extended(string variable, object value);
+
+
+
+        public static IDataCache Create(object data)
+        {
+            if (data is IReadOnlyDictionary<string, object> dictionaryData)
+            {
+                return new DictionaryDataCache(dictionaryData);
+            }
+
+            return new ObjectDataCache(data);
+        }
+    }
+
+
+
+    private class ObjectDataCache(object data) : IDataCache
+    {
+        public object Value { get; } = data;
+        private readonly List<PropertyInfo> _dataProperties = [.. data.GetType().GetProperties()];
+        private readonly Dictionary<string, IDataCache> _cache = [];
+
+
+
+        private ObjectDataCache(object data, Dictionary<string, IDataCache> cache) : this(data)
+        {
+            _cache = cache;
+        }
+
+
+
+        public bool TryGetData(string variable, [NotNullWhen(true)] out IDataCache? data)
+        {
+            if (_cache.TryGetValue(variable, out data)) return true;
+
+            if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty
+                || variableProperty.GetValue(Value) is not object variableValue) return false;
+
+            data = IDataCache.Create(variableValue);
+            _cache.Add(variable, data);
+
+            return true;
+        }
+
+
+
+        public IDataCache Extended(string variable, object value)
+        {
+            var valueCache = IDataCache.Create(value);
+
+            var extendedCache = _cache.ToDictionary();
+            extendedCache.Add(variable, valueCache);
+
+            return new ObjectDataCache(Value, extendedCache);
+        }
+    }
+
+
+
+    private class DictionaryDataCache(IReadOnlyDictionary<string, object> data) : IDataCache
+    {
+        public object Value { get; } = nameof(DictionaryDataCache);
+        private readonly IReadOnlyDictionary<string, object> _data = data;
+        private readonly Dictionary<string, IDataCache> _cache = [];
+
+
+
+        public bool TryGetData(string variable, [NotNullWhen(true)] out IDataCache? data)
+        {
+            if (_cache.TryGetValue(variable, out data)) return true;
+
+            if (!_data.TryGetValue(variable, out var variableProperty)) return false;
+
+            data = IDataCache.Create(variableProperty);
+            _cache.Add(variable, data);
+
+            return true;
+        }
+
+
+
+        public IDataCache Extended(string variable, object value)
+        {
+            var extendedData = _data.ToDictionary();
+            extendedData.Add(variable, value);
+
+            return new DictionaryDataCache(extendedData);
+        }
     }
 }

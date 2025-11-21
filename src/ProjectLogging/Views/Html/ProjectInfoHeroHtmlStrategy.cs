@@ -42,20 +42,20 @@ public class ProjectInfoHeroHtmlStrategy : ViewStrategy<IHtmlItem, ProjectInfo>
                 ]),
             ]).AddCssClass("details-grid"),
 
-            new HtmlSection([
-                HtmlText.BeginHeader(2, "Features"),
-                IHtmlElement.Div(model.Features?.Select(f =>
-                    {
-                        if (f.Length < 2) return (IHtmlItem)IHtmlElement.Raw("None");
+            // new HtmlSection([
+            //     HtmlText.BeginHeader(2, "Features"),
+            //     IHtmlElement.Div(model.Features?.Select(f =>
+            //         {
+            //             if (f.Length < 2) return (IHtmlItem)IHtmlElement.Raw("None");
 
-                        return IHtmlElement.Div(
-                            HtmlText.BeginHeader(4, f[0]),
-                            HtmlText.BeginParagraph(f[1])
-                        ).AddCssClass($"card {f[1].Replace(' ', '-')}");
-                    })
-                    ?? []
-                ).AddCssClass("feature-cards"),
-            ]).AddCssClass("features"),
+            //             return IHtmlElement.Div(
+            //                 HtmlText.BeginHeader(4, f[0]),
+            //                 HtmlText.BeginParagraph(f[1])
+            //             ).AddCssClass($"card {f[1].Replace(' ', '-')}");
+            //         })
+            //         ?? []
+            //     ).AddCssClass("feature-cards"),
+            // ]).AddCssClass("features"),
         ]);
 
         return new HtmlContainer(header, main);
