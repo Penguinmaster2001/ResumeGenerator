@@ -111,4 +111,31 @@ public static class StringFormatter
 
         return sb.ToString();
     }
+
+
+
+    public static string SnakeCase(this string toFormat) => toFormat.Replace(' ', '_');
+
+
+
+    public static string TitleCase(this string toFormat)
+    {
+        if (string.IsNullOrWhiteSpace(toFormat)) return toFormat;
+
+        var titleCase = char.ToUpper(toFormat[0]).ToString();
+
+        for (int c = 1; c < toFormat.Length; c++)
+        {
+            if (toFormat[c - 1] == ' ')
+            {
+                titleCase += char.ToUpper(toFormat[c]);
+            }
+            else
+            {
+                titleCase += toFormat[c];
+            }
+        }
+
+        return titleCase;
+    }
 }

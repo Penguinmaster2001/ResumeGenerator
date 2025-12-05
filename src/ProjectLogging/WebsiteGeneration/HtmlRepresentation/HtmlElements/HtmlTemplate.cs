@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using ProjectLogging.Projects;
+using ProjectLogging.Views;
 
 
 
@@ -18,6 +18,14 @@ public partial class HtmlTemplate : IHtmlItem
 
     [GeneratedRegex("""{% ?for (?<itemLabel>\w+) in (?<collectionName>\w+) ?%}(?<content>.*?){% ?endfor ?%}""", RegexOptions.Singleline)]
     private static partial Regex _templateEnumerableRegex { get; }
+
+    private static readonly Dictionary<string, Func<string, string>> _formatters = new()
+    {
+        ["upper"] = s => s.ToUpper(),
+        ["lower"] = s => s.ToLower(),
+        ["snake"] = s => s.SnakeCase(),
+    };
+
 
 
     private readonly string _template;
@@ -131,17 +139,13 @@ public partial class HtmlTemplate : IHtmlItem
     {
         foreach (var format in formats.Split(' '))
         {
-            switch (format.ToLower())
+            if (_formatters.TryGetValue(format.ToLower(), out var formatter))
             {
-                case "lower":
-                    value = value.ToLower();
-                    break;
-                case "snake":
-                    value = value.Replace(' ', '_');
-                    break;
-                default:
-                    if (overrideStrict ?? Strict) throw new Exception($"Invalid format \"{format}\".");
-                    break;
+                value = formatter(value);
+            }
+            else if (overrideStrict ?? Strict)
+            {
+                throw new Exception($"Invalid format \"{format}\".");
             }
         }
 

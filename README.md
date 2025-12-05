@@ -251,7 +251,6 @@ This project is licensed under the [MIT License](LICENSE).
 - .NET
 - QuestPDF
 - markdown
-- VS Code
 - HuggingFace
 
 > Anthony Cieri [anthony.cieri@hotmail.com](mailto:anthony.cieri@hotmail.com) [anthonycieri.com](https://anthonycieri.com)
