@@ -50,7 +50,10 @@ public static class WebsiteGenerator
 
 
 
-    private static void SetUpFactory(ViewFactory<IHtmlItem> viewFactory, IPageLinker pageLinker, ITemplateManager templateManager)
+    private static void SetUpFactory(
+        ViewFactory<IHtmlItem> viewFactory,
+        IPageLinker pageLinker,
+        ITemplateManager templateManager)
     {
         viewFactory.AddStrategy<ProjectInfoHeroHtmlStrategy>();
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
@@ -61,9 +64,9 @@ public static class WebsiteGenerator
         viewFactory.AddStrategy<ResumeHtmlStrategy>();
         viewFactory.AddStrategy<NavLinksStrategy>();
 
-        viewFactory.AddHelper(pageLinker);
         viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
         viewFactory.AddHelper(templateManager);
+        viewFactory.AddHelper(pageLinker);
 
         viewFactory.AddPostAction((htmlItem, factory) =>
             {
@@ -89,8 +92,16 @@ public static class WebsiteGenerator
 
             var info = await ProjectInfo.CreateFromCardAsync(card);
 
+            var header = new HtmlSection(HtmlTag.Header, [
+                new NavLinksModel(["page1"]).CreateView(viewFactory),
+                IHtmlElement.Div([
+                    HtmlText.BeginHeader(1, info.ProjectTitle),
+                    new RawHtml($"<p class=\"tagline\">{info.ShortDescription}</p>")
+                ]).AddCssClass("hero-content"),
+            ]).AddCssClass("hero");
+
             return new HtmlPageBuilder(card.ProjectTitle, "styles/project-hero.css")
-                .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
+                .AddHeader(header)
                 .AddBody(info.CreateView(viewFactory))
                 .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
                 .Build();

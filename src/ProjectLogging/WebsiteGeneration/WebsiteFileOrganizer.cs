@@ -9,7 +9,7 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public class WebsiteFileOrganizer : IFileOrganizer
 {
-    private readonly ConcurrentDictionary<string, Dictionary<string, PathInfo>> _filePaths = [];
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, PathInfo>> _filePaths = [];
 
 
 

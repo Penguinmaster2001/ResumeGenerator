@@ -51,7 +51,10 @@ public class ReadmeNodeBuilder
 
     private List<string> List(string content)
     {
-        return [.. content.Split('\n').Select(l => l.Trim().Trim('-').Trim())];
+        return [.. content.Split('\n')
+            .Select(l => l.Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l) && (l.StartsWith('-') || l.StartsWith('*')))
+            .Select(l => l.Trim('-').Trim('*').Trim())];
     }
 
 
