@@ -30,7 +30,7 @@ public partial class HtmlTemplate : IHtmlItem
 
     private readonly string _template;
     public object? Data { get; set; } = null;
-    public bool Strict { get; set; } = true;
+    public bool Strict { get; set; } = false;
 
 
 
@@ -42,7 +42,7 @@ public partial class HtmlTemplate : IHtmlItem
 
 
 
-    public static async Task<HtmlTemplate> LoadFromFile(string path, object? data = null)
+    public static async Task<HtmlTemplate> LoadFromFileAsync(string path, object? data = null)
     {
         using var file = new StreamReader(path);
 

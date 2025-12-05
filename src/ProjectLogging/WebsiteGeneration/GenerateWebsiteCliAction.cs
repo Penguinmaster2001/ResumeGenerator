@@ -63,7 +63,7 @@ public static class GenerateWebsiteCliAction
 
         Console.WriteLine(info.Features);
 
-        var htmlTemplate = await HtmlTemplate.LoadFromFile(templatePath);
+        var htmlTemplate = await HtmlTemplate.LoadFromFileAsync(templatePath);
         htmlTemplate.Strict = parsedCli.Arguments.TryGetArgument<bool>("strict", out var strict) && strict;
         var html = htmlTemplate.GenerateHtml(info)!;
 

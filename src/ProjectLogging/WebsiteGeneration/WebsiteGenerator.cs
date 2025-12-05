@@ -24,8 +24,10 @@ public static class WebsiteGenerator
             RootDirectory = outDir,
         };
 
+        var templateManager = await LoadTemplatesAsync(Path.Combine(outDir, "Templates"));
+
         var viewFactory = new ViewFactory<IHtmlItem>();
-        SetUpFactory(viewFactory, new PageLinker(fileOrganizer));
+        SetUpFactory(viewFactory, new PageLinker(fileOrganizer), templateManager);
 
         var website = new Website(fileOrganizer);
 
@@ -48,7 +50,7 @@ public static class WebsiteGenerator
 
 
 
-    private static void SetUpFactory(ViewFactory<IHtmlItem> viewFactory, IPageLinker pageLinker)
+    private static void SetUpFactory(ViewFactory<IHtmlItem> viewFactory, IPageLinker pageLinker, ITemplateManager templateManager)
     {
         viewFactory.AddStrategy<ProjectInfoHeroHtmlStrategy>();
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
@@ -61,6 +63,7 @@ public static class WebsiteGenerator
 
         viewFactory.AddHelper(pageLinker);
         viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
+        viewFactory.AddHelper(templateManager);
 
         viewFactory.AddPostAction((htmlItem, factory) =>
             {
@@ -100,5 +103,26 @@ public static class WebsiteGenerator
             .Build();
 
         return [.. projectPages.Append(projectCardPage)];
+    }
+
+
+
+    private static async Task<ITemplateManager> LoadTemplatesAsync(string templateDir)
+    {
+        var files = Directory.EnumerateFiles(templateDir, "*", SearchOption.TopDirectoryOnly).ToArray();
+
+        var tasks = files.Select(async path =>
+        {
+            var template = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+            var templateName = Path.GetFileNameWithoutExtension(path)!;
+
+            Console.WriteLine(templateName);
+            return (templateName, template);
+        }).ToArray();
+
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+        var templateNames = results.ToDictionary(t => t.templateName, t => t.template);
+
+        return new TemplateManager(templateNames);
     }
 }

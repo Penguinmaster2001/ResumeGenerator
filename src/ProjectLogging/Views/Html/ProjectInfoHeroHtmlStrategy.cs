@@ -16,47 +16,15 @@ public class ProjectInfoHeroHtmlStrategy : ViewStrategy<IHtmlItem, ProjectInfo>
 {
     public override IHtmlItem BuildView(ProjectInfo model, IViewFactory<IHtmlItem> factory)
     {
-        var pageLinker = factory.GetHelper<IPageLinker>();
-
         var header = new HtmlSection(HtmlTag.Header, [
+            new NavLinksModel(["page1"]).CreateView(factory),
             IHtmlElement.Div([
                 HtmlText.BeginHeader(1, model.ProjectTitle),
                 new RawHtml($"<p class=\"tagline\">{model.ShortDescription}</p>")
             ]).AddCssClass("hero-content"),
         ]).AddCssClass("hero");
 
-        var main = new HtmlSection(HtmlTag.Main, [
-            new HtmlSection([
-                HtmlText.BeginHeader(2, "Overview"),
-                HtmlText.BeginParagraph(model.Description?.Replace("\n", "<br>") ?? string.Empty),
-            ]).AddCssClass("overview"),
-
-            new HtmlSection([
-                IHtmlElement.Div([
-                    HtmlText.BeginHeader(3, "Goals"),
-                    IHtmlElement.UnorderedList(model.Goals?.Select(IHtmlElement.Raw) ?? [IHtmlElement.Raw("None")])
-                ]),
-                IHtmlElement.Div([
-                    HtmlText.BeginHeader(3, "Built With"),
-                    IHtmlElement.UnorderedList(model.BuiltWith?.Select(IHtmlElement.Raw) ?? [IHtmlElement.Raw("None")])
-                ]),
-            ]).AddCssClass("details-grid"),
-
-            // new HtmlSection([
-            //     HtmlText.BeginHeader(2, "Features"),
-            //     IHtmlElement.Div(model.Features?.Select(f =>
-            //         {
-            //             if (f.Length < 2) return (IHtmlItem)IHtmlElement.Raw("None");
-
-            //             return IHtmlElement.Div(
-            //                 HtmlText.BeginHeader(4, f[0]),
-            //                 HtmlText.BeginParagraph(f[1])
-            //             ).AddCssClass($"card {f[1].Replace(' ', '-')}");
-            //         })
-            //         ?? []
-            //     ).AddCssClass("feature-cards"),
-            // ]).AddCssClass("features"),
-        ]);
+        var main = factory.GetHelper<ITemplateManager>().Create("heroTemplate", model);
 
         return new HtmlContainer(header, main);
     }
