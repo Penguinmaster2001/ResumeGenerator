@@ -24,13 +24,13 @@ public class AnchorElement : HtmlSection<AnchorElement>
 
 
 
-    public AnchorElement(string href, params List<IHtmlItem> content)
+    public AnchorElement(string href, params IEnumerable<IHtmlItem> content)
         : base(HtmlTag.Anchor, content)
         => AddAttribute("href", href).AddAttribute("target", TargetString(Targets.Self));
 
 
 
-    public AnchorElement(string href, Targets target, params List<IHtmlItem> content)
+    public AnchorElement(string href, Targets target, params IEnumerable<IHtmlItem> content)
         : base(HtmlTag.Anchor, content)
         => AddAttribute("href", href).AddAttribute("target", TargetString(target));
 }

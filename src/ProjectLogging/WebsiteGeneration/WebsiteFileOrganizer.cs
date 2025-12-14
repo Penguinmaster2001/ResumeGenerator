@@ -1,5 +1,5 @@
 
-using System.Text;
+using System.Collections.Concurrent;
 
 
 
@@ -9,7 +9,7 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public class WebsiteFileOrganizer : IFileOrganizer
 {
-    private readonly Dictionary<string, Dictionary<string, PathInfo>> _filePaths = [];
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, PathInfo>> _filePaths = [];
 
 
 

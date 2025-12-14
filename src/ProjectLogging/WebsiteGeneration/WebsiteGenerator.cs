@@ -1,5 +1,5 @@
 
-using ProjectLogging.Models.Resume;
+using ProjectLogging.Data;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Views.Html;
 using ProjectLogging.Views.ViewCreation;
@@ -13,25 +13,54 @@ namespace ProjectLogging.WebsiteGeneration;
 
 
 
-public class WebsiteGenerator
+public static class WebsiteGenerator
 {
-    public static Website GenerateWebsite(ResumeModel resumeModel, string outDir)
+    public static async Task<Website> GenerateWebsiteAsync(string outDir, List<ProjectReadme> projectReadmes)
     {
+        var projects = projectReadmes.Select(p => new ProjectCard(p)).ToList();
+
         var fileOrganizer = new WebsiteFileOrganizer
         {
             RootDirectory = outDir,
         };
 
+        var templateManager = await LoadTemplatesAsync(Path.Combine(outDir, "templates"));
+
         var viewFactory = new ViewFactory<IHtmlItem>();
+        SetUpFactory(viewFactory, new PageLinker(fileOrganizer), templateManager);
+
+        var website = new Website(fileOrganizer);
+
+        website.Pages.AddRange(await CreateProjectPages(projectReadmes, viewFactory));
+
+        website.Pages.Add(new HtmlPageBuilder("page2", "styles/stylesNew.css")
+            .AddHeader(new NavLinksModel(["page0"]).CreateView(viewFactory))
+            .AddBody(HtmlText.BeginHeader(1, "Page2"))
+            .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
+            .Build());
+
+        return website;
+    }
+
+
+
+    private static void SetUpFactory(
+        ViewFactory<IHtmlItem> viewFactory,
+        IPageLinker pageLinker,
+        ITemplateManager templateManager)
+    {
+        viewFactory.AddStrategy<ProjectInfoHeroHtmlStrategy>();
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
+        viewFactory.AddStrategy<ProjectCardHtmlStrategy>();
         viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
         viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHtmlStrategy>();
         viewFactory.AddStrategy<NavLinksStrategy>();
 
-        viewFactory.AddHelper<IPageLinker>(new PageLinker(fileOrganizer));
         viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
+        viewFactory.AddHelper(templateManager);
+        viewFactory.AddHelper(pageLinker);
 
         viewFactory.AddPostAction((htmlItem, factory) =>
             {
@@ -40,27 +69,65 @@ public class WebsiteGenerator
                     factory.GetHelper<IHtmlStyleManager>().ApplyStyle(htmlElement);
                 }
             });
+    }
 
-        var website = new Website(fileOrganizer);
 
-        website.Pages.Add(new HtmlPageBuilder("page0", "styles/styles.css")
-            .AddHeader(new NavLinksModel(["page1", "page2"]).CreateView(viewFactory))
-            .AddBody(resumeModel.CreateView(viewFactory))
-            .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-            .Build());
 
-        website.Pages.Add(new HtmlPageBuilder("page1", "styles/styles.css")
+    private static async Task<List<HtmlPage>> CreateProjectPages(
+        List<ProjectReadme> projectReadmes,
+        IViewFactory<IHtmlItem> viewFactory)
+    {
+        var projectCards = new List<ProjectCard>();
+
+        var projectPages = await Task.WhenAll(projectReadmes.Select(async r =>
+        {
+            var card = new ProjectCard(r);
+            projectCards.Add(card);
+
+            var info = await ProjectInfo.CreateFromCardAsync(card);
+
+            var header = new HtmlSection(HtmlTag.Header, [
+                new NavLinksModel(["page1"]).CreateView(viewFactory),
+                IHtmlElement.Div([
+                    HtmlText.BeginHeader(1, info.ProjectTitle),
+                    new RawHtml($"<p class=\"tagline\">{info.ShortDescription}</p>")
+                ]).AddCssClass("hero-content"),
+            ]).AddCssClass("hero");
+
+            return new HtmlPageBuilder(card.ProjectTitle, "styles/project-hero.css")
+                .AddHeader(header)
+                .AddBody(info.CreateView(viewFactory))
+                .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
+                .Build();
+        }));
+
+        var projectCardPage = new HtmlPageBuilder("page1", "styles/stylesNew.css")
             .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
-            .AddBody(HtmlText.BeginHeader(1, "Page1"))
+            .AddBody(IHtmlElement.Div(projectCards.Select(p => p.CreateView(viewFactory))))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-            .Build());
+            .Build();
 
-        website.Pages.Add(new HtmlPageBuilder("page2", "styles/styles.css")
-            .AddHeader(new NavLinksModel(["page0"]).CreateView(viewFactory))
-            .AddBody(HtmlText.BeginHeader(1, "Page2"))
-            .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-            .Build());
+        return [.. projectPages.Append(projectCardPage)];
+    }
 
-        return website;
+
+
+    private static async Task<ITemplateManager> LoadTemplatesAsync(string templateDir)
+    {
+        var files = Directory.EnumerateFiles(templateDir, "*", SearchOption.TopDirectoryOnly).ToArray();
+
+        var tasks = files.Select(async path =>
+        {
+            var template = await File.ReadAllTextAsync(path).ConfigureAwait(false);
+            var templateName = Path.GetFileNameWithoutExtension(path)!;
+
+            Console.WriteLine(templateName);
+            return (templateName, template);
+        }).ToArray();
+
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+        var templateNames = results.ToDictionary(t => t.templateName, t => t.template);
+
+        return new TemplateManager(templateNames);
     }
 }

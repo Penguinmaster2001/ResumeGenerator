@@ -47,7 +47,7 @@ public class HtmlText : IHtmlElement
     private bool _inNestedTag = false;
 
     public List<ITagAttribute> Attributes { get => throw new NotImplementedException(); }
-
+    public HtmlTag Tag { get => throw new NotImplementedException(); }
 
 
 

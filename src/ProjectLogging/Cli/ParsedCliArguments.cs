@@ -18,14 +18,14 @@ public class ParsedCliArguments
     {
         if (!_parsedArgumentIds.TryGetValue(argumentName, out var parsedArgumentId))
         {
-            throw new ArgumentException($"Unable to find argument {argumentName}", nameof(argumentName));
+            throw new ArgumentException($"Unable to find argument \"{argumentName}\".", nameof(argumentName));
         }
 
         var parsedArgument = _parsedArgDatabase[parsedArgumentId];
 
         if (parsedArgument is not T typedArgument)
         {
-            throw new ArgumentException($"Argument {argumentName} is not assignable to {typeof(T).Name}",
+            throw new ArgumentException($"Argument \"{argumentName}\" is not assignable to type \"{typeof(T).Name}\".",
                 nameof(argumentName));
         }
 

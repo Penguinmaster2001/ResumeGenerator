@@ -15,14 +15,18 @@ public class Website(IFileOrganizer fileOrganizer)
 
 
 
-    public void CreateFiles()
+    public async Task CreateFilesAsync()
     {
         Directory.CreateDirectory(_fileOrganizer.RootDirectory);
 
+        var tasks = new List<Task>();
+
         foreach (var page in Pages)
         {
-            File.WriteAllText(_fileOrganizer.GetFullPath(page.Head.Title, Constants.Resources.Html),
-                page.GenerateHtml());
+            tasks.Add(File.WriteAllTextAsync(_fileOrganizer.GetFullPath(page.Head.Title, Constants.Resources.Html),
+                page.GenerateHtml()));
         }
+
+        await Task.WhenAll(tasks);
     }
 }

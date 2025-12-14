@@ -7,7 +7,8 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public abstract class HtmlSection<T>(HtmlTag tag, IEnumerable<IHtmlItem> content) : HtmlElementWithAttributeBase<T>(tag)
+public abstract class HtmlSection<T>(HtmlTag? tag, IEnumerable<IHtmlItem> content)
+    : HtmlElementWithAttributeBase<T>(tag ?? HtmlTag.Section)
     where T : HtmlSection<T>
 {
     public List<IHtmlItem> Content { get; set; } = [.. content];
@@ -42,4 +43,11 @@ public class HtmlSection : HtmlSection<HtmlSection>
     public HtmlSection(HtmlTag.HtmlTags tag, params IEnumerable<IHtmlItem> content) : base(new HtmlTag(tag), content) { }
 
     public HtmlSection(params IEnumerable<IHtmlItem> content) : base(HtmlTag.Section, content) { }
+}
+
+
+
+public class HtmlContainer : HtmlSection<HtmlSection>
+{
+    public HtmlContainer(params IEnumerable<IHtmlItem> content) : base(null, content) { }
 }

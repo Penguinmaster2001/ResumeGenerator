@@ -1,6 +1,6 @@
 
 using ProjectLogging.Cli;
-using ProjectLogging.Models.Resume;
+using ProjectLogging.Projects;
 using ProjectLogging.ResumeGeneration;
 using ProjectLogging.WebsiteGeneration;
 
@@ -15,31 +15,41 @@ public static class Program
     public static async Task<int> Main()
     {
         var cliParser = new CliParser(
-            [GenerateResumeCliAction.CliAction],
-            []
-        );
+            [
+                GenerateResumeCliAction.CliAction,
+                GenerateWebsiteCliAction.CliAction,
+                GenerateWebsiteCliAction.TestHtmlTemplateCliAction,
+                TestParseReadmeCliAction.CliAction,
+            ],
+            [
+                CliOptions.Verbose,
+            ]);
 
         var parseResults = cliParser.ParseArgs(Environment.GetCommandLineArgs());
 
-        var result = await parseResults.Action.Action.Invoke(parseResults.Arguments);
+        var result = await parseResults.Action.Action.Invoke(parseResults);
 
         switch (result)
         {
-            case CliActionFailureResult cliActionFailureResult:
-                Console.WriteLine($"Error: {cliActionFailureResult.Message}");
+            case CliActionFailureResult failure:
+                if (failure.Message is not null)
+                {
+                    Console.WriteLine($"Failure: {failure.Message}");
+                }
                 return -1;
+
+            case CliActionSuccessResult success:
+                if (success.Message is not null)
+                {
+                    Console.WriteLine($"Success: {success.Message}");
+                }
+                return 0;
+
             case GenerateResumeResult generateResumeResult:
                 Console.WriteLine("Finished generating resume.");
                 return 0;
         }
 
         return 0;
-    }
-
-
-
-    public static void GenerateWebsite(ResumeModel resumeModel, string outDir)
-    {
-        WebsiteGenerator.GenerateWebsite(resumeModel, outDir).CreateFiles();
     }
 }

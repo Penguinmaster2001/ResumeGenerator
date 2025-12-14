@@ -9,7 +9,7 @@ public class CliAction
     public string SubCommand { get; set; }
     public string HelpText { get; set; }
 
-    public Func<ParsedCliArguments, Task<ICliActionResult>> Action { get; set; }
+    public Func<CliParseResults, Task<ICliActionResult>> Action { get; set; }
 
     public List<CliArgument> ExpectedArguments { get; set; } = [];
 
@@ -20,7 +20,7 @@ public class CliAction
         string command,
         string subCommand,
         string helpText,
-        Func<ParsedCliArguments, Task<ICliActionResult>> action,
+        Func<CliParseResults, Task<ICliActionResult>> action,
         List<CliArgument> expectedArguments)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(command, nameof(command));

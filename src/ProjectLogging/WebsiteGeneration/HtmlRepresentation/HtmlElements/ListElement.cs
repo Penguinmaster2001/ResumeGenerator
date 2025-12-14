@@ -12,8 +12,7 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
     public bool Ordered { get; set; } = ordered;
     public List<IHtmlItem> ListItems { get; set; } = [.. listItems];
     public List<ITagAttribute> Attributes { get; } = [];
-
-
+    public HtmlTag Tag { get => new(Ordered ? HtmlTag.HtmlTags.OrderedList : HtmlTag.HtmlTags.UnorderedList, Attributes); }
 
     IHtmlElement IHtmlElement.AddAttribute(string name, string value) => AddAttribute(name, value);
     public ListElement AddAttribute(string name, string value)
@@ -43,16 +42,10 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
 
     public string GenerateHtml()
     {
-        var listTag = new HtmlTag(Ordered ? HtmlTag.HtmlTags.OrderedList : HtmlTag.HtmlTags.UnorderedList);
         var itemTag = new HtmlTag(HtmlTag.HtmlTags.ListItem);
-        
-        foreach (var attribute in Attributes)
-        {
-            listTag.Attributes.Add(attribute);
-        }
 
         var sb = new StringBuilder();
-        sb.Append(listTag.Opener);
+        sb.Append(Tag.Opener);
 
         foreach (var item in ListItems)
         {
@@ -61,7 +54,7 @@ public class ListElement(bool ordered = false, params IEnumerable<IHtmlItem> lis
               .Append(itemTag.Closer);
         }
 
-        sb.Append(listTag.Closer);
+        sb.Append(Tag.Closer);
 
         return sb.ToString();
     }
