@@ -24,18 +24,12 @@ public static class WebsiteGenerator
             RootDirectory = outDir,
         };
 
-        var templateManager = await LoadTemplatesAsync(Path.Combine(outDir, "Templates"));
+        var templateManager = await LoadTemplatesAsync(Path.Combine(outDir, "templates"));
 
         var viewFactory = new ViewFactory<IHtmlItem>();
         SetUpFactory(viewFactory, new PageLinker(fileOrganizer), templateManager);
 
         var website = new Website(fileOrganizer);
-
-        // website.Pages.Add(new HtmlPageBuilder("page1", "styles/stylesNew.css")
-        //     .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
-        //     .AddBody(IHtmlElement.Div(projects.Select(p => p.CreateView(viewFactory))))
-        //     .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-        //     .Build());
 
         website.Pages.AddRange(await CreateProjectPages(projectReadmes, viewFactory));
 

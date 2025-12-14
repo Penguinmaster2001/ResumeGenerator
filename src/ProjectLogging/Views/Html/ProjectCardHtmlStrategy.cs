@@ -18,7 +18,6 @@ public class ProjectCardHtmlStrategy : ViewStrategy<IHtmlItem, ProjectCard>
 
         section.Content.Add(HtmlText.BeginHeader(3, model.ProjectTitle));
         section.Content.Add(HtmlText.BeginParagraph(model.ShortDescription));
-        section.Content.Add(IHtmlElement.UnorderedList().AddAttribute("class", "tags"));
         section.Content.Add(IHtmlElement.Anchor($"{model.ProjectTitle}.html", "View Project").AddAttribute("class", "btn"));
 
         return section;
