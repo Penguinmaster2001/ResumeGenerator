@@ -109,11 +109,25 @@ public static class GenerateResumeCliAction
 
         Console.WriteLine("Filtering");
         var filtered = diversityRanker.FilterResume(model.ResumeBody.ResumeSegments, dataConfig);
+
+        // Resort entries by date
+        foreach (var segment in filtered)
+        {
+            if (segment.Entries.All(e => e.StartDate is not null || e.EndDate is not null))
+            {
+                Console.WriteLine(string.Join(", ", segment.Entries.Select(e => e.TitleText)));
+                segment.Entries = [.. segment.Entries.OrderByDescending(e => { Console.WriteLine(e.EndDate ?? DateOnly.MaxValue); return e.EndDate ?? DateOnly.MaxValue; })];
+                Console.WriteLine(string.Join(", ", segment.Entries.Select(e => e.TitleText)));
+            }
+        }
+
         Console.WriteLine("Filtering done");
 
         var filteredBody = new ResumeBodyModel(filtered);
-        var filteredModel = new ResumeModel(model.ResumeHeader, filteredBody);
-        filteredModel.Name = config.FilteredResumeName;
+        var filteredModel = new ResumeModel(model.ResumeHeader, filteredBody)
+        {
+            Name = config.FilteredResumeName
+        };
 
         return filteredModel;
     }

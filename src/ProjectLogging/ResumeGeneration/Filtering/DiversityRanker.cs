@@ -39,6 +39,8 @@ public class DiversityRanker
 
     public List<ResumeSegmentModel> FilterResume(List<ResumeSegmentModel> resumeSegments, DataConfig dataConfig)
     {
+        int maxLineLen = 140;
+
         resumeSegments = [.. resumeSegments];
 
         // Hardcoding this for now
@@ -54,7 +56,7 @@ public class DiversityRanker
         int educationListLength = relevantCoursesEntry.TitleText.Length + 2;
         relevantCoursesEntry.PointsText = [.. relevantCoursesEntry.PointsText.Select(p => (score: MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"University course taken: {p}")), text: p)).OrderByDescending(p => p.score).TakeWhile(p => {
             educationListLength += p.text.Length + 2;
-            return educationListLength < 120;
+            return educationListLength < maxLineLen;
         }).Select(p => p.text)];
 
         resumeSegments[educationSegmentIndex] = new(educationSegment.TitleText, educationSegmentEntries);
@@ -64,7 +66,7 @@ public class DiversityRanker
         var skillsSegment = resumeSegments[skillsSegmentIndex];
         var skillsSegmentEntries = skillsSegment.Entries.ToList();
 
-        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: _config.EntryBoosts.GetValueOrDefault(s.TitleText, 1.0f) * MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}")), category: s))
+        var bestSkillCategories = skillsSegmentEntries.Select(s => (score: _config.EntryBoosts.GetValueOrDefault(s.TitleText, 1.0f) * (1.0f + MathHelpers.CosineSimilarity(_jobDescriptionEmbedding, _embeddingGenerator.GetEmbedding($"Skill category: {s.TitleText}: {string.Join(", ", s.PointsText)}"))), category: s))
             .OrderByDescending(s => s.score)
             .Take(_config.SegmentTitlePointCounts.GetValueOrDefault(dataConfig.Skills.Title, 3))
             .Select(s => s.category)
@@ -82,7 +84,7 @@ public class DiversityRanker
                 .OrderByDescending(s => s.score))
             {
                 // In case of duplicate skills
-                if (totalLength + text.Length + 2 > 120 || !skillsSet.Add(text)) continue;
+                if (totalLength + text.Length + 2 > maxLineLen || !skillsSet.Add(text)) continue;
 
                 totalLength += text.Length + 2;
 
@@ -294,6 +296,7 @@ public class DiversityRanker
         foreach (var rank in ranks)
         {
             rank.JobScore = NormalizeScore((rank.JobScore - averageJobScore) / variance);
+            rank.AverageSimilarity = NormalizeScore(rank.AverageSimilarity);
 
             rank.TotalScore = CalculateTotalScore(rank);
         }

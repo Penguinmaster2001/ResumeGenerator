@@ -74,10 +74,16 @@ public class ResumeHeaderViewStrategy : ViewStrategy<Action<IContainer>, ResumeH
         => (container) => container.Row(row =>
             {
                 var horizontalPadding = 3.0f;
-                row.AutoItem().Text(model.PhoneNumberText);
-                row.AutoItem().AlignMiddle().PaddingHorizontal(horizontalPadding).Height(12.0f).LineVertical(0.8f);
-                row.AutoItem().Text(model.LocationText);
-                row.AutoItem().AlignMiddle().PaddingHorizontal(horizontalPadding).Height(12.0f).LineVertical(0.8f);
+                if (model.PhoneNumberText is not null)
+                {
+                    row.AutoItem().Text(model.PhoneNumberText);
+                    row.AutoItem().AlignMiddle().PaddingHorizontal(horizontalPadding).Height(12.0f).LineVertical(0.8f);
+                }
+                if (model.LocationText is not null)
+                {
+                    row.AutoItem().Text(model.LocationText);
+                    row.AutoItem().AlignMiddle().PaddingHorizontal(horizontalPadding).Height(12.0f).LineVertical(0.8f);
+                }
                 row.AutoItem().Text(text => text.Hyperlink(model.EmailText, $"mailto:{model.EmailText}").Underline());
                 row.AutoItem().AlignMiddle().PaddingHorizontal(horizontalPadding).Height(12.0f).LineVertical(0.8f);
 
