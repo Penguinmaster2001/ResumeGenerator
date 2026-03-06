@@ -70,4 +70,9 @@ public class CliArgument
 
         return new(name, shortName, required, description, typeof(T), s => parseFunc(s), defaultValue);
     }
+
+
+
+    public override string ToString()
+        => $"-{ShortName} --{Name} {ArgumentType.Name}{(DefaultValue is object dv ? $" {dv}" : string.Empty)}{(Required ? " (required)" : string.Empty)} {Description}";
 }

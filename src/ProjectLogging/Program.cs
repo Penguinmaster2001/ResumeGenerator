@@ -25,7 +25,19 @@ public static class Program
                 CliOptions.Verbose,
             ]);
 
-        var parseResults = cliParser.ParseArgs(Environment.GetCommandLineArgs());
+        CliParseResults parseResults;
+        try
+        {
+            parseResults = cliParser.ParseArgs(Environment.GetCommandLineArgs());
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error parsing arguments: {e.Message}");
+
+            Console.WriteLine(cliParser.HelpMenu());
+
+            return -1;
+        }
 
         var result = await parseResults.Action.Action.Invoke(parseResults);
 

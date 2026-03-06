@@ -1,5 +1,6 @@
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 
 
@@ -85,6 +86,22 @@ public class CliParser
         }
 
         return new(parsedParameters, parsedOptions, action);
+    }
+
+
+
+    public string HelpMenu()
+    {
+        var sb = new StringBuilder();
+        foreach (var action in _cliActions)
+        {
+            sb.AppendLine($"{action.Command} {action.SubCommand}")
+                .AppendLine($"\t{action.HelpText}")
+                .AppendJoin('\n', action.ExpectedArguments.Select(a => $"\t{a}"))
+                .Append('\n');
+        }
+
+        return sb.ToString();
     }
 
 
