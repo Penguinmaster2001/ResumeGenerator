@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using ProjectLogging.Cli;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Projects;
@@ -15,8 +16,8 @@ public static class GenerateWebsiteCliAction
     public static CliAction CliAction => new("generate", "website", "Generate a website", GenerateWebsiteAsync, new([
         CliArgument.Create<string>("output", "o", true, "Output path.", null),
         CliArgument.Create<string>("projects", "p", true, "Project readmes.", null),
+        CliArgument.Create<string>("settings", "s", true, "Settings file.", null),
     ]));
-
 
 
 
@@ -24,16 +25,18 @@ public static class GenerateWebsiteCliAction
     {
         var outDir = parsedCli.Arguments.GetArgument<string>("output");
         var projectJson = parsedCli.Arguments.GetArgument<string>("projects");
+        var settingsPath = parsedCli.Arguments.GetArgument<string>("settings");
+
+        var settings = await JsonSerializer.DeserializeAsync<WebsiteGenerationSettings>(File.OpenRead(settingsPath));
 
         var projects = await RecordLoader.LoadProjectReadmeAsync(projectJson);
 
-        var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, projects);
+        var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, settings!, projects);
 
         await website.CreateFilesAsync();
 
         return ICliActionResult.Success;
     }
-
 
 
 
@@ -48,7 +51,6 @@ public static class GenerateWebsiteCliAction
 
 
 
-
     public static async Task<ICliActionResult> TestHtmlTemplateAsync(CliParseResults parsedCli)
     {
         var templatePath = parsedCli.Arguments.GetArgument<string>("template");
@@ -57,7 +59,7 @@ public static class GenerateWebsiteCliAction
 
         var projects = await RecordLoader.LoadProjectReadmeAsync(projectJson);
         var project = projects.Find(p => string.Equals(p.Title, testProjectTitle, StringComparison.OrdinalIgnoreCase));
-        
+
         var card = new ProjectCard(project!);
         var info = await ProjectInfo.CreateFromCardAsync(card);
 

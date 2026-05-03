@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using ProjectLogging.Data;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Views.Html;
@@ -15,7 +16,7 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public static class WebsiteGenerator
 {
-    public static async Task<Website> GenerateWebsiteAsync(string outDir, List<ProjectReadme> projectReadmes)
+    public static async Task<Website> GenerateWebsiteAsync(string outDir, WebsiteGenerationSettings settings, List<ProjectReadme> projectReadmes)
     {
         var projects = projectReadmes.Select(p => new ProjectCard(p)).ToList();
 
@@ -24,7 +25,9 @@ public static class WebsiteGenerator
             RootDirectory = outDir,
         };
 
-        var templateManager = await LoadTemplatesAsync(Path.Combine(outDir, "templates"));
+        var templateSettings = await JsonSerializer.DeserializeAsync<TemplateSettings>(File.OpenRead(settings.TemplateSettingsPath));
+
+        var templateManager = await LoadTemplatesAsync(templateSettings!, Path.Combine(outDir, "templates"));
 
         var viewFactory = new ViewFactory<IHtmlItem>();
         SetUpFactory(viewFactory, new PageLinker(fileOrganizer), templateManager);
@@ -34,7 +37,7 @@ public static class WebsiteGenerator
         website.Pages.AddRange(await CreateProjectPages(projectReadmes, viewFactory));
 
         website.Pages.Add(new HtmlPageBuilder("page2", "styles/stylesNew.css")
-            .AddHeader(new NavLinksModel(["page0"]).CreateView(viewFactory))
+            .AddHeader(new NavLinksModel(["page1"]).CreateView(viewFactory))
             .AddBody(HtmlText.BeginHeader(1, "Page2"))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
             .Build());
@@ -102,7 +105,7 @@ public static class WebsiteGenerator
         }));
 
         var projectCardPage = new HtmlPageBuilder("page1", "styles/stylesNew.css")
-            .AddHeader(new NavLinksModel(["page0", "page2"]).CreateView(viewFactory))
+            .AddHeader(new NavLinksModel(["page2"]).CreateView(viewFactory))
             .AddBody(IHtmlElement.Div(projectCards.Select(p => p.CreateView(viewFactory))))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
             .Build();
@@ -112,14 +115,15 @@ public static class WebsiteGenerator
 
 
 
-    private static async Task<ITemplateManager> LoadTemplatesAsync(string templateDir)
+    private static async Task<ITemplateManager> LoadTemplatesAsync(TemplateSettings templateSettings, string templateDir)
     {
         var files = Directory.EnumerateFiles(templateDir, "*", SearchOption.TopDirectoryOnly).ToArray();
 
         var tasks = files.Select(async path =>
         {
             var template = await File.ReadAllTextAsync(path).ConfigureAwait(false);
-            var templateName = Path.GetFileNameWithoutExtension(path)!;
+            var templateName = Path.GetFileNameWithoutExtension(path);
+            templateName = templateSettings.TemplateNames.GetValueOrDefault(templateName, templateName);
 
             Console.WriteLine(templateName);
             return (templateName, template);
