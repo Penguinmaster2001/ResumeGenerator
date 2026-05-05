@@ -32,7 +32,7 @@ public static class WebsiteGenerator
         var htmlStyleManager = new HtmlStyleManager(Path.Combine(settings.StylesPath, settings.Style));
 
         var viewFactory = new ViewFactory<IHtmlItem>();
-        SetUpFactory(viewFactory, htmlStyleManager, new PageLinker(fileOrganizer), templateManager);
+        SetUpFactory(viewFactory, htmlStyleManager, new PageLinker(fileOrganizer), templateManager, templateSettings!);
 
         var website = new Website(fileOrganizer);
 
@@ -54,9 +54,10 @@ public static class WebsiteGenerator
         ViewFactory<IHtmlItem> viewFactory,
         IHtmlStyleManager htmlStyleManager,
         IPageLinker pageLinker,
-        ITemplateManager templateManager)
+        ITemplateManager templateManager,
+        TemplateSettings templateSettings)
     {
-        viewFactory.AddStrategy<ProjectInfoHeroHtmlStrategy>();
+        viewFactory.AddStrategy(new TemplateHtmlStrategy<ProjectInfo>(templateSettings.TemplateUses["ProjectInfo"]));
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
         viewFactory.AddStrategy<ProjectCardHtmlStrategy>();

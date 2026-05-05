@@ -30,7 +30,7 @@ public partial class HtmlTemplate : IHtmlItem
 
     private readonly string _template;
     public object? Data { get; set; } = null;
-    public bool Strict { get; set; } = false;
+    public bool Strict { get; set; } = true;
 
 
 

@@ -15,6 +15,6 @@ public class ProjectInfoHeroHtmlStrategy : ViewStrategy<IHtmlItem, ProjectInfo>
 {
     public override IHtmlItem BuildView(ProjectInfo model, IViewFactory<IHtmlItem> factory)
     {
-        return new HtmlSection(HtmlTag.Main, factory.GetHelper<ITemplateManager>().Create("heroTemplate", model));
+        return new HtmlSection(HtmlTag.Main, factory.GetHelper<ITemplateManager>().Create("hero_template", model));
     }
 }
