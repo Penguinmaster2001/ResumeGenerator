@@ -27,16 +27,19 @@ public static class WebsiteGenerator
 
         var templateSettings = await JsonSerializer.DeserializeAsync<TemplateSettings>(File.OpenRead(settings.TemplateSettingsPath));
 
-        var templateManager = await LoadTemplatesAsync(templateSettings!, Path.Combine(outDir, "templates"));
+        var templateManager = await LoadTemplatesAsync(templateSettings!, settings.TemplatesPath);
+
+        var htmlStyleManager = new HtmlStyleManager(Path.Combine(settings.StylesPath, settings.Style));
 
         var viewFactory = new ViewFactory<IHtmlItem>();
-        SetUpFactory(viewFactory, new PageLinker(fileOrganizer), templateManager);
+        SetUpFactory(viewFactory, htmlStyleManager, new PageLinker(fileOrganizer), templateManager);
 
         var website = new Website(fileOrganizer);
 
         website.Pages.AddRange(await CreateProjectPages(projectReadmes, viewFactory));
 
-        website.Pages.Add(new HtmlPageBuilder("page2", "styles/stylesNew.css")
+        Console.WriteLine(Path.Combine(settings.StylesPath, settings.Style));
+        website.Pages.Add(new HtmlPageBuilder("page2", htmlStyleManager.BaseStylePath)
             .AddHeader(new NavLinksModel(["page1"]).CreateView(viewFactory))
             .AddBody(HtmlText.BeginHeader(1, "Page2"))
             .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
@@ -49,6 +52,7 @@ public static class WebsiteGenerator
 
     private static void SetUpFactory(
         ViewFactory<IHtmlItem> viewFactory,
+        IHtmlStyleManager htmlStyleManager,
         IPageLinker pageLinker,
         ITemplateManager templateManager)
     {
@@ -61,7 +65,7 @@ public static class WebsiteGenerator
         viewFactory.AddStrategy<ResumeHtmlStrategy>();
         viewFactory.AddStrategy<NavLinksStrategy>();
 
-        viewFactory.AddHelper<IHtmlStyleManager, HtmlStyleManager>();
+        viewFactory.AddHelper(htmlStyleManager);
         viewFactory.AddHelper(templateManager);
         viewFactory.AddHelper(pageLinker);
 
@@ -80,6 +84,8 @@ public static class WebsiteGenerator
         List<ProjectReadme> projectReadmes,
         IViewFactory<IHtmlItem> viewFactory)
     {
+        var styleManager = viewFactory.GetHelper<IHtmlStyleManager>();
+
         var projectCards = new List<ProjectCard>();
 
         var projectPages = await Task.WhenAll(projectReadmes.Select(async r =>
@@ -97,7 +103,7 @@ public static class WebsiteGenerator
                 ]).AddCssClass("hero-content"),
             ]).AddCssClass("hero");
 
-            return new HtmlPageBuilder(card.ProjectTitle, "styles/project-hero.css")
+            return new HtmlPageBuilder(card.ProjectTitle, styleManager.BaseStylePath)
                 .AddHeader(header)
                 .AddBody(info.CreateView(viewFactory))
                 .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))

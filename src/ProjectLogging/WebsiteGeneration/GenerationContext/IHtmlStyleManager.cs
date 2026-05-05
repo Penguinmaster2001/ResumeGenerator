@@ -9,6 +9,10 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 
 public interface IHtmlStyleManager
 {
+    string BaseStylePath { get; }
+
+
+
     void AddStyle(IHtmlElement element, string property, string value);
 
 

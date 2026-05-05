@@ -11,6 +11,7 @@ public class WebsiteGenerationSettings
 {
     public string BasePath { get; }
     public string StylesPath { get; }
+    public string TemplatesPath { get; }
     public string Style { get; }
     public string WebsiteOutputPath { get; }
     public string DataConfigPath { get; }
@@ -22,6 +23,7 @@ public class WebsiteGenerationSettings
     public WebsiteGenerationSettings(
         string basePath,
         string stylesPath,
+        string templatesPath,
         string style,
         string websiteOutputPath,
         string dataConfigPath,
@@ -29,6 +31,7 @@ public class WebsiteGenerationSettings
     {
         BasePath = Path.GetFullPath(basePath);
         StylesPath = GetFullPath(stylesPath);
+        TemplatesPath = GetFullPath(templatesPath);
         Style = style;
         WebsiteOutputPath = GetFullPath(websiteOutputPath);
         DataConfigPath = GetFullPath(dataConfigPath);

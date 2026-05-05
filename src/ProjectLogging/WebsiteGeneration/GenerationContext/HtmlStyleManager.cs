@@ -14,6 +14,17 @@ public class HtmlStyleManager : IHtmlStyleManager
 
 
 
+    public string BaseStylePath { get; }
+
+
+
+    public HtmlStyleManager(string baseStylePath)
+    {
+        BaseStylePath = baseStylePath;
+    }
+
+
+
     public StyleCollection GetStyles(IHtmlElement element)
         => _elementStyles.TryGetValue(element, out var styleCollection) ? styleCollection : new();
 
