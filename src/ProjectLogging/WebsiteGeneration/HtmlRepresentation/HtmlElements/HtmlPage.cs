@@ -7,12 +7,14 @@ namespace ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
 
 
 
-public class HtmlPage(HeadElement head, IHtmlItem headerRoot, IHtmlItem bodyRoot, IHtmlItem footerRoot) : IHtmlItem
+public class HtmlPage(HeadElement head, IHtmlItem headerRoot, IHtmlItem bodyRoot, IHtmlItem footerRoot) : IHtmlPage
 {
     public HeadElement Head { get; set; } = head;
-    public IHtmlItem HeaderRoot { get; set; } = headerRoot;
-    public IHtmlItem BodyRoot { get; set; } = bodyRoot;
-    public IHtmlItem FooterRoot { get; set; } = footerRoot;
+    IHtmlItem IHtmlPage.Head => Head;
+    public IHtmlItem Header { get; set; } = headerRoot;
+    public IHtmlItem Body { get; set; } = bodyRoot;
+    public IHtmlItem Footer { get; set; } = footerRoot;
+    public string Title { get => Head.Title; }
 
 
 
@@ -22,9 +24,9 @@ public class HtmlPage(HeadElement head, IHtmlItem headerRoot, IHtmlItem bodyRoot
             .Append("<!DOCTYPE html>")
             .Append(new RawTagElement(HtmlTag.HtmlTags.Html, new StringBuilder()
                     .Append(Head.GenerateHtml())
-                    .Append(HeaderRoot.GenerateHtml())
-                    .Append(BodyRoot.GenerateHtml())
-                    .Append(FooterRoot.GenerateHtml())
+                    .Append(Header.GenerateHtml())
+                    .Append(Body.GenerateHtml())
+                    .Append(Footer.GenerateHtml())
                     .ToString())
                 .AddAttribute("lang", "en")
                 .GenerateHtml())

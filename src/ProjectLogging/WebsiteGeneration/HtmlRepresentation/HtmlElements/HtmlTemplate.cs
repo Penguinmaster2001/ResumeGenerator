@@ -30,7 +30,7 @@ public partial class HtmlTemplate : IHtmlItem
 
     private readonly string _template;
     public object? Data { get; set; } = null;
-    public bool Strict { get; set; } = true;
+    public bool Strict { get; set; } = false;
 
 
 
@@ -119,7 +119,7 @@ public partial class HtmlTemplate : IHtmlItem
                 && dataCache.TryGetValue(variableGroup.Value, out var value))
             {
                 var variableString = value.ToString() ?? ((overrideStrict ?? Strict)
-                    ? throw new Exception($"Unknown variable \"{variableGroup.Value}\".")
+                    ? throw new Exception($"Unknown variable \"{variableGroup.Value}\". Available variables: {string.Join(", ", dataCache.VariableNames)}")
                     : m.Value);
 
                 return m.Groups.TryGetValue("formats", out var formats)
@@ -127,7 +127,7 @@ public partial class HtmlTemplate : IHtmlItem
                     : variableString;
             }
 
-            if (overrideStrict ?? Strict) throw new Exception($"Unknown variable \"{variableGroup?.Value ?? m.Value}\".");
+            if (overrideStrict ?? Strict) throw new Exception($"Variable not found \"{variableGroup?.Value ?? m.Value}\". Available variables: {string.Join(", ", dataCache.VariableNames)}");
 
             return m.Value;
         });
@@ -157,6 +157,8 @@ public partial class HtmlTemplate : IHtmlItem
     private interface IDataCache
     {
         object Value { get; }
+
+        IEnumerable<string> VariableNames { get; }
 
 
 
@@ -205,8 +207,10 @@ public partial class HtmlTemplate : IHtmlItem
     private class ObjectDataCache(object data) : IDataCache
     {
         public object Value { get; } = data;
+
         private readonly List<PropertyInfo> _dataProperties = [.. data.GetType().GetProperties()];
         private readonly Dictionary<string, IDataCache> _cache = [];
+        public IEnumerable<string> VariableNames { get => _dataProperties.Select(p => p.Name).Union(_cache.Keys); }
 
 
 
@@ -221,10 +225,12 @@ public partial class HtmlTemplate : IHtmlItem
         {
             if (_cache.TryGetValue(variable, out data)) return true;
 
+            // if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty) return false;
             if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty
                 || variableProperty.GetValue(Value) is not object variableValue) return false;
 
             data = IDataCache.Create(variableValue);
+            // data = IDataCache.Create(variableProperty.GetValue(Value) ?? variableProperty);
             _cache.Add(variable, data);
 
             return true;
@@ -250,6 +256,7 @@ public partial class HtmlTemplate : IHtmlItem
         public object Value { get; } = nameof(DictionaryDataCache);
         private readonly IReadOnlyDictionary<string, object> _data = data;
         private readonly Dictionary<string, IDataCache> _cache = [];
+        public IEnumerable<string> VariableNames { get => _data.Keys.Union(_cache.Keys); }
 
 
 

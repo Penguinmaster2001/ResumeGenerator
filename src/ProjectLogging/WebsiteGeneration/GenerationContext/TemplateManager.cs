@@ -21,5 +21,5 @@ public class TemplateManager(Dictionary<string, string> templates) : ITemplateMa
 
 
 
-    public HtmlTemplate Create(string name, object data) => new(_templates[name], data);
+    public HtmlTemplate Create(string name, object? data) => new(_templates[name], data);
 }

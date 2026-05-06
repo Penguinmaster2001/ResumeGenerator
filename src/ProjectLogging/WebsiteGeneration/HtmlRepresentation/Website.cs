@@ -11,7 +11,7 @@ public class Website(IFileOrganizer fileOrganizer)
 {
     private readonly IFileOrganizer _fileOrganizer = fileOrganizer;
 
-    public List<HtmlPage> Pages { get; set; } = [];
+    public List<IHtmlPage> Pages { get; set; } = [];
 
 
 
@@ -23,7 +23,7 @@ public class Website(IFileOrganizer fileOrganizer)
 
         foreach (var page in Pages)
         {
-            tasks.Add(File.WriteAllTextAsync(_fileOrganizer.GetFullPath(page.Head.Title, Constants.Resources.Html),
+            tasks.Add(File.WriteAllTextAsync(_fileOrganizer.GetFullPath(page.Title, Constants.Resources.Html),
                 page.GenerateHtml()));
         }
 
