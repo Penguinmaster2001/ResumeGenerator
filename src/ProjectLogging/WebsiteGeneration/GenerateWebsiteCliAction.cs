@@ -1,6 +1,7 @@
 
 using System.Text.Json;
 using ProjectLogging.Cli;
+using ProjectLogging.Data;
 using ProjectLogging.Models.Website;
 using ProjectLogging.Projects;
 using ProjectLogging.WebsiteGeneration.HtmlRepresentation.HtmlElements;
@@ -29,9 +30,28 @@ public static class GenerateWebsiteCliAction
 
         var settings = await JsonSerializer.DeserializeAsync<WebsiteGenerationSettings>(File.OpenRead(settingsPath));
 
+        if (settings is null)
+        {
+            return new CliActionFailureResult("Unable to read settings.");
+        }
+
         var projects = await RecordLoader.LoadProjectReadmeAsync(projectJson);
 
-        var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, settings!, projects);
+        var dataConfig = JsonSerializer.Deserialize<DataConfig>(File.OpenRead(settings.DataConfigPath));
+
+        if (dataConfig is null)
+        {
+            return new CliActionFailureResult("Unable to read data config.");
+        }
+
+        var personalInfo = RecordLoader.LoadPersonalInfoAsync(Path.Combine(settings.DataConfigPath[0..(settings.DataConfigPath.Length-Path.GetFileName(settings.DataConfigPath).Length)], dataConfig.PersonalInfo.Path));
+
+        await Task.WhenAll(personalInfo);
+
+        var dataCollection = new DataCollection(dataConfig);
+        dataCollection.AddData(dataConfig.PersonalInfo.Title, personalInfo.Result);
+
+        var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, dataCollection, settings!, projects);
 
         await website.CreateFilesAsync();
 

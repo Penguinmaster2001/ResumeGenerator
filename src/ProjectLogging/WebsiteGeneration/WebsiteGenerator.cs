@@ -16,7 +16,7 @@ namespace ProjectLogging.WebsiteGeneration;
 
 public static class WebsiteGenerator
 {
-    public static async Task<Website> GenerateWebsiteAsync(string outDir, WebsiteGenerationSettings settings, List<ProjectReadme> projectReadmes)
+    public static async Task<Website> GenerateWebsiteAsync(string outDir, IDataCollection data, WebsiteGenerationSettings settings, List<ProjectReadme> projectReadmes)
     {
         var projects = projectReadmes.Select(p => new ProjectCard(p)).ToList();
 
@@ -29,7 +29,7 @@ public static class WebsiteGenerator
 
         var templateManager = await LoadTemplatesAsync(templateSettings!, settings.TemplatesPath);
 
-        var htmlStyleManager = new HtmlStyleManager(Path.Combine(settings.StylesPath, settings.Style));
+        var htmlStyleManager = new HtmlStyleManager(settings.Styles.ToDictionary(kvp => kvp.Key, kvp => Path.Combine(settings.StylesPath, kvp.Value)));
 
         var viewFactory = new ViewFactory<IHtmlItem>();
         SetUpFactory(viewFactory, htmlStyleManager, new PageLinker(fileOrganizer), templateManager, templateSettings!);
@@ -38,13 +38,11 @@ public static class WebsiteGenerator
 
         var head = templateManager.Create("head", new Dictionary<string, object>
         {
-            {"meta_description", "This is the description"},
+            {"meta_description", "This is a meta description description"},
             {"page_title", "Project Page"},
-            {"og_image", "./path/to/image"},
-            {"canonical_url", "anthonycieri.com/project"},
-            {"css_path", htmlStyleManager.BaseStylePath},
+            {"css_paths", new List<string> {htmlStyleManager.StylePaths["base"]}},
         });
-        var header = templateManager.Create("header", new Dictionary<string, object>());
+        var header = templateManager.Create("header", null);
         var footer = templateManager.Create("footer", new Dictionary<string, object>
         {
             {"year", DateTime.Now.Year.ToString()},
@@ -52,12 +50,36 @@ public static class WebsiteGenerator
 
         website.Pages.AddRange(await CreateProjectPages(head, header, footer, projectReadmes, viewFactory));
 
-        Console.WriteLine(Path.Combine(settings.StylesPath, settings.Style));
         // website.Pages.Add(new HtmlPageBuilder("page2", htmlStyleManager.BaseStylePath)
         //     .AddHeader(new NavLinksModel(["page1"]).CreateView(viewFactory))
         //     .AddBody(HtmlText.BeginHeader(1, "Page2"))
         //     .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
         //     .Build());
+
+        var personalInfo = data.GetData<PersonalInfo>(data.DataConfig.PersonalInfo.Title);
+
+        website.Pages.Add(new TemplatePage
+        {
+            Title = "home",
+            Head = templateManager.Create("head", new Dictionary<string, object>
+            {
+                {"meta_description", "This is a meta description description"},
+                {"page_title", "Project Page"},
+                {"css_paths",
+                    new List<string>
+                    {
+                        htmlStyleManager.StylePaths["base"],
+                        htmlStyleManager.StylePaths["home"]
+                    }
+                },
+            }),
+            Header = header,
+            Body = templateManager.Create("home", new Dictionary<string, string>
+            {
+                {"name", personalInfo.Name}
+            }),
+            Footer = footer,
+        });
 
         return website;
     }
@@ -122,20 +144,6 @@ public static class WebsiteGenerator
                 Body = info.CreateView(viewFactory),
                 Footer = footer,
             };
-
-            // var header = new HtmlSection(HtmlTag.Header, [
-            //     new NavLinksModel(["page1"]).CreateView(viewFactory),
-            //     IHtmlElement.Div([
-            //         HtmlText.BeginHeader(1, info.ProjectTitle),
-            //         new RawHtml($"<p class=\"tagline\">{info.ShortDescription}</p>")
-            //     ]).AddCssClass("hero-content"),
-            // ]).AddCssClass("hero");
-
-            // return new HtmlPageBuilder(card.ProjectTitle, styleManager.BaseStylePath)
-            //     .AddHeader(header)
-            //     .AddBody(info.CreateView(viewFactory))
-            //     .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-            //     .Build();
         }));
 
         // var projectCardPage = new HtmlPageBuilder("page1", "styles/stylesNew.css")

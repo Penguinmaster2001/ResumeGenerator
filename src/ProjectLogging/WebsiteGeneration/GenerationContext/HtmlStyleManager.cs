@@ -14,13 +14,13 @@ public class HtmlStyleManager : IHtmlStyleManager
 
 
 
-    public string BaseStylePath { get; }
+    public Dictionary<string, string> StylePaths { get; }
 
 
 
-    public HtmlStyleManager(string baseStylePath)
+    public HtmlStyleManager(Dictionary<string, string> stylePaths)
     {
-        BaseStylePath = baseStylePath;
+        StylePaths = stylePaths;
     }
 
 

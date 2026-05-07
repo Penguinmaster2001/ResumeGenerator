@@ -9,7 +9,7 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 
 public interface IHtmlStyleManager
 {
-    string BaseStylePath { get; }
+    Dictionary<string, string> StylePaths { get; }
 
 
 

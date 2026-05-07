@@ -53,15 +53,7 @@ public partial class HtmlTemplate : IHtmlItem
 
     public string GenerateHtml()
     {
-        if (Data is null)
-        {
-            if (Strict)
-            {
-                throw new Exception("Strict is enabled but Data is null.");
-            }
-
-            return _template;
-        }
+        if (Data is null) return _template;
 
         return GenerateHtml(Data);
     }
@@ -191,6 +183,15 @@ public partial class HtmlTemplate : IHtmlItem
 
 
 
+        public static IDataCache Create<K, V>(IReadOnlyDictionary<K, V> dictionaryData)
+        {
+            return new DictionaryDataCache(dictionaryData.ToDictionary(
+                kvp => kvp.Key!.ToString()!,
+                kvp => kvp.Value! as object));
+        }
+
+
+
         public static IDataCache Create(object data)
         {
             if (data is IReadOnlyDictionary<string, object> dictionaryData)
@@ -225,12 +226,10 @@ public partial class HtmlTemplate : IHtmlItem
         {
             if (_cache.TryGetValue(variable, out data)) return true;
 
-            // if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty) return false;
             if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty
                 || variableProperty.GetValue(Value) is not object variableValue) return false;
 
             data = IDataCache.Create(variableValue);
-            // data = IDataCache.Create(variableProperty.GetValue(Value) ?? variableProperty);
             _cache.Add(variable, data);
 
             return true;
@@ -257,6 +256,11 @@ public partial class HtmlTemplate : IHtmlItem
         private readonly IReadOnlyDictionary<string, object> _data = data;
         private readonly Dictionary<string, IDataCache> _cache = [];
         public IEnumerable<string> VariableNames { get => _data.Keys.Union(_cache.Keys); }
+
+
+
+        // public DictionaryDataCache(IReadOnlyDictionary<string, string> data)
+        //     : this(data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value as object)) { }
 
 
 
