@@ -35,6 +35,22 @@ public static class RecordLoader
         => await JsonSerializer.DeserializeAsync<PersonalInfo>(stream)
             ?? new(string.Empty, string.Empty, string.Empty, string.Empty, []);
 
+
+    public async static Task<Dictionary<string, T>> LoadEntriesAsync<T>(string basePath, List<DataEntry> entries)
+    {
+        var tasks = entries.Select(async entry =>
+        {
+            var path = Path.Combine(basePath, entry.Path);
+            var data = await JsonSerializer.DeserializeAsync<T>(File.OpenRead(path));
+            Console.WriteLine($"{entry.Title}\t{data!.GetType()}");
+            return (title: entry.Title, data);
+        }).ToArray();
+
+        var results = await Task.WhenAll(tasks).ConfigureAwait(false);
+
+        return results.ToDictionary(r => r.title!, r => r.data!);
+    }
+
     public async static Task<List<ProjectReadme>> LoadProjectReadmeAsync(string filePath)
     {
         var readmes = await JsonSerializer.DeserializeAsync<List<ProjectReadme>>(File.OpenRead(filePath), ProjectReadme.JsonOptions);

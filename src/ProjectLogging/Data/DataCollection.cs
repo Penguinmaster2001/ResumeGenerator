@@ -35,6 +35,17 @@ public class DataCollection : IDataCollection
 
 
 
+    public void AddData<T>(Dictionary<string, T> dataEntries)
+    {
+        foreach (var data in dataEntries)
+        {
+            AddData(data.Key, data.Value);
+        }
+    }
+
+
+
+
     public T GetData<T>(string label)
     {
         if (!_data.TryGetValue((label, typeof(T)), out var data))

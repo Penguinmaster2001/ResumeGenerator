@@ -48,14 +48,6 @@ public static class WebsiteGenerator
             {"year", DateTime.Now.Year.ToString()},
         });
 
-        website.Pages.AddRange(await CreateProjectPages(head, header, footer, projectReadmes, viewFactory));
-
-        // website.Pages.Add(new HtmlPageBuilder("page2", htmlStyleManager.BaseStylePath)
-        //     .AddHeader(new NavLinksModel(["page1"]).CreateView(viewFactory))
-        //     .AddBody(HtmlText.BeginHeader(1, "Page2"))
-        //     .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-        //     .Build());
-
         var personalInfo = data.GetData<PersonalInfo>(data.DataConfig.PersonalInfo.Title);
 
         website.Pages.Add(new TemplatePage
@@ -65,6 +57,8 @@ public static class WebsiteGenerator
             {
                 {"meta_description", "This is a meta description description"},
                 {"page_title", "Project Page"},
+                {"og_image", "Project Page"},
+                {"canonical_url", "Project Page"},
                 {"css_paths",
                     new List<string>
                     {
@@ -74,12 +68,11 @@ public static class WebsiteGenerator
                 },
             }),
             Header = header,
-            Body = templateManager.Create("home", new Dictionary<string, string>
-            {
-                {"name", personalInfo.Name}
-            }),
+            Body = templateManager.Create("home", data.GetData<Dictionary<string, object>>("main_page")),
             Footer = footer,
         });
+
+        website.Pages.AddRange(await CreateProjectPages(head, header, footer, projectReadmes, viewFactory));
 
         return website;
     }

@@ -11,7 +11,8 @@ public record DataConfig(
     DataEntry Education,
     DataEntry Courses,
     DataEntry Volunteering,
-    DataEntry Hobbies);
+    DataEntry Hobbies,
+    List<DataEntry> Other);
 
 
 

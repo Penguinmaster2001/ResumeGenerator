@@ -44,12 +44,15 @@ public static class GenerateWebsiteCliAction
             return new CliActionFailureResult("Unable to read data config.");
         }
 
-        var personalInfo = RecordLoader.LoadPersonalInfoAsync(Path.Combine(settings.DataConfigPath[0..(settings.DataConfigPath.Length-Path.GetFileName(settings.DataConfigPath).Length)], dataConfig.PersonalInfo.Path));
+        var baseDataPath = settings.DataConfigPath[0..(settings.DataConfigPath.Length-Path.GetFileName(settings.DataConfigPath).Length)];
+        var personalInfo = RecordLoader.LoadPersonalInfoAsync(Path.Combine(baseDataPath, dataConfig.PersonalInfo.Path));
+        var entries = RecordLoader.LoadEntriesAsync<Dictionary<string, object>>(baseDataPath, dataConfig.Other);
 
-        await Task.WhenAll(personalInfo);
+        await Task.WhenAll(personalInfo, entries);
 
         var dataCollection = new DataCollection(dataConfig);
         dataCollection.AddData(dataConfig.PersonalInfo.Title, personalInfo.Result);
+        dataCollection.AddData(entries.Result);
 
         var website = await WebsiteGenerator.GenerateWebsiteAsync(outDir, dataCollection, settings!, projects);
 
