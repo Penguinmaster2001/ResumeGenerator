@@ -68,7 +68,7 @@ public static class WebsiteGenerator
                 },
             }),
             Header = header,
-            Body = templateManager.Create("home", data.GetData<Dictionary<string, object>>("main_page")),
+            Body = templateManager.Create("home", IDataCache.Create(data.GetData<Dictionary<string, object>>("main_page"))),
             Footer = footer,
         });
 
