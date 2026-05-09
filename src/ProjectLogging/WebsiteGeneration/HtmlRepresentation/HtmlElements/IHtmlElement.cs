@@ -12,6 +12,8 @@ public interface IHtmlElement : IHtmlItem
 
 
     public static HtmlSection Div(params IEnumerable<IHtmlItem> content) => new(HtmlTag.Div, content);
+    public static HtmlSection Body(params IEnumerable<IHtmlItem> content) => new(HtmlTag.Body, content);
+    public static HtmlSection Section(params IEnumerable<IHtmlItem> content) => new(HtmlTag.Section, content);
     public static ListElement OrderedList(params IEnumerable<IHtmlElement> content) => new(true, content);
     public static ListElement UnorderedList(params IEnumerable<IHtmlItem> content) => new(false, content);
     public static AnchorElement Anchor(string href, params IEnumerable<IHtmlElement> content) => new(href, content);

@@ -88,9 +88,9 @@ public static class WebsiteGenerator
     {
         viewFactory.AddStrategy(new TemplateHtmlStrategy<ProjectInfo>(templateSettings.TemplateUses["ProjectInfo"]));
         viewFactory.AddStrategy(new TemplateHtmlStrategy<FooterInfo>(templateSettings.TemplateUses["FooterInfo"]));
+        viewFactory.AddStrategy(new TemplateHtmlStrategy<ProjectCard>(templateSettings.TemplateUses["ProjectCard"]));
         viewFactory.AddStrategy<ResumeSegmentHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHeaderHtmlStrategy>();
-        viewFactory.AddStrategy<ProjectCardHtmlStrategy>();
         viewFactory.AddStrategy<ResumeEntryHtmlStrategy>();
         viewFactory.AddStrategy<ResumeBodyHtmlStrategy>();
         viewFactory.AddStrategy<ResumeHtmlStrategy>();
@@ -139,14 +139,16 @@ public static class WebsiteGenerator
             };
         }));
 
-        // var projectCardPage = new HtmlPageBuilder("page1", "styles/stylesNew.css")
-        //     .AddHeader(new NavLinksModel(["page2"]).CreateView(viewFactory))
-        //     .AddBody(IHtmlElement.Div(projectCards.Select(p => p.CreateView(viewFactory))))
-        //     .AddFooter(new RawTagElement(HtmlTag.HtmlTags.Paragraph, "this is the footer"))
-        //     .Build();
+        var projectCardPage = new TemplatePage
+        {
+            Title = "Projects",
+            Head = head,
+            Header = header,
+            Body = IHtmlElement.Body(IHtmlElement.Section(projectCards.Select(p => p.CreateView(viewFactory))).AddCssClass("project-grid")),
+            Footer = footer,
+        };
 
-        // return [.. projectPages.Append(projectCardPage)];
-        return [.. projectPages];
+        return [.. projectPages.Append(projectCardPage)];
     }
 
 
