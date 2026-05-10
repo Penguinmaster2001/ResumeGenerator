@@ -28,6 +28,11 @@ public static class WebsiteGenerator
         var templateSettings = await JsonSerializer.DeserializeAsync<TemplateSettings>(File.OpenRead(settings.TemplateSettingsPath));
 
         var templateManager = await LoadTemplatesAsync(templateSettings!, settings.TemplatesPath);
+        templateManager.AddBaseData(IDataCache.Create(new Dictionary<string, string>
+        {
+            {"HomePagePath", "home.html"},
+            {"ProjectPagePath", "projects.html"},
+        }));
 
         var htmlStyleManager = new HtmlStyleManager(settings.Styles.ToDictionary(kvp => kvp.Key, kvp => Path.Combine(settings.StylesPath, kvp.Value)));
 
@@ -131,7 +136,7 @@ public static class WebsiteGenerator
 
             return new TemplatePage
             {
-                Title = info.ProjectTitle,
+                Title = info.ProjectTitle.ToLower().Replace(' ', '_'),
                 Head = head,
                 Header = header,
                 Body = info.CreateView(viewFactory),
@@ -141,7 +146,7 @@ public static class WebsiteGenerator
 
         var projectCardPage = new TemplatePage
         {
-            Title = "Projects",
+            Title = "projects",
             Head = head,
             Header = header,
             Body = IHtmlElement.Body(IHtmlElement.Section(projectCards.Select(p => p.CreateView(viewFactory))).AddCssClass("project-grid")),

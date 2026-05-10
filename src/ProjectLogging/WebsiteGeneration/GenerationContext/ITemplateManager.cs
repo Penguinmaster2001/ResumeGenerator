@@ -9,5 +9,6 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 
 public interface ITemplateManager
 {
+    void AddBaseData(object data);
     HtmlTemplate Create(string name, object? data);
 }

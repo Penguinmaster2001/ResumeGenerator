@@ -10,6 +10,7 @@ namespace ProjectLogging.WebsiteGeneration.GenerationContext;
 public class TemplateManager(Dictionary<string, string> templates) : ITemplateManager
 {
     private readonly Dictionary<string, string> _templates = templates;
+    private IDataCache _baseData = IDataCache.Create();
 
 
 
@@ -21,5 +22,11 @@ public class TemplateManager(Dictionary<string, string> templates) : ITemplateMa
 
 
 
-    public HtmlTemplate Create(string name, object? data) => new(_templates[name], data);
+    public void AddBaseData(object data) => _baseData = _baseData.Combined(IDataCache.Create(data));
+    public void AddBaseData(string name, object data) => _baseData = _baseData.Extended(name, data);
+
+
+
+    public HtmlTemplate Create(string name, object? data)
+        => new(_templates[name], _baseData.Combined(IDataCache.Create(data)));
 }

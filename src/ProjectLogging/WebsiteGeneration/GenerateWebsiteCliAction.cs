@@ -18,6 +18,7 @@ public static class GenerateWebsiteCliAction
         CliArgument.Create<string>("output", "o", true, "Output path.", null),
         CliArgument.Create<string>("projects", "p", true, "Project readmes.", null),
         CliArgument.Create<string>("settings", "s", true, "Settings file.", null),
+        CliArgument.Create("strict", "r", false, "Output path.", false),
     ]));
 
 

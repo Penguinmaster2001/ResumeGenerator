@@ -13,6 +13,7 @@ public interface IDataCache
     object Value { get; }
 
     IEnumerable<string> VariableNames { get; }
+    IReadOnlyDictionary<string, IDataCache> Data { get; }
 
 
 
@@ -45,6 +46,17 @@ public interface IDataCache
 
 
 
+    IDataCache Combined(IDataCache other);
+
+
+
+    public static IDataCache Create() => new DictionaryDataCache(new Dictionary<string, object>());
+
+
+    public static IDataCache Create(IDataCache dataCache) => dataCache;
+
+
+
     public static IDataCache Create<K, V>(IReadOnlyDictionary<K, V> dictionaryData)
     {
         return new DictionaryDataCache(dictionaryData.ToDictionary(
@@ -54,8 +66,13 @@ public interface IDataCache
 
 
 
-    public static IDataCache Create(object data)
+    public static IDataCache Create(object? data)
     {
+        if (data is null)
+        {
+            return new DictionaryDataCache(new Dictionary<string, object>());
+        }
+
         if (data is IReadOnlyDictionary<string, object> dictionaryData)
         {
             return new DictionaryDataCache(dictionaryData);
@@ -79,6 +96,17 @@ public class ObjectDataCache(object data) : IDataCache
     private readonly List<PropertyInfo> _dataProperties = [.. data.GetType().GetProperties()];
     private readonly Dictionary<string, IDataCache> _cache = [];
     public IEnumerable<string> VariableNames { get => _dataProperties.Select(p => p.Name).Union(_cache.Keys); }
+    public IReadOnlyDictionary<string, IDataCache> Data
+    {
+        get
+        {
+            foreach (var prop in _dataProperties)
+            {
+                CacheIfExists(prop.Name);
+            }
+            return _cache.AsReadOnly();
+        }
+    }
 
 
 
@@ -104,6 +132,19 @@ public class ObjectDataCache(object data) : IDataCache
 
 
 
+    private void CacheIfExists(string variable)
+    {
+        if (_cache.TryGetValue(variable, out _)) return;
+
+        if (_dataProperties.Find(p => p.Name == variable) is not PropertyInfo variableProperty
+            || variableProperty.GetValue(Value) is not object variableValue) return;
+
+        var data = IDataCache.Create(variableValue);
+        _cache.Add(variable, data);
+    }
+
+
+
     public IDataCache Extended(string variable, object value)
     {
         var valueCache = IDataCache.Create(value);
@@ -113,16 +154,43 @@ public class ObjectDataCache(object data) : IDataCache
 
         return new ObjectDataCache(Value, extendedCache);
     }
+
+
+
+    public IDataCache Combined(IDataCache other)
+    {
+        var combinedCache = _cache.Concat(other.Data).ToDictionary();
+
+        return new ObjectDataCache(Value, combinedCache);
+    }
 }
 
 
 
-public class DictionaryDataCache(IReadOnlyDictionary<string, object> data) : IDataCache
+public class DictionaryDataCache(IReadOnlyDictionary<string, object> _data) : IDataCache
 {
     public object Value { get; } = nameof(DictionaryDataCache);
-    private readonly IReadOnlyDictionary<string, object> _data = data;
+    private readonly IReadOnlyDictionary<string, object> _data = _data;
     private readonly Dictionary<string, IDataCache> _cache = [];
     public IEnumerable<string> VariableNames { get => _data.Keys.Union(_cache.Keys); }
+    public IReadOnlyDictionary<string, IDataCache> Data
+    {
+        get
+        {
+            foreach (var prop in _data)
+            {
+                _cache.Add(prop.Key, IDataCache.Create(prop.Value));
+            }
+            return _cache.AsReadOnly();
+        }
+    }
+
+
+
+    private DictionaryDataCache(IReadOnlyDictionary<string, object> data, Dictionary<string, IDataCache> cache) : this(data)
+    {
+        _cache = cache;
+    }
 
 
 
@@ -146,5 +214,14 @@ public class DictionaryDataCache(IReadOnlyDictionary<string, object> data) : IDa
         extendedData.Add(variable, value);
 
         return new DictionaryDataCache(extendedData);
+    }
+
+
+
+    public IDataCache Combined(IDataCache other)
+    {
+        var combinedCache = _cache.Concat(other.Data).ToDictionary();
+
+        return new DictionaryDataCache(_data, combinedCache);
     }
 }
