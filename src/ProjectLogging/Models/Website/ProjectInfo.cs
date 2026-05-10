@@ -11,6 +11,7 @@ namespace ProjectLogging.Models.Website;
 public class ProjectInfo : IModel
 {
     public string ProjectTitle { get; }
+    public string? RemoteUrl { get; }
     public string? ShortDescription { get; }
     public string? Description { get; }
     public string? Motivation { get; }
@@ -24,6 +25,7 @@ public class ProjectInfo : IModel
     public ProjectInfo(
         string projectTitle,
         string? shortDescription,
+        string? remoteUrl = null,
         string? description = null,
         string? motivation = null,
         List<string>? goals = null,
@@ -33,6 +35,7 @@ public class ProjectInfo : IModel
     {
         ProjectTitle = projectTitle;
         ShortDescription = shortDescription;
+        RemoteUrl = remoteUrl;
         Motivation = motivation;
         Goals = goals;
         BuiltWith = builtWith;
@@ -55,6 +58,7 @@ public class ProjectInfo : IModel
         return new(
             card.ProjectTitle,
             card.ShortDescription,
+            card.RemoteUrl,
             parseResult.GetSectionContentOrDefault<string>("description", null, StringComparison.OrdinalIgnoreCase),
             parseResult.GetSectionContentOrDefault<string>("motivation", null, StringComparison.OrdinalIgnoreCase),
             parseResult.GetSectionContentOrDefault<List<string>>("goals", null, StringComparison.OrdinalIgnoreCase),

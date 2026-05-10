@@ -1,12 +1,15 @@
 
 using System.Text.Json;
 
+
+
 namespace ProjectLogging.Data;
 
 
 
 public record ProjectReadme(
     string Title,
+    string RemoteUrl,
     string RepoPath,
     string ReadmePath,
     DateOnly? StartDate,

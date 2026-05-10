@@ -28,10 +28,10 @@ public static class WebsiteGenerator
         var templateSettings = await JsonSerializer.DeserializeAsync<TemplateSettings>(File.OpenRead(settings.TemplateSettingsPath));
 
         var templateManager = await LoadTemplatesAsync(templateSettings!, settings.TemplatesPath);
-        templateManager.AddBaseData(IDataCache.Create(new Dictionary<string, string>
+        templateManager.AddBaseData("Links", IDataCache.Create(new Dictionary<string, string>
         {
-            {"HomePagePath", "home.html"},
-            {"ProjectPagePath", "projects.html"},
+            {"Home", "home.html"},
+            {"Project", "projects.html"},
         }));
 
         var htmlStyleManager = new HtmlStyleManager(settings.Styles.ToDictionary(kvp => kvp.Key, kvp => Path.Combine(settings.StylesPath, kvp.Value)));
